@@ -1,0 +1,7 @@
+
+git init
+git add .
+git commit -m "Version1"
+git branch -M main
+git remote add origin https://github.com/Vaillantval/MAKET-PYIZAN-Version-Mobile-Transversal.git
+git push -u origin main
