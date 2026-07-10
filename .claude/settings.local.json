@@ -2,7 +2,22 @@
   "permissions": {
     "allow": [
       "Bash(flutter pub:*)",
-      "Bash(flutter analyze:*)"
+      "Bash(flutter analyze:*)",
+      "Bash(find . -maxdepth 2 -iname \"*django*\" -o -iname \"*backend*\")",
+      "Bash(find / -maxdepth 3 -iname \"*wallet*urls*\")",
+      "Bash(cat lib/core/utils/format_utils.dart)",
+      "Bash(cat lib/shared/widgets/htg_text.dart)",
+      "Bash(cat lib/core/constants/app_colors.dart)",
+      "Bash(dart run *)",
+      "PowerShell(dart *)",
+      "PowerShell(Get-Command *)",
+      "PowerShell([Environment]::GetEnvironmentVariable\\(\"Path\",\"User\"\\); Write-Output \"---MACHINE---\"; [Environment]::GetEnvironmentVariable\\(\"Path\",\"Machine\"\\))",
+      "PowerShell(try { $r = Invoke-WebRequest -Uri \"https://storage.googleapis.com/flutter_infra_release/releases/releases_windows.json\" -UseBasicParsing -TimeoutSec 20; Write-Output \"OK, size: $\\($r.Content.Length\\)\" } catch { Write-Output \"FAILED: $\\($_.Exception.Message\\)\" })",
+      "PowerShell(Invoke-WebRequest -Uri \"https://storage.googleapis.com/flutter_infra_release/releases/stable/windows/flutter_windows_3.44.6-stable.zip\" -OutFile \"C:\\\\dev\\\\flutter_sdk.zip\" -UseBasicParsing)",
+      "PowerShell($ProgressPreference = 'SilentlyContinue')",
+      "PowerShell(Get-Process *)",
+      "WebFetch(domain:pub.dev)",
+      "PowerShell(Get-CimInstance *)"
     ]
   }
 }

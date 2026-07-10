@@ -8,6 +8,8 @@ import '../providers/panier_provider.dart';
 import '../widgets/produit_card.dart';
 import '../../../core/offline/offline_banner.dart';
 import '../../../shared/widgets/loading_widget.dart';
+import '../../../core/utils/format_utils.dart';
+import '../providers/wallet_provider.dart';
 
 class AccueilScreen extends ConsumerWidget {
   const AccueilScreen({super.key});
@@ -17,6 +19,7 @@ class AccueilScreen extends ConsumerWidget {
     final user       = ref.watch(authProvider).user;
     final catState   = ref.watch(catalogueProvider);
     final categories = ref.watch(categoriesProvider);
+    final walletState = ref.watch(walletProvider);
 
     return Scaffold(
       backgroundColor: AppColors.grisClair,
@@ -65,48 +68,100 @@ class AccueilScreen extends ConsumerWidget {
                                   ),
                                 ],
                               ),
-                              // Badge panier
-                              GestureDetector(
-                                onTap: () => context.go('/acheteur/panier'),
-                                child: Stack(
-                                  children: [
-                                    const CircleAvatar(
-                                      backgroundColor: Color(0x33FFFFFF),
-                                      child: Icon(
-                                        Icons.shopping_cart_outlined,
-                                        color: Colors.white,
+                              Row(
+                                children: [
+                                  // Badge Portefeuille
+                                  GestureDetector(
+                                    onTap: () => context.push('/acheteur/wallet'),
+                                    child: Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 10, vertical: 6,
                                       ),
-                                    ),
-                                    Positioned(
-                                      top: 0, right: 0,
-                                      child: Consumer(
-                                        builder: (_, ref, __) {
-                                          final nb = ref
-                                              .watch(panierProvider.notifier)
-                                              .nbArticles;
-                                          if (nb == 0) return const SizedBox.shrink();
-                                          return Container(
-                                            width:  18, height: 18,
-                                            decoration: const BoxDecoration(
-                                              color:  AppColors.jaune,
-                                              shape:  BoxShape.circle,
-                                            ),
-                                            child: Center(
-                                              child: Text(
-                                                '$nb',
-                                                style: const TextStyle(
-                                                  fontSize: 10,
-                                                  fontWeight: FontWeight.w800,
-                                                  color: AppColors.noir,
-                                                ),
+                                      decoration: BoxDecoration(
+                                        color: const Color(0x33FFFFFF),
+                                        borderRadius: BorderRadius.circular(20),
+                                      ),
+                                      child: Row(
+                                        children: [
+                                          const Icon(
+                                            Icons.account_balance_wallet_outlined,
+                                            color: Colors.white,
+                                            size: 16,
+                                          ),
+                                          const SizedBox(width: 6),
+                                          walletState.when(
+                                            data: (w) => Text(
+                                              FormatUtils.htg(w.solde),
+                                              style: const TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 11,
+                                                fontWeight: FontWeight.w700,
                                               ),
                                             ),
-                                          );
-                                        },
+                                            loading: () => const SizedBox(
+                                              width: 12, height: 12,
+                                              child: CircularProgressIndicator(
+                                                strokeWidth: 1.5,
+                                                color: Colors.white,
+                                              ),
+                                            ),
+                                            error: (_, __) => const Text(
+                                              'Solde',
+                                              style: TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 11,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
                                       ),
                                     ),
-                                  ],
-                                ),
+                                  ),
+                                  const SizedBox(width: 10),
+                                  // Badge panier
+                                  GestureDetector(
+                                    onTap: () => context.go('/acheteur/panier'),
+                                    child: Stack(
+                                      children: [
+                                        const CircleAvatar(
+                                          backgroundColor: Color(0x33FFFFFF),
+                                          child: Icon(
+                                            Icons.shopping_cart_outlined,
+                                            color: Colors.white,
+                                          ),
+                                        ),
+                                        Positioned(
+                                          top: 0, right: 0,
+                                          child: Consumer(
+                                            builder: (_, ref, __) {
+                                              final nb = ref
+                                                  .watch(panierProvider.notifier)
+                                                  .nbArticles;
+                                              if (nb == 0) return const SizedBox.shrink();
+                                              return Container(
+                                                width:  18, height: 18,
+                                                decoration: const BoxDecoration(
+                                                  color:  AppColors.jaune,
+                                                  shape:  BoxShape.circle,
+                                                ),
+                                                child: Center(
+                                                  child: Text(
+                                                    '$nb',
+                                                    style: const TextStyle(
+                                                      fontSize: 10,
+                                                      fontWeight: FontWeight.w800,
+                                                      color: AppColors.noir,
+                                                    ),
+                                                  ),
+                                                ),
+                                              );
+                                            },
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
                               ),
                             ],
                           ),

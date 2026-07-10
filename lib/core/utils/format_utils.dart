@@ -31,4 +31,14 @@ class FormatUtils {
       return isoDate;
     }
   }
+
+  static String heure(String? isoDate) {
+    if (isoDate == null) return '';
+    try {
+      final dt = DateTime.parse(isoDate).toLocal();
+      return DateFormat('HH:mm', 'fr_FR').format(dt);
+    } catch (_) {
+      return isoDate;
+    }
+  }
 }

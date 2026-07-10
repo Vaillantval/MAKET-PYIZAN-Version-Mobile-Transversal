@@ -18,6 +18,12 @@ class AppConstants {
   static const String keySyncQueue     = 'sync_queue';
   static const String keyLastSync      = 'last_sync';
 
+  // POS
+  static const String keyPosDeviceUid    = 'pos_device_uid';
+  static const String keyPosCatalogCache = 'pos_catalog_cache';
+  static const String hivePosSessionBox  = 'pos_session';
+  static const String hivePosSalesBox    = 'pos_sales';
+
   // Cache TTL
   static const Duration catalogCacheTTL  = Duration(hours: 6);
   static const Duration geoCacheTTL      = Duration(hours: 24);

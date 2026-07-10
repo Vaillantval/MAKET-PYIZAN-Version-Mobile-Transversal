@@ -4,6 +4,8 @@ import 'package:go_router/go_router.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../providers/auth_provider.dart';
+import '../../../core/utils/format_utils.dart';
+import '../providers/wallet_provider.dart';
 
 class ProfilScreen extends ConsumerWidget {
   const ProfilScreen({super.key});
@@ -12,6 +14,7 @@ class ProfilScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final auth = ref.watch(authProvider);
     final user = auth.user;
+    final walletState = ref.watch(walletProvider);
 
     return Scaffold(
       backgroundColor: AppColors.grisClair,
@@ -121,6 +124,19 @@ class ProfilScreen extends ConsumerWidget {
               ),
               child: Column(
                 children: [
+                  ListTile(
+                    leading: const Icon(Icons.account_balance_wallet,
+                      color: AppColors.vertVif),
+                    title: const Text('Mon Portefeuille'),
+                    subtitle: walletState.when(
+                      data: (w) => Text(FormatUtils.htg(w.solde)),
+                      loading: () => const Text('Chargement...'),
+                      error: (_, __) => const Text('Indisponible'),
+                    ),
+                    trailing: const Icon(Icons.arrow_forward_ios),
+                    onTap: () => context.push('/acheteur/wallet'),
+                  ),
+                  const Divider(height: 1),
                   ListTile(
                     leading: const Icon(Icons.location_on,
                       color: AppColors.vertVif),

@@ -27,6 +27,21 @@ class CacheManager {
     AppConstants.catalogCacheTTL,
   );
 
+  // ── Catalogue POS (ETag — pas de TTL, toujours servi hors ligne) ─
+
+  Future<void> savePosCatalogue(List<dynamic> produits, {String? etag}) async {
+    await _storage.setJsonList(AppConstants.keyPosCatalogCache, produits);
+    if (etag != null) {
+      await _storage.setString('${AppConstants.keyPosCatalogCache}_etag', etag);
+    }
+  }
+
+  List<dynamic>? getPosCatalogue() =>
+      _storage.getJsonList(AppConstants.keyPosCatalogCache);
+
+  String? getPosCatalogueEtag() =>
+      _storage.getString('${AppConstants.keyPosCatalogCache}_etag');
+
   // ── Géographie ─────────────────────────────────────────────────
 
   Future<void> saveGeo(Map<String, dynamic> data) async {

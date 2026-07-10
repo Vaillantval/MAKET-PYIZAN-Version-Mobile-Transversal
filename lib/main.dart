@@ -6,6 +6,8 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'core/offline/connectivity_service.dart';
 import 'core/storage/local_storage.dart';
+import 'core/storage/pos_local_storage.dart';
+import 'core/constants/app_constants.dart';
 import 'core/notifications/fcm_service.dart';
 import 'app.dart';
 
@@ -14,6 +16,8 @@ void main() async {
 
   // Hive
   await Hive.initFlutter();
+  final posSessionBox = await Hive.openBox(AppConstants.hivePosSessionBox);
+  final posSalesBox   = await Hive.openBox(AppConstants.hivePosSalesBox);
 
   // SharedPreferences
   final prefs = await SharedPreferences.getInstance();
@@ -33,6 +37,9 @@ void main() async {
     ProviderScope(
       overrides: [
         localStorageProvider.overrideWithValue(LocalStorage(prefs)),
+        posLocalStorageProvider.overrideWithValue(
+          PosLocalStorage(posSessionBox, posSalesBox),
+        ),
       ],
       child: const MaketPeyizanApp(),
     ),

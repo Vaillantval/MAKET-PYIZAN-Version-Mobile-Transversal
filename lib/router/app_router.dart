@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../providers/auth_provider.dart';
+import '../core/constants/app_constants.dart';
+import '../core/storage/local_storage.dart';
+import '../core/offline/offline_banner.dart';
 import '../features/auth/screens/splash_screen.dart';
 import '../features/auth/screens/login_screen.dart';
 import '../features/auth/screens/register_screen.dart';
@@ -16,12 +19,24 @@ import '../features/acheteur/screens/commandes_screen.dart';
 import '../features/acheteur/screens/commande_detail_screen.dart';
 import '../features/acheteur/screens/profil_screen.dart';
 import '../features/acheteur/screens/adresses_screen.dart';
+import '../features/acheteur/screens/wallet_screen.dart';
+import '../features/acheteur/screens/wallet_recharge_screen.dart';
+import '../features/acheteur/screens/wallet_retrait_screen.dart';
+import '../features/acheteur/screens/bons_cadeaux_screen.dart';
+import '../features/acheteur/screens/wallet_code_paiement_screen.dart';
 import '../features/producteur/screens/dashboard_screen.dart' show DashboardProducteurScreen;
 import '../features/producteur/screens/commandes_recues_screen.dart';
 import '../features/producteur/screens/mes_produits_screen.dart';
 import '../features/producteur/screens/collectes_screen.dart' show CollectesProducteurScreen;
 import '../features/producteur/screens/profil_producteur_screen.dart';
 import '../features/collecteur/screens/collectes_terrain_screen.dart';
+import '../features/pos/screens/pos_appairage_screen.dart';
+import '../features/pos/screens/pos_vente_screen.dart';
+import '../features/pos/screens/pos_session_screen.dart';
+import '../features/pos/screens/pos_historique_screen.dart';
+import '../features/pos/screens/pos_paiement_screen.dart';
+import '../features/pos/screens/pos_profil_screen.dart';
+import '../features/pos/widgets/pos_session_banner.dart';
 import '../features/admin/screens/admin_dashboard_screen.dart';
 import '../features/admin/screens/admin_producteurs_screen.dart';
 import '../features/admin/screens/admin_commandes_screen.dart';
@@ -49,10 +64,17 @@ final routerProvider = Provider<GoRouter>((ref) {
         return isAuth ? null : '/login';
       }
 
+      final role = authState.user?.role ?? 'acheteur';
+
       // Connecté
       if (isAuth) {
         // Rediriger selon le rôle
-        return _homeRouteForRole(authState.user?.role ?? 'acheteur');
+        return _homeRouteForRole(role);
+      }
+
+      // Garde-fou : /pos/* réservé au rôle pos_operator
+      if (path.startsWith('/pos/') && role != 'pos_operator') {
+        return _homeRouteForRole(role);
       }
 
       // Producteur en attente → écran dédié
@@ -60,6 +82,16 @@ final routerProvider = Provider<GoRouter>((ref) {
       if (notifier.isProducteurEnAttente &&
           path != '/producteur/en-attente') {
         return '/producteur/en-attente';
+      }
+
+      // POS : terminal non appairé → forcer l'écran d'appairage
+      if (role == 'pos_operator' && path != '/pos/appairage') {
+        final deviceUid = ref
+            .read(localStorageProvider)
+            .getString(AppConstants.keyPosDeviceUid);
+        if (deviceUid == null || deviceUid.isEmpty) {
+          return '/pos/appairage';
+        }
       }
 
       return null;
@@ -80,6 +112,10 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path:    '/producteur/en-attente',
         builder: (_, __) => const PendingValidationScreen(),
+      ),
+      GoRoute(
+        path:    '/pos/appairage',
+        builder: (_, __) => const PosAppairageScreen(),
       ),
 
       // ── Acheteur ──────────────────────────────────────────────
@@ -108,6 +144,12 @@ final routerProvider = Provider<GoRouter>((ref) {
           ),
           GoRoute(path: '/acheteur/profil',     builder: (_, __) => const ProfilScreen()),
           GoRoute(path: '/acheteur/adresses',   builder: (_, __) => const AdressesScreen()),
+          // ── Wallet ────────────────────────────────────────
+          GoRoute(path: '/acheteur/wallet',          builder: (_, __) => const WalletScreen()),
+          GoRoute(path: '/acheteur/wallet/recharge', builder: (_, __) => const WalletRechargeScreen()),
+          GoRoute(path: '/acheteur/wallet/retrait',  builder: (_, __) => const WalletRetraitScreen()),
+          GoRoute(path: '/acheteur/wallet/bons',     builder: (_, __) => const BonsCadeauxScreen()),
+          GoRoute(path: '/acheteur/wallet/code-paiement', builder: (_, __) => const WalletCodePaiementScreen()),
         ],
       ),
 
@@ -129,6 +171,18 @@ final routerProvider = Provider<GoRouter>((ref) {
         routes: [
           GoRoute(path: '/collecteur/collectes', builder: (_, __) => const CollectesTerrainScreen()),
           GoRoute(path: '/collecteur/profil',    builder: (_, __) => const Placeholder()),
+        ],
+      ),
+
+      // ── POS (opérateur comptoir) ────────────────────────────────
+      ShellRoute(
+        builder: (ctx, state, child) => PosShell(child: child),
+        routes: [
+          GoRoute(path: '/pos/vente',      builder: (_, __) => const PosVenteScreen()),
+          GoRoute(path: '/pos/paiement',   builder: (_, __) => const PosPaiementScreen()),
+          GoRoute(path: '/pos/session',    builder: (_, __) => const PosSessionScreen()),
+          GoRoute(path: '/pos/historique', builder: (_, __) => const PosHistoriqueScreen()),
+          GoRoute(path: '/pos/profil',     builder: (_, __) => const PosProfilScreen()),
         ],
       ),
 
@@ -154,6 +208,7 @@ String _homeRouteForRole(String role) {
   switch (role) {
     case 'producteur':  return '/producteur/dashboard';
     case 'collecteur':  return '/collecteur/collectes';
+    case 'pos_operator': return '/pos/vente';
     case 'superadmin':
     case 'admin':       return '/admin/dashboard';
     default:            return '/acheteur/accueil';
@@ -211,6 +266,30 @@ class CollecteurShell extends ConsumerWidget {
       bottomNavigationBar: _buildBottomNav(context, [
         const _NavItem(icon: Icons.local_shipping_outlined, label: 'Collectes', route: '/collecteur/collectes'),
         const _NavItem(icon: Icons.person_outline,          label: 'Profil',    route: '/collecteur/profil'),
+      ]),
+    );
+  }
+}
+
+class PosShell extends ConsumerWidget {
+  final Widget child;
+  const PosShell({required this.child, super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return Scaffold(
+      body: Column(
+        children: [
+          const OfflineBanner(),
+          const PosSessionBanner(),
+          Expanded(child: child),
+        ],
+      ),
+      bottomNavigationBar: _buildBottomNav(context, [
+        const _NavItem(icon: Icons.point_of_sale,     label: 'Vente',      route: '/pos/vente'),
+        const _NavItem(icon: Icons.lock_clock_outlined, label: 'Session',  route: '/pos/session'),
+        const _NavItem(icon: Icons.history,            label: 'Historique', route: '/pos/historique'),
+        const _NavItem(icon: Icons.person_outline,     label: 'Profil',     route: '/pos/profil'),
       ]),
     );
   }

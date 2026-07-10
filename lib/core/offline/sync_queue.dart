@@ -22,6 +22,7 @@ enum SyncActionType {
   updateProduit,
   deleteProduit,
   contactMessage,
+  posSale,
 }
 
 class SyncAction {
