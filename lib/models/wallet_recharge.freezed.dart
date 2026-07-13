@@ -21,6 +21,7 @@ WalletRecharge _$WalletRechargeFromJson(Map<String, dynamic> json) {
 /// @nodoc
 mixin _$WalletRecharge {
   int get id => throw _privateConstructorUsedError;
+  @JsonKey(fromJson: jsonToDouble)
   double get montant => throw _privateConstructorUsedError;
   String get methode => throw _privateConstructorUsedError;
   @JsonKey(name: 'methode_display')
@@ -50,7 +51,7 @@ abstract class $WalletRechargeCopyWith<$Res> {
   @useResult
   $Res call(
       {int id,
-      double montant,
+      @JsonKey(fromJson: jsonToDouble) double montant,
       String methode,
       @JsonKey(name: 'methode_display') String methodeDisplay,
       String statut,
@@ -130,7 +131,7 @@ abstract class _$$WalletRechargeImplCopyWith<$Res>
   @useResult
   $Res call(
       {int id,
-      double montant,
+      @JsonKey(fromJson: jsonToDouble) double montant,
       String methode,
       @JsonKey(name: 'methode_display') String methodeDisplay,
       String statut,
@@ -203,7 +204,7 @@ class __$$WalletRechargeImplCopyWithImpl<$Res>
 class _$WalletRechargeImpl implements _WalletRecharge {
   const _$WalletRechargeImpl(
       {required this.id,
-      required this.montant,
+      @JsonKey(fromJson: jsonToDouble) required this.montant,
       required this.methode,
       @JsonKey(name: 'methode_display') this.methodeDisplay = '',
       required this.statut,
@@ -217,6 +218,7 @@ class _$WalletRechargeImpl implements _WalletRecharge {
   @override
   final int id;
   @override
+  @JsonKey(fromJson: jsonToDouble)
   final double montant;
   @override
   final String methode;
@@ -284,7 +286,7 @@ class _$WalletRechargeImpl implements _WalletRecharge {
 abstract class _WalletRecharge implements WalletRecharge {
   const factory _WalletRecharge(
           {required final int id,
-          required final double montant,
+          @JsonKey(fromJson: jsonToDouble) required final double montant,
           required final String methode,
           @JsonKey(name: 'methode_display') final String methodeDisplay,
           required final String statut,
@@ -299,6 +301,7 @@ abstract class _WalletRecharge implements WalletRecharge {
   @override
   int get id;
   @override
+  @JsonKey(fromJson: jsonToDouble)
   double get montant;
   @override
   String get methode;

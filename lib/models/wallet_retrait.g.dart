@@ -9,7 +9,7 @@ part of 'wallet_retrait.dart';
 _$WalletRetraitImpl _$$WalletRetraitImplFromJson(Map<String, dynamic> json) =>
     _$WalletRetraitImpl(
       id: (json['id'] as num).toInt(),
-      montant: (json['montant'] as num).toDouble(),
+      montant: jsonToDouble(json['montant']),
       canal: json['canal'] as String,
       canalDisplay: json['canal_display'] as String? ?? '',
       numeroTelephone: json['numero_telephone'] as String,

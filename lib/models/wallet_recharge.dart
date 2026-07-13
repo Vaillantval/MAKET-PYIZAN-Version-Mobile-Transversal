@@ -1,5 +1,6 @@
 // ignore_for_file: invalid_annotation_target
 import 'package:freezed_annotation/freezed_annotation.dart';
+import '../core/utils/json_converters.dart';
 
 part 'wallet_recharge.freezed.dart';
 part 'wallet_recharge.g.dart';
@@ -8,7 +9,7 @@ part 'wallet_recharge.g.dart';
 class WalletRecharge with _$WalletRecharge {
   const factory WalletRecharge({
     required int    id,
-    required double montant,
+    @JsonKey(fromJson: jsonToDouble) required double montant,
     required String methode,
     @JsonKey(name: 'methode_display')  @Default('') String methodeDisplay,
     required String statut,

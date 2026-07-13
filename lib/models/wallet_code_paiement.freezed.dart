@@ -23,6 +23,7 @@ mixin _$WalletCodePaiement {
   String get code => throw _privateConstructorUsedError;
   @JsonKey(name: 'expire_dans')
   int get expireDans => throw _privateConstructorUsedError; // secondes
+  @JsonKey(fromJson: jsonToDouble)
   double get solde => throw _privateConstructorUsedError;
 
   /// Serializes this WalletCodePaiement to a JSON map.
@@ -44,7 +45,7 @@ abstract class $WalletCodePaiementCopyWith<$Res> {
   $Res call(
       {String code,
       @JsonKey(name: 'expire_dans') int expireDans,
-      double solde});
+      @JsonKey(fromJson: jsonToDouble) double solde});
 }
 
 /// @nodoc
@@ -94,7 +95,7 @@ abstract class _$$WalletCodePaiementImplCopyWith<$Res>
   $Res call(
       {String code,
       @JsonKey(name: 'expire_dans') int expireDans,
-      double solde});
+      @JsonKey(fromJson: jsonToDouble) double solde});
 }
 
 /// @nodoc
@@ -137,7 +138,7 @@ class _$WalletCodePaiementImpl implements _WalletCodePaiement {
   const _$WalletCodePaiementImpl(
       {required this.code,
       @JsonKey(name: 'expire_dans') required this.expireDans,
-      required this.solde});
+      @JsonKey(fromJson: jsonToDouble) required this.solde});
 
   factory _$WalletCodePaiementImpl.fromJson(Map<String, dynamic> json) =>
       _$$WalletCodePaiementImplFromJson(json);
@@ -149,6 +150,7 @@ class _$WalletCodePaiementImpl implements _WalletCodePaiement {
   final int expireDans;
 // secondes
   @override
+  @JsonKey(fromJson: jsonToDouble)
   final double solde;
 
   @override
@@ -190,9 +192,10 @@ class _$WalletCodePaiementImpl implements _WalletCodePaiement {
 
 abstract class _WalletCodePaiement implements WalletCodePaiement {
   const factory _WalletCodePaiement(
-      {required final String code,
-      @JsonKey(name: 'expire_dans') required final int expireDans,
-      required final double solde}) = _$WalletCodePaiementImpl;
+          {required final String code,
+          @JsonKey(name: 'expire_dans') required final int expireDans,
+          @JsonKey(fromJson: jsonToDouble) required final double solde}) =
+      _$WalletCodePaiementImpl;
 
   factory _WalletCodePaiement.fromJson(Map<String, dynamic> json) =
       _$WalletCodePaiementImpl.fromJson;
@@ -203,6 +206,7 @@ abstract class _WalletCodePaiement implements WalletCodePaiement {
   @JsonKey(name: 'expire_dans')
   int get expireDans; // secondes
   @override
+  @JsonKey(fromJson: jsonToDouble)
   double get solde;
 
   /// Create a copy of WalletCodePaiement

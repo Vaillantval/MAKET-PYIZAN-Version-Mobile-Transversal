@@ -26,10 +26,11 @@ mixin _$PosItem {
   String get nomProduit => throw _privateConstructorUsedError;
   @JsonKey(name: 'lot_id')
   int? get lotId => throw _privateConstructorUsedError;
+  @JsonKey(fromJson: jsonToDouble)
   double get quantite => throw _privateConstructorUsedError;
-  @JsonKey(name: 'prix_unitaire')
+  @JsonKey(name: 'prix_unitaire', fromJson: jsonToDouble)
   double get prixUnitaire => throw _privateConstructorUsedError;
-  @JsonKey(name: 'sous_total')
+  @JsonKey(name: 'sous_total', fromJson: jsonToDouble)
   double get sousTotal => throw _privateConstructorUsedError;
 
   /// Serializes this PosItem to a JSON map.
@@ -50,9 +51,10 @@ abstract class $PosItemCopyWith<$Res> {
       {@JsonKey(name: 'produit_id') int produitId,
       @JsonKey(name: 'nom_produit') String nomProduit,
       @JsonKey(name: 'lot_id') int? lotId,
-      double quantite,
-      @JsonKey(name: 'prix_unitaire') double prixUnitaire,
-      @JsonKey(name: 'sous_total') double sousTotal});
+      @JsonKey(fromJson: jsonToDouble) double quantite,
+      @JsonKey(name: 'prix_unitaire', fromJson: jsonToDouble)
+      double prixUnitaire,
+      @JsonKey(name: 'sous_total', fromJson: jsonToDouble) double sousTotal});
 }
 
 /// @nodoc
@@ -117,9 +119,10 @@ abstract class _$$PosItemImplCopyWith<$Res> implements $PosItemCopyWith<$Res> {
       {@JsonKey(name: 'produit_id') int produitId,
       @JsonKey(name: 'nom_produit') String nomProduit,
       @JsonKey(name: 'lot_id') int? lotId,
-      double quantite,
-      @JsonKey(name: 'prix_unitaire') double prixUnitaire,
-      @JsonKey(name: 'sous_total') double sousTotal});
+      @JsonKey(fromJson: jsonToDouble) double quantite,
+      @JsonKey(name: 'prix_unitaire', fromJson: jsonToDouble)
+      double prixUnitaire,
+      @JsonKey(name: 'sous_total', fromJson: jsonToDouble) double sousTotal});
 }
 
 /// @nodoc
@@ -178,9 +181,10 @@ class _$PosItemImpl implements _PosItem {
       {@JsonKey(name: 'produit_id') required this.produitId,
       @JsonKey(name: 'nom_produit') this.nomProduit = '',
       @JsonKey(name: 'lot_id') this.lotId,
-      required this.quantite,
-      @JsonKey(name: 'prix_unitaire') required this.prixUnitaire,
-      @JsonKey(name: 'sous_total') this.sousTotal = 0});
+      @JsonKey(fromJson: jsonToDouble) required this.quantite,
+      @JsonKey(name: 'prix_unitaire', fromJson: jsonToDouble)
+      required this.prixUnitaire,
+      @JsonKey(name: 'sous_total', fromJson: jsonToDouble) this.sousTotal = 0});
 
   factory _$PosItemImpl.fromJson(Map<String, dynamic> json) =>
       _$$PosItemImplFromJson(json);
@@ -195,12 +199,13 @@ class _$PosItemImpl implements _PosItem {
   @JsonKey(name: 'lot_id')
   final int? lotId;
   @override
+  @JsonKey(fromJson: jsonToDouble)
   final double quantite;
   @override
-  @JsonKey(name: 'prix_unitaire')
+  @JsonKey(name: 'prix_unitaire', fromJson: jsonToDouble)
   final double prixUnitaire;
   @override
-  @JsonKey(name: 'sous_total')
+  @JsonKey(name: 'sous_total', fromJson: jsonToDouble)
   final double sousTotal;
 
   @override
@@ -252,9 +257,11 @@ abstract class _PosItem implements PosItem {
       {@JsonKey(name: 'produit_id') required final int produitId,
       @JsonKey(name: 'nom_produit') final String nomProduit,
       @JsonKey(name: 'lot_id') final int? lotId,
-      required final double quantite,
-      @JsonKey(name: 'prix_unitaire') required final double prixUnitaire,
-      @JsonKey(name: 'sous_total') final double sousTotal}) = _$PosItemImpl;
+      @JsonKey(fromJson: jsonToDouble) required final double quantite,
+      @JsonKey(name: 'prix_unitaire', fromJson: jsonToDouble)
+      required final double prixUnitaire,
+      @JsonKey(name: 'sous_total', fromJson: jsonToDouble)
+      final double sousTotal}) = _$PosItemImpl;
 
   factory _PosItem.fromJson(Map<String, dynamic> json) = _$PosItemImpl.fromJson;
 
@@ -268,12 +275,13 @@ abstract class _PosItem implements PosItem {
   @JsonKey(name: 'lot_id')
   int? get lotId;
   @override
+  @JsonKey(fromJson: jsonToDouble)
   double get quantite;
   @override
-  @JsonKey(name: 'prix_unitaire')
+  @JsonKey(name: 'prix_unitaire', fromJson: jsonToDouble)
   double get prixUnitaire;
   @override
-  @JsonKey(name: 'sous_total')
+  @JsonKey(name: 'sous_total', fromJson: jsonToDouble)
   double get sousTotal;
 
   /// Create a copy of PosItem

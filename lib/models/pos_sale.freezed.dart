@@ -25,11 +25,11 @@ mixin _$PosSale {
   @JsonKey(name: 'numero_vente')
   String? get numeroVente => throw _privateConstructorUsedError;
   List<PosItem> get items => throw _privateConstructorUsedError;
-  @JsonKey(name: 'montant_total')
+  @JsonKey(name: 'montant_total', fromJson: jsonToDouble)
   double get montantTotal => throw _privateConstructorUsedError;
   @JsonKey(name: 'methode_paiement')
   String get methodePaiement => throw _privateConstructorUsedError;
-  @JsonKey(name: 'montant_wallet')
+  @JsonKey(name: 'montant_wallet', fromJson: jsonToDouble)
   double get montantWallet => throw _privateConstructorUsedError;
   String get statut => throw _privateConstructorUsedError;
   @JsonKey(name: 'vendue_le')
@@ -55,9 +55,11 @@ abstract class $PosSaleCopyWith<$Res> {
       {@JsonKey(name: 'idempotency_key') String idempotencyKey,
       @JsonKey(name: 'numero_vente') String? numeroVente,
       List<PosItem> items,
-      @JsonKey(name: 'montant_total') double montantTotal,
+      @JsonKey(name: 'montant_total', fromJson: jsonToDouble)
+      double montantTotal,
       @JsonKey(name: 'methode_paiement') String methodePaiement,
-      @JsonKey(name: 'montant_wallet') double montantWallet,
+      @JsonKey(name: 'montant_wallet', fromJson: jsonToDouble)
+      double montantWallet,
       String statut,
       @JsonKey(name: 'vendue_le') String vendueLe,
       String syncStatus});
@@ -140,9 +142,11 @@ abstract class _$$PosSaleImplCopyWith<$Res> implements $PosSaleCopyWith<$Res> {
       {@JsonKey(name: 'idempotency_key') String idempotencyKey,
       @JsonKey(name: 'numero_vente') String? numeroVente,
       List<PosItem> items,
-      @JsonKey(name: 'montant_total') double montantTotal,
+      @JsonKey(name: 'montant_total', fromJson: jsonToDouble)
+      double montantTotal,
       @JsonKey(name: 'methode_paiement') String methodePaiement,
-      @JsonKey(name: 'montant_wallet') double montantWallet,
+      @JsonKey(name: 'montant_wallet', fromJson: jsonToDouble)
+      double montantWallet,
       String statut,
       @JsonKey(name: 'vendue_le') String vendueLe,
       String syncStatus});
@@ -219,9 +223,11 @@ class _$PosSaleImpl implements _PosSale {
       {@JsonKey(name: 'idempotency_key') required this.idempotencyKey,
       @JsonKey(name: 'numero_vente') this.numeroVente,
       final List<PosItem> items = const [],
-      @JsonKey(name: 'montant_total') required this.montantTotal,
+      @JsonKey(name: 'montant_total', fromJson: jsonToDouble)
+      required this.montantTotal,
       @JsonKey(name: 'methode_paiement') this.methodePaiement = 'cash',
-      @JsonKey(name: 'montant_wallet') this.montantWallet = 0,
+      @JsonKey(name: 'montant_wallet', fromJson: jsonToDouble)
+      this.montantWallet = 0,
       this.statut = 'en_attente',
       @JsonKey(name: 'vendue_le') required this.vendueLe,
       this.syncStatus = 'enAttente'})
@@ -246,13 +252,13 @@ class _$PosSaleImpl implements _PosSale {
   }
 
   @override
-  @JsonKey(name: 'montant_total')
+  @JsonKey(name: 'montant_total', fromJson: jsonToDouble)
   final double montantTotal;
   @override
   @JsonKey(name: 'methode_paiement')
   final String methodePaiement;
   @override
-  @JsonKey(name: 'montant_wallet')
+  @JsonKey(name: 'montant_wallet', fromJson: jsonToDouble)
   final double montantWallet;
   @override
   @JsonKey()
@@ -328,9 +334,11 @@ abstract class _PosSale implements PosSale {
       {@JsonKey(name: 'idempotency_key') required final String idempotencyKey,
       @JsonKey(name: 'numero_vente') final String? numeroVente,
       final List<PosItem> items,
-      @JsonKey(name: 'montant_total') required final double montantTotal,
+      @JsonKey(name: 'montant_total', fromJson: jsonToDouble)
+      required final double montantTotal,
       @JsonKey(name: 'methode_paiement') final String methodePaiement,
-      @JsonKey(name: 'montant_wallet') final double montantWallet,
+      @JsonKey(name: 'montant_wallet', fromJson: jsonToDouble)
+      final double montantWallet,
       final String statut,
       @JsonKey(name: 'vendue_le') required final String vendueLe,
       final String syncStatus}) = _$PosSaleImpl;
@@ -346,13 +354,13 @@ abstract class _PosSale implements PosSale {
   @override
   List<PosItem> get items;
   @override
-  @JsonKey(name: 'montant_total')
+  @JsonKey(name: 'montant_total', fromJson: jsonToDouble)
   double get montantTotal;
   @override
   @JsonKey(name: 'methode_paiement')
   String get methodePaiement;
   @override
-  @JsonKey(name: 'montant_wallet')
+  @JsonKey(name: 'montant_wallet', fromJson: jsonToDouble)
   double get montantWallet;
   @override
   String get statut;

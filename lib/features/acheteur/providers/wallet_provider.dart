@@ -10,6 +10,17 @@ import '../../../models/wallet_retrait.dart';
 import '../../../models/bon_cadeau.dart';
 import '../../../models/wallet_code_paiement.dart';
 
+/// Extrait la liste d'une réponse paginée
+/// ({"results": [...], "count": ..., "next": ..., "previous": ...})
+/// tout en tolérant l'ancien format où `data` était directement une liste.
+List<dynamic> _extraireListe(dynamic data) {
+  if (data is List) return data;
+  if (data is Map<String, dynamic> && data['results'] is List) {
+    return data['results'] as List;
+  }
+  return const [];
+}
+
 // ── Provider principal — solde wallet ─────────────────────────────────
 
 final walletProvider =
@@ -289,7 +300,7 @@ class WalletTransactionsNotifier
       final res  = await _api.get(AppEndpoints.walletTransactions);
       final data = res.data as Map<String, dynamic>;
       if (data['success'] == true) {
-        final list = (data['data'] as List)
+        final list = _extraireListe(data['data'])
             .map((e) => WalletTransaction.fromJson(e as Map<String, dynamic>))
             .toList();
         state = AsyncValue.data(list);
@@ -319,7 +330,7 @@ class WalletRechargesNotifier
       final res  = await _api.get(AppEndpoints.walletRecharges);
       final data = res.data as Map<String, dynamic>;
       if (data['success'] == true) {
-        final list = (data['data'] as List)
+        final list = _extraireListe(data['data'])
             .map((e) => WalletRecharge.fromJson(e as Map<String, dynamic>))
             .toList();
         state = AsyncValue.data(list);
@@ -349,7 +360,7 @@ class WalletRetraitsNotifier
       final res  = await _api.get(AppEndpoints.walletRetraits);
       final data = res.data as Map<String, dynamic>;
       if (data['success'] == true) {
-        final list = (data['data'] as List)
+        final list = _extraireListe(data['data'])
             .map((e) => WalletRetrait.fromJson(e as Map<String, dynamic>))
             .toList();
         state = AsyncValue.data(list);
@@ -379,7 +390,7 @@ class BonsAchetesNotifier
       final res  = await _api.get(AppEndpoints.walletBons);
       final data = res.data as Map<String, dynamic>;
       if (data['success'] == true) {
-        final list = (data['data'] as List)
+        final list = _extraireListe(data['data'])
             .map((e) => BonCadeau.fromJson(e as Map<String, dynamic>))
             .toList();
         state = AsyncValue.data(list);
@@ -409,7 +420,7 @@ class BonsRecusNotifier
       final res  = await _api.get(AppEndpoints.walletBonsRecus);
       final data = res.data as Map<String, dynamic>;
       if (data['success'] == true) {
-        final list = (data['data'] as List)
+        final list = _extraireListe(data['data'])
             .map((e) => BonCadeau.fromJson(e as Map<String, dynamic>))
             .toList();
         state = AsyncValue.data(list);

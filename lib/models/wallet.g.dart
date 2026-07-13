@@ -7,7 +7,7 @@ part of 'wallet.dart';
 // **************************************************************************
 
 _$WalletImpl _$$WalletImplFromJson(Map<String, dynamic> json) => _$WalletImpl(
-      solde: (json['solde'] as num).toDouble(),
+      solde: jsonToDouble(json['solde']),
       isActive: json['is_active'] as bool? ?? true,
     );
 

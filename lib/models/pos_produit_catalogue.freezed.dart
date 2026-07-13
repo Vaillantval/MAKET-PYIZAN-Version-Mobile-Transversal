@@ -23,7 +23,7 @@ mixin _$PosLot {
   int get id => throw _privateConstructorUsedError;
   @JsonKey(name: 'code_barres')
   String? get codeBarres => throw _privateConstructorUsedError;
-  @JsonKey(name: 'quantite_actuelle')
+  @JsonKey(name: 'quantite_actuelle', fromJson: jsonToDouble)
   double get quantiteActuelle => throw _privateConstructorUsedError;
 
   /// Serializes this PosLot to a JSON map.
@@ -43,7 +43,8 @@ abstract class $PosLotCopyWith<$Res> {
   $Res call(
       {int id,
       @JsonKey(name: 'code_barres') String? codeBarres,
-      @JsonKey(name: 'quantite_actuelle') double quantiteActuelle});
+      @JsonKey(name: 'quantite_actuelle', fromJson: jsonToDouble)
+      double quantiteActuelle});
 }
 
 /// @nodoc
@@ -92,7 +93,8 @@ abstract class _$$PosLotImplCopyWith<$Res> implements $PosLotCopyWith<$Res> {
   $Res call(
       {int id,
       @JsonKey(name: 'code_barres') String? codeBarres,
-      @JsonKey(name: 'quantite_actuelle') double quantiteActuelle});
+      @JsonKey(name: 'quantite_actuelle', fromJson: jsonToDouble)
+      double quantiteActuelle});
 }
 
 /// @nodoc
@@ -135,7 +137,8 @@ class _$PosLotImpl implements _PosLot {
   const _$PosLotImpl(
       {required this.id,
       @JsonKey(name: 'code_barres') this.codeBarres,
-      @JsonKey(name: 'quantite_actuelle') this.quantiteActuelle = 0});
+      @JsonKey(name: 'quantite_actuelle', fromJson: jsonToDouble)
+      this.quantiteActuelle = 0});
 
   factory _$PosLotImpl.fromJson(Map<String, dynamic> json) =>
       _$$PosLotImplFromJson(json);
@@ -146,7 +149,7 @@ class _$PosLotImpl implements _PosLot {
   @JsonKey(name: 'code_barres')
   final String? codeBarres;
   @override
-  @JsonKey(name: 'quantite_actuelle')
+  @JsonKey(name: 'quantite_actuelle', fromJson: jsonToDouble)
   final double quantiteActuelle;
 
   @override
@@ -189,10 +192,10 @@ class _$PosLotImpl implements _PosLot {
 
 abstract class _PosLot implements PosLot {
   const factory _PosLot(
-          {required final int id,
-          @JsonKey(name: 'code_barres') final String? codeBarres,
-          @JsonKey(name: 'quantite_actuelle') final double quantiteActuelle}) =
-      _$PosLotImpl;
+      {required final int id,
+      @JsonKey(name: 'code_barres') final String? codeBarres,
+      @JsonKey(name: 'quantite_actuelle', fromJson: jsonToDouble)
+      final double quantiteActuelle}) = _$PosLotImpl;
 
   factory _PosLot.fromJson(Map<String, dynamic> json) = _$PosLotImpl.fromJson;
 
@@ -202,7 +205,7 @@ abstract class _PosLot implements PosLot {
   @JsonKey(name: 'code_barres')
   String? get codeBarres;
   @override
-  @JsonKey(name: 'quantite_actuelle')
+  @JsonKey(name: 'quantite_actuelle', fromJson: jsonToDouble)
   double get quantiteActuelle;
 
   /// Create a copy of PosLot
@@ -221,11 +224,16 @@ PosProduitCatalogue _$PosProduitCatalogueFromJson(Map<String, dynamic> json) {
 mixin _$PosProduitCatalogue {
   int get id => throw _privateConstructorUsedError;
   String get nom => throw _privateConstructorUsedError;
-  @JsonKey(name: 'prix_detail')
+  @JsonKey(name: 'prix_unitaire', fromJson: jsonToDouble)
   double get prixDetail => throw _privateConstructorUsedError;
-  @JsonKey(name: 'prix_gros')
+  @JsonKey(name: 'prix_gros', fromJson: jsonToDoubleNullable)
   double? get prixGros => throw _privateConstructorUsedError;
+  @JsonKey(name: 'categorie', fromJson: _categorieNomFromJson)
   String get categorie => throw _privateConstructorUsedError;
+  @JsonKey(name: 'unite_vente')
+  String get uniteVente => throw _privateConstructorUsedError;
+  @JsonKey(name: 'stock_disponible', fromJson: jsonToDouble)
+  double get stockDisponible => throw _privateConstructorUsedError;
   List<PosLot> get lots => throw _privateConstructorUsedError;
 
   /// Serializes this PosProduitCatalogue to a JSON map.
@@ -247,9 +255,14 @@ abstract class $PosProduitCatalogueCopyWith<$Res> {
   $Res call(
       {int id,
       String nom,
-      @JsonKey(name: 'prix_detail') double prixDetail,
-      @JsonKey(name: 'prix_gros') double? prixGros,
+      @JsonKey(name: 'prix_unitaire', fromJson: jsonToDouble) double prixDetail,
+      @JsonKey(name: 'prix_gros', fromJson: jsonToDoubleNullable)
+      double? prixGros,
+      @JsonKey(name: 'categorie', fromJson: _categorieNomFromJson)
       String categorie,
+      @JsonKey(name: 'unite_vente') String uniteVente,
+      @JsonKey(name: 'stock_disponible', fromJson: jsonToDouble)
+      double stockDisponible,
       List<PosLot> lots});
 }
 
@@ -273,6 +286,8 @@ class _$PosProduitCatalogueCopyWithImpl<$Res, $Val extends PosProduitCatalogue>
     Object? prixDetail = null,
     Object? prixGros = freezed,
     Object? categorie = null,
+    Object? uniteVente = null,
+    Object? stockDisponible = null,
     Object? lots = null,
   }) {
     return _then(_value.copyWith(
@@ -296,6 +311,14 @@ class _$PosProduitCatalogueCopyWithImpl<$Res, $Val extends PosProduitCatalogue>
           ? _value.categorie
           : categorie // ignore: cast_nullable_to_non_nullable
               as String,
+      uniteVente: null == uniteVente
+          ? _value.uniteVente
+          : uniteVente // ignore: cast_nullable_to_non_nullable
+              as String,
+      stockDisponible: null == stockDisponible
+          ? _value.stockDisponible
+          : stockDisponible // ignore: cast_nullable_to_non_nullable
+              as double,
       lots: null == lots
           ? _value.lots
           : lots // ignore: cast_nullable_to_non_nullable
@@ -315,9 +338,14 @@ abstract class _$$PosProduitCatalogueImplCopyWith<$Res>
   $Res call(
       {int id,
       String nom,
-      @JsonKey(name: 'prix_detail') double prixDetail,
-      @JsonKey(name: 'prix_gros') double? prixGros,
+      @JsonKey(name: 'prix_unitaire', fromJson: jsonToDouble) double prixDetail,
+      @JsonKey(name: 'prix_gros', fromJson: jsonToDoubleNullable)
+      double? prixGros,
+      @JsonKey(name: 'categorie', fromJson: _categorieNomFromJson)
       String categorie,
+      @JsonKey(name: 'unite_vente') String uniteVente,
+      @JsonKey(name: 'stock_disponible', fromJson: jsonToDouble)
+      double stockDisponible,
       List<PosLot> lots});
 }
 
@@ -339,6 +367,8 @@ class __$$PosProduitCatalogueImplCopyWithImpl<$Res>
     Object? prixDetail = null,
     Object? prixGros = freezed,
     Object? categorie = null,
+    Object? uniteVente = null,
+    Object? stockDisponible = null,
     Object? lots = null,
   }) {
     return _then(_$PosProduitCatalogueImpl(
@@ -362,6 +392,14 @@ class __$$PosProduitCatalogueImplCopyWithImpl<$Res>
           ? _value.categorie
           : categorie // ignore: cast_nullable_to_non_nullable
               as String,
+      uniteVente: null == uniteVente
+          ? _value.uniteVente
+          : uniteVente // ignore: cast_nullable_to_non_nullable
+              as String,
+      stockDisponible: null == stockDisponible
+          ? _value.stockDisponible
+          : stockDisponible // ignore: cast_nullable_to_non_nullable
+              as double,
       lots: null == lots
           ? _value._lots
           : lots // ignore: cast_nullable_to_non_nullable
@@ -376,9 +414,14 @@ class _$PosProduitCatalogueImpl implements _PosProduitCatalogue {
   const _$PosProduitCatalogueImpl(
       {required this.id,
       required this.nom,
-      @JsonKey(name: 'prix_detail') required this.prixDetail,
-      @JsonKey(name: 'prix_gros') this.prixGros,
+      @JsonKey(name: 'prix_unitaire', fromJson: jsonToDouble)
+      required this.prixDetail,
+      @JsonKey(name: 'prix_gros', fromJson: jsonToDoubleNullable) this.prixGros,
+      @JsonKey(name: 'categorie', fromJson: _categorieNomFromJson)
       this.categorie = '',
+      @JsonKey(name: 'unite_vente') this.uniteVente = '',
+      @JsonKey(name: 'stock_disponible', fromJson: jsonToDouble)
+      this.stockDisponible = 0,
       final List<PosLot> lots = const []})
       : _lots = lots;
 
@@ -390,14 +433,20 @@ class _$PosProduitCatalogueImpl implements _PosProduitCatalogue {
   @override
   final String nom;
   @override
-  @JsonKey(name: 'prix_detail')
+  @JsonKey(name: 'prix_unitaire', fromJson: jsonToDouble)
   final double prixDetail;
   @override
-  @JsonKey(name: 'prix_gros')
+  @JsonKey(name: 'prix_gros', fromJson: jsonToDoubleNullable)
   final double? prixGros;
   @override
-  @JsonKey()
+  @JsonKey(name: 'categorie', fromJson: _categorieNomFromJson)
   final String categorie;
+  @override
+  @JsonKey(name: 'unite_vente')
+  final String uniteVente;
+  @override
+  @JsonKey(name: 'stock_disponible', fromJson: jsonToDouble)
+  final double stockDisponible;
   final List<PosLot> _lots;
   @override
   @JsonKey()
@@ -409,7 +458,7 @@ class _$PosProduitCatalogueImpl implements _PosProduitCatalogue {
 
   @override
   String toString() {
-    return 'PosProduitCatalogue(id: $id, nom: $nom, prixDetail: $prixDetail, prixGros: $prixGros, categorie: $categorie, lots: $lots)';
+    return 'PosProduitCatalogue(id: $id, nom: $nom, prixDetail: $prixDetail, prixGros: $prixGros, categorie: $categorie, uniteVente: $uniteVente, stockDisponible: $stockDisponible, lots: $lots)';
   }
 
   @override
@@ -425,13 +474,25 @@ class _$PosProduitCatalogueImpl implements _PosProduitCatalogue {
                 other.prixGros == prixGros) &&
             (identical(other.categorie, categorie) ||
                 other.categorie == categorie) &&
+            (identical(other.uniteVente, uniteVente) ||
+                other.uniteVente == uniteVente) &&
+            (identical(other.stockDisponible, stockDisponible) ||
+                other.stockDisponible == stockDisponible) &&
             const DeepCollectionEquality().equals(other._lots, _lots));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, id, nom, prixDetail, prixGros,
-      categorie, const DeepCollectionEquality().hash(_lots));
+  int get hashCode => Object.hash(
+      runtimeType,
+      id,
+      nom,
+      prixDetail,
+      prixGros,
+      categorie,
+      uniteVente,
+      stockDisponible,
+      const DeepCollectionEquality().hash(_lots));
 
   /// Create a copy of PosProduitCatalogue
   /// with the given fields replaced by the non-null parameter values.
@@ -454,9 +515,15 @@ abstract class _PosProduitCatalogue implements PosProduitCatalogue {
   const factory _PosProduitCatalogue(
       {required final int id,
       required final String nom,
-      @JsonKey(name: 'prix_detail') required final double prixDetail,
-      @JsonKey(name: 'prix_gros') final double? prixGros,
+      @JsonKey(name: 'prix_unitaire', fromJson: jsonToDouble)
+      required final double prixDetail,
+      @JsonKey(name: 'prix_gros', fromJson: jsonToDoubleNullable)
+      final double? prixGros,
+      @JsonKey(name: 'categorie', fromJson: _categorieNomFromJson)
       final String categorie,
+      @JsonKey(name: 'unite_vente') final String uniteVente,
+      @JsonKey(name: 'stock_disponible', fromJson: jsonToDouble)
+      final double stockDisponible,
       final List<PosLot> lots}) = _$PosProduitCatalogueImpl;
 
   factory _PosProduitCatalogue.fromJson(Map<String, dynamic> json) =
@@ -467,13 +534,20 @@ abstract class _PosProduitCatalogue implements PosProduitCatalogue {
   @override
   String get nom;
   @override
-  @JsonKey(name: 'prix_detail')
+  @JsonKey(name: 'prix_unitaire', fromJson: jsonToDouble)
   double get prixDetail;
   @override
-  @JsonKey(name: 'prix_gros')
+  @JsonKey(name: 'prix_gros', fromJson: jsonToDoubleNullable)
   double? get prixGros;
   @override
+  @JsonKey(name: 'categorie', fromJson: _categorieNomFromJson)
   String get categorie;
+  @override
+  @JsonKey(name: 'unite_vente')
+  String get uniteVente;
+  @override
+  @JsonKey(name: 'stock_disponible', fromJson: jsonToDouble)
+  double get stockDisponible;
   @override
   List<PosLot> get lots;
 

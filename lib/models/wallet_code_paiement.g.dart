@@ -11,7 +11,7 @@ _$WalletCodePaiementImpl _$$WalletCodePaiementImplFromJson(
     _$WalletCodePaiementImpl(
       code: json['code'] as String,
       expireDans: (json['expire_dans'] as num).toInt(),
-      solde: (json['solde'] as num).toDouble(),
+      solde: jsonToDouble(json['solde']),
     );
 
 Map<String, dynamic> _$$WalletCodePaiementImplToJson(

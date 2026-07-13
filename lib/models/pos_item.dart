@@ -1,5 +1,6 @@
 // ignore_for_file: invalid_annotation_target
 import 'package:freezed_annotation/freezed_annotation.dart';
+import '../core/utils/json_converters.dart';
 
 part 'pos_item.freezed.dart';
 part 'pos_item.g.dart';
@@ -10,9 +11,9 @@ class PosItem with _$PosItem {
     @JsonKey(name: 'produit_id')    required int    produitId,
     @JsonKey(name: 'nom_produit')   @Default('') String nomProduit,
     @JsonKey(name: 'lot_id')        int? lotId,
-    required double quantite,
-    @JsonKey(name: 'prix_unitaire') required double prixUnitaire,
-    @JsonKey(name: 'sous_total')    @Default(0) double sousTotal,
+    @JsonKey(fromJson: jsonToDouble) required double quantite,
+    @JsonKey(name: 'prix_unitaire', fromJson: jsonToDouble) required double prixUnitaire,
+    @JsonKey(name: 'sous_total', fromJson: jsonToDouble)    @Default(0) double sousTotal,
   }) = _PosItem;
 
   factory PosItem.fromJson(Map<String, dynamic> json) =>

@@ -24,8 +24,9 @@ mixin _$WalletTransaction {
   String get type => throw _privateConstructorUsedError;
   @JsonKey(name: 'type_display')
   String get typeDisplay => throw _privateConstructorUsedError;
+  @JsonKey(fromJson: jsonToDouble)
   double get montant => throw _privateConstructorUsedError;
-  @JsonKey(name: 'solde_apres')
+  @JsonKey(name: 'solde_apres', fromJson: jsonToDouble)
   double get soldeApres => throw _privateConstructorUsedError;
   @JsonKey(name: 'commande_numero')
   String? get commandeNumero => throw _privateConstructorUsedError;
@@ -54,8 +55,8 @@ abstract class $WalletTransactionCopyWith<$Res> {
       {int id,
       String type,
       @JsonKey(name: 'type_display') String typeDisplay,
-      double montant,
-      @JsonKey(name: 'solde_apres') double soldeApres,
+      @JsonKey(fromJson: jsonToDouble) double montant,
+      @JsonKey(name: 'solde_apres', fromJson: jsonToDouble) double soldeApres,
       @JsonKey(name: 'commande_numero') String? commandeNumero,
       String description,
       String reference,
@@ -140,8 +141,8 @@ abstract class _$$WalletTransactionImplCopyWith<$Res>
       {int id,
       String type,
       @JsonKey(name: 'type_display') String typeDisplay,
-      double montant,
-      @JsonKey(name: 'solde_apres') double soldeApres,
+      @JsonKey(fromJson: jsonToDouble) double montant,
+      @JsonKey(name: 'solde_apres', fromJson: jsonToDouble) double soldeApres,
       @JsonKey(name: 'commande_numero') String? commandeNumero,
       String description,
       String reference,
@@ -219,8 +220,9 @@ class _$WalletTransactionImpl implements _WalletTransaction {
       {required this.id,
       required this.type,
       @JsonKey(name: 'type_display') this.typeDisplay = '',
-      required this.montant,
-      @JsonKey(name: 'solde_apres') required this.soldeApres,
+      @JsonKey(fromJson: jsonToDouble) required this.montant,
+      @JsonKey(name: 'solde_apres', fromJson: jsonToDouble)
+      required this.soldeApres,
       @JsonKey(name: 'commande_numero') this.commandeNumero,
       this.description = '',
       this.reference = '',
@@ -237,9 +239,10 @@ class _$WalletTransactionImpl implements _WalletTransaction {
   @JsonKey(name: 'type_display')
   final String typeDisplay;
   @override
+  @JsonKey(fromJson: jsonToDouble)
   final double montant;
   @override
-  @JsonKey(name: 'solde_apres')
+  @JsonKey(name: 'solde_apres', fromJson: jsonToDouble)
   final double soldeApres;
   @override
   @JsonKey(name: 'commande_numero')
@@ -308,8 +311,9 @@ abstract class _WalletTransaction implements WalletTransaction {
           {required final int id,
           required final String type,
           @JsonKey(name: 'type_display') final String typeDisplay,
-          required final double montant,
-          @JsonKey(name: 'solde_apres') required final double soldeApres,
+          @JsonKey(fromJson: jsonToDouble) required final double montant,
+          @JsonKey(name: 'solde_apres', fromJson: jsonToDouble)
+          required final double soldeApres,
           @JsonKey(name: 'commande_numero') final String? commandeNumero,
           final String description,
           final String reference,
@@ -327,9 +331,10 @@ abstract class _WalletTransaction implements WalletTransaction {
   @JsonKey(name: 'type_display')
   String get typeDisplay;
   @override
+  @JsonKey(fromJson: jsonToDouble)
   double get montant;
   @override
-  @JsonKey(name: 'solde_apres')
+  @JsonKey(name: 'solde_apres', fromJson: jsonToDouble)
   double get soldeApres;
   @override
   @JsonKey(name: 'commande_numero')

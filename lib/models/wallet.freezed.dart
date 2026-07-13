@@ -20,6 +20,7 @@ Wallet _$WalletFromJson(Map<String, dynamic> json) {
 
 /// @nodoc
 mixin _$Wallet {
+  @JsonKey(fromJson: jsonToDouble)
   double get solde => throw _privateConstructorUsedError;
   @JsonKey(name: 'is_active')
   bool get isActive => throw _privateConstructorUsedError;
@@ -38,7 +39,9 @@ abstract class $WalletCopyWith<$Res> {
   factory $WalletCopyWith(Wallet value, $Res Function(Wallet) then) =
       _$WalletCopyWithImpl<$Res, Wallet>;
   @useResult
-  $Res call({double solde, @JsonKey(name: 'is_active') bool isActive});
+  $Res call(
+      {@JsonKey(fromJson: jsonToDouble) double solde,
+      @JsonKey(name: 'is_active') bool isActive});
 }
 
 /// @nodoc
@@ -79,7 +82,9 @@ abstract class _$$WalletImplCopyWith<$Res> implements $WalletCopyWith<$Res> {
       __$$WalletImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({double solde, @JsonKey(name: 'is_active') bool isActive});
+  $Res call(
+      {@JsonKey(fromJson: jsonToDouble) double solde,
+      @JsonKey(name: 'is_active') bool isActive});
 }
 
 /// @nodoc
@@ -115,12 +120,14 @@ class __$$WalletImplCopyWithImpl<$Res>
 @JsonSerializable()
 class _$WalletImpl implements _Wallet {
   const _$WalletImpl(
-      {required this.solde, @JsonKey(name: 'is_active') this.isActive = true});
+      {@JsonKey(fromJson: jsonToDouble) required this.solde,
+      @JsonKey(name: 'is_active') this.isActive = true});
 
   factory _$WalletImpl.fromJson(Map<String, dynamic> json) =>
       _$$WalletImplFromJson(json);
 
   @override
+  @JsonKey(fromJson: jsonToDouble)
   final double solde;
   @override
   @JsonKey(name: 'is_active')
@@ -163,12 +170,13 @@ class _$WalletImpl implements _Wallet {
 
 abstract class _Wallet implements Wallet {
   const factory _Wallet(
-      {required final double solde,
+      {@JsonKey(fromJson: jsonToDouble) required final double solde,
       @JsonKey(name: 'is_active') final bool isActive}) = _$WalletImpl;
 
   factory _Wallet.fromJson(Map<String, dynamic> json) = _$WalletImpl.fromJson;
 
   @override
+  @JsonKey(fromJson: jsonToDouble)
   double get solde;
   @override
   @JsonKey(name: 'is_active')

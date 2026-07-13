@@ -22,11 +22,11 @@ PosSession _$PosSessionFromJson(Map<String, dynamic> json) {
 mixin _$PosSession {
   int get id => throw _privateConstructorUsedError;
   String get statut => throw _privateConstructorUsedError;
-  @JsonKey(name: 'fonds_ouverture')
+  @JsonKey(name: 'fonds_ouverture', fromJson: jsonToDouble)
   double get fondsOuverture => throw _privateConstructorUsedError;
-  @JsonKey(name: 'fonds_fermeture')
+  @JsonKey(name: 'fonds_fermeture', fromJson: jsonToDoubleNullable)
   double? get fondsFermeture => throw _privateConstructorUsedError;
-  @JsonKey(name: 'ecart_caisse')
+  @JsonKey(name: 'ecart_caisse', fromJson: jsonToDoubleNullable)
   double? get ecartCaisse => throw _privateConstructorUsedError;
   @JsonKey(name: 'ouverte_le')
   String get ouverteLe => throw _privateConstructorUsedError;
@@ -52,9 +52,12 @@ abstract class $PosSessionCopyWith<$Res> {
   $Res call(
       {int id,
       String statut,
-      @JsonKey(name: 'fonds_ouverture') double fondsOuverture,
-      @JsonKey(name: 'fonds_fermeture') double? fondsFermeture,
-      @JsonKey(name: 'ecart_caisse') double? ecartCaisse,
+      @JsonKey(name: 'fonds_ouverture', fromJson: jsonToDouble)
+      double fondsOuverture,
+      @JsonKey(name: 'fonds_fermeture', fromJson: jsonToDoubleNullable)
+      double? fondsFermeture,
+      @JsonKey(name: 'ecart_caisse', fromJson: jsonToDoubleNullable)
+      double? ecartCaisse,
       @JsonKey(name: 'ouverte_le') String ouverteLe,
       @JsonKey(name: 'fermee_le') String? fermeeLe});
 }
@@ -126,9 +129,12 @@ abstract class _$$PosSessionImplCopyWith<$Res>
   $Res call(
       {int id,
       String statut,
-      @JsonKey(name: 'fonds_ouverture') double fondsOuverture,
-      @JsonKey(name: 'fonds_fermeture') double? fondsFermeture,
-      @JsonKey(name: 'ecart_caisse') double? ecartCaisse,
+      @JsonKey(name: 'fonds_ouverture', fromJson: jsonToDouble)
+      double fondsOuverture,
+      @JsonKey(name: 'fonds_fermeture', fromJson: jsonToDoubleNullable)
+      double? fondsFermeture,
+      @JsonKey(name: 'ecart_caisse', fromJson: jsonToDoubleNullable)
+      double? ecartCaisse,
       @JsonKey(name: 'ouverte_le') String ouverteLe,
       @JsonKey(name: 'fermee_le') String? fermeeLe});
 }
@@ -193,9 +199,12 @@ class _$PosSessionImpl implements _PosSession {
   const _$PosSessionImpl(
       {required this.id,
       required this.statut,
-      @JsonKey(name: 'fonds_ouverture') required this.fondsOuverture,
-      @JsonKey(name: 'fonds_fermeture') this.fondsFermeture,
-      @JsonKey(name: 'ecart_caisse') this.ecartCaisse,
+      @JsonKey(name: 'fonds_ouverture', fromJson: jsonToDouble)
+      required this.fondsOuverture,
+      @JsonKey(name: 'fonds_fermeture', fromJson: jsonToDoubleNullable)
+      this.fondsFermeture,
+      @JsonKey(name: 'ecart_caisse', fromJson: jsonToDoubleNullable)
+      this.ecartCaisse,
       @JsonKey(name: 'ouverte_le') required this.ouverteLe,
       @JsonKey(name: 'fermee_le') this.fermeeLe});
 
@@ -207,13 +216,13 @@ class _$PosSessionImpl implements _PosSession {
   @override
   final String statut;
   @override
-  @JsonKey(name: 'fonds_ouverture')
+  @JsonKey(name: 'fonds_ouverture', fromJson: jsonToDouble)
   final double fondsOuverture;
   @override
-  @JsonKey(name: 'fonds_fermeture')
+  @JsonKey(name: 'fonds_fermeture', fromJson: jsonToDoubleNullable)
   final double? fondsFermeture;
   @override
-  @JsonKey(name: 'ecart_caisse')
+  @JsonKey(name: 'ecart_caisse', fromJson: jsonToDoubleNullable)
   final double? ecartCaisse;
   @override
   @JsonKey(name: 'ouverte_le')
@@ -271,9 +280,12 @@ abstract class _PosSession implements PosSession {
   const factory _PosSession(
       {required final int id,
       required final String statut,
-      @JsonKey(name: 'fonds_ouverture') required final double fondsOuverture,
-      @JsonKey(name: 'fonds_fermeture') final double? fondsFermeture,
-      @JsonKey(name: 'ecart_caisse') final double? ecartCaisse,
+      @JsonKey(name: 'fonds_ouverture', fromJson: jsonToDouble)
+      required final double fondsOuverture,
+      @JsonKey(name: 'fonds_fermeture', fromJson: jsonToDoubleNullable)
+      final double? fondsFermeture,
+      @JsonKey(name: 'ecart_caisse', fromJson: jsonToDoubleNullable)
+      final double? ecartCaisse,
       @JsonKey(name: 'ouverte_le') required final String ouverteLe,
       @JsonKey(name: 'fermee_le') final String? fermeeLe}) = _$PosSessionImpl;
 
@@ -285,13 +297,13 @@ abstract class _PosSession implements PosSession {
   @override
   String get statut;
   @override
-  @JsonKey(name: 'fonds_ouverture')
+  @JsonKey(name: 'fonds_ouverture', fromJson: jsonToDouble)
   double get fondsOuverture;
   @override
-  @JsonKey(name: 'fonds_fermeture')
+  @JsonKey(name: 'fonds_fermeture', fromJson: jsonToDoubleNullable)
   double? get fondsFermeture;
   @override
-  @JsonKey(name: 'ecart_caisse')
+  @JsonKey(name: 'ecart_caisse', fromJson: jsonToDoubleNullable)
   double? get ecartCaisse;
   @override
   @JsonKey(name: 'ouverte_le')

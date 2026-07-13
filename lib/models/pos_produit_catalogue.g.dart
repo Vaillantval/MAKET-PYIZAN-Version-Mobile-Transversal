@@ -9,7 +9,9 @@ part of 'pos_produit_catalogue.dart';
 _$PosLotImpl _$$PosLotImplFromJson(Map<String, dynamic> json) => _$PosLotImpl(
       id: (json['id'] as num).toInt(),
       codeBarres: json['code_barres'] as String?,
-      quantiteActuelle: (json['quantite_actuelle'] as num?)?.toDouble() ?? 0,
+      quantiteActuelle: json['quantite_actuelle'] == null
+          ? 0
+          : jsonToDouble(json['quantite_actuelle']),
     );
 
 Map<String, dynamic> _$$PosLotImplToJson(_$PosLotImpl instance) =>
@@ -24,9 +26,15 @@ _$PosProduitCatalogueImpl _$$PosProduitCatalogueImplFromJson(
     _$PosProduitCatalogueImpl(
       id: (json['id'] as num).toInt(),
       nom: json['nom'] as String,
-      prixDetail: (json['prix_detail'] as num).toDouble(),
-      prixGros: (json['prix_gros'] as num?)?.toDouble(),
-      categorie: json['categorie'] as String? ?? '',
+      prixDetail: jsonToDouble(json['prix_unitaire']),
+      prixGros: jsonToDoubleNullable(json['prix_gros']),
+      categorie: json['categorie'] == null
+          ? ''
+          : _categorieNomFromJson(json['categorie']),
+      uniteVente: json['unite_vente'] as String? ?? '',
+      stockDisponible: json['stock_disponible'] == null
+          ? 0
+          : jsonToDouble(json['stock_disponible']),
       lots: (json['lots'] as List<dynamic>?)
               ?.map((e) => PosLot.fromJson(e as Map<String, dynamic>))
               .toList() ??
@@ -38,8 +46,10 @@ Map<String, dynamic> _$$PosProduitCatalogueImplToJson(
     <String, dynamic>{
       'id': instance.id,
       'nom': instance.nom,
-      'prix_detail': instance.prixDetail,
+      'prix_unitaire': instance.prixDetail,
       'prix_gros': instance.prixGros,
       'categorie': instance.categorie,
+      'unite_vente': instance.uniteVente,
+      'stock_disponible': instance.stockDisponible,
       'lots': instance.lots,
     };

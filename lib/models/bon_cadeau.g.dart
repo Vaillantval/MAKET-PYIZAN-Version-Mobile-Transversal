@@ -10,7 +10,7 @@ _$BonCadeauImpl _$$BonCadeauImplFromJson(Map<String, dynamic> json) =>
     _$BonCadeauImpl(
       id: (json['id'] as num).toInt(),
       code: json['code'] as String,
-      montant: (json['montant'] as num).toDouble(),
+      montant: jsonToDouble(json['montant']),
       statut: json['statut'] as String,
       statutDisplay: json['statut_display'] as String? ?? '',
       emailDestinataire: json['email_destinataire'] as String?,

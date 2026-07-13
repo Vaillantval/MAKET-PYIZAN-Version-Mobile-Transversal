@@ -22,6 +22,7 @@ BonCadeau _$BonCadeauFromJson(Map<String, dynamic> json) {
 mixin _$BonCadeau {
   int get id => throw _privateConstructorUsedError;
   String get code => throw _privateConstructorUsedError;
+  @JsonKey(fromJson: jsonToDouble)
   double get montant => throw _privateConstructorUsedError;
   String get statut => throw _privateConstructorUsedError;
   @JsonKey(name: 'statut_display')
@@ -51,7 +52,7 @@ abstract class $BonCadeauCopyWith<$Res> {
   $Res call(
       {int id,
       String code,
-      double montant,
+      @JsonKey(fromJson: jsonToDouble) double montant,
       String statut,
       @JsonKey(name: 'statut_display') String statutDisplay,
       @JsonKey(name: 'email_destinataire') String? emailDestinataire,
@@ -131,7 +132,7 @@ abstract class _$$BonCadeauImplCopyWith<$Res>
   $Res call(
       {int id,
       String code,
-      double montant,
+      @JsonKey(fromJson: jsonToDouble) double montant,
       String statut,
       @JsonKey(name: 'statut_display') String statutDisplay,
       @JsonKey(name: 'email_destinataire') String? emailDestinataire,
@@ -204,7 +205,7 @@ class _$BonCadeauImpl implements _BonCadeau {
   const _$BonCadeauImpl(
       {required this.id,
       required this.code,
-      required this.montant,
+      @JsonKey(fromJson: jsonToDouble) required this.montant,
       required this.statut,
       @JsonKey(name: 'statut_display') this.statutDisplay = '',
       @JsonKey(name: 'email_destinataire') this.emailDestinataire,
@@ -219,6 +220,7 @@ class _$BonCadeauImpl implements _BonCadeau {
   @override
   final String code;
   @override
+  @JsonKey(fromJson: jsonToDouble)
   final double montant;
   @override
   final String statut;
@@ -284,7 +286,7 @@ abstract class _BonCadeau implements BonCadeau {
   const factory _BonCadeau(
           {required final int id,
           required final String code,
-          required final double montant,
+          @JsonKey(fromJson: jsonToDouble) required final double montant,
           required final String statut,
           @JsonKey(name: 'statut_display') final String statutDisplay,
           @JsonKey(name: 'email_destinataire') final String? emailDestinataire,
@@ -300,6 +302,7 @@ abstract class _BonCadeau implements BonCadeau {
   @override
   String get code;
   @override
+  @JsonKey(fromJson: jsonToDouble)
   double get montant;
   @override
   String get statut;

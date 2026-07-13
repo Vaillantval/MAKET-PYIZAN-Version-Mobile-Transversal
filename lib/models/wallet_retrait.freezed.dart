@@ -21,6 +21,7 @@ WalletRetrait _$WalletRetraitFromJson(Map<String, dynamic> json) {
 /// @nodoc
 mixin _$WalletRetrait {
   int get id => throw _privateConstructorUsedError;
+  @JsonKey(fromJson: jsonToDouble)
   double get montant => throw _privateConstructorUsedError;
   String get canal => throw _privateConstructorUsedError;
   @JsonKey(name: 'canal_display')
@@ -51,7 +52,7 @@ abstract class $WalletRetraitCopyWith<$Res> {
   @useResult
   $Res call(
       {int id,
-      double montant,
+      @JsonKey(fromJson: jsonToDouble) double montant,
       String canal,
       @JsonKey(name: 'canal_display') String canalDisplay,
       @JsonKey(name: 'numero_telephone') String numeroTelephone,
@@ -131,7 +132,7 @@ abstract class _$$WalletRetraitImplCopyWith<$Res>
   @useResult
   $Res call(
       {int id,
-      double montant,
+      @JsonKey(fromJson: jsonToDouble) double montant,
       String canal,
       @JsonKey(name: 'canal_display') String canalDisplay,
       @JsonKey(name: 'numero_telephone') String numeroTelephone,
@@ -204,7 +205,7 @@ class __$$WalletRetraitImplCopyWithImpl<$Res>
 class _$WalletRetraitImpl implements _WalletRetrait {
   const _$WalletRetraitImpl(
       {required this.id,
-      required this.montant,
+      @JsonKey(fromJson: jsonToDouble) required this.montant,
       required this.canal,
       @JsonKey(name: 'canal_display') this.canalDisplay = '',
       @JsonKey(name: 'numero_telephone') required this.numeroTelephone,
@@ -218,6 +219,7 @@ class _$WalletRetraitImpl implements _WalletRetrait {
   @override
   final int id;
   @override
+  @JsonKey(fromJson: jsonToDouble)
   final double montant;
   @override
   final String canal;
@@ -284,7 +286,7 @@ class _$WalletRetraitImpl implements _WalletRetrait {
 abstract class _WalletRetrait implements WalletRetrait {
   const factory _WalletRetrait(
       {required final int id,
-      required final double montant,
+      @JsonKey(fromJson: jsonToDouble) required final double montant,
       required final String canal,
       @JsonKey(name: 'canal_display') final String canalDisplay,
       @JsonKey(name: 'numero_telephone') required final String numeroTelephone,
@@ -299,6 +301,7 @@ abstract class _WalletRetrait implements WalletRetrait {
   @override
   int get id;
   @override
+  @JsonKey(fromJson: jsonToDouble)
   double get montant;
   @override
   String get canal;

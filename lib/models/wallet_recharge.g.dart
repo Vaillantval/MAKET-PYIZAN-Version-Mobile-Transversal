@@ -9,7 +9,7 @@ part of 'wallet_recharge.dart';
 _$WalletRechargeImpl _$$WalletRechargeImplFromJson(Map<String, dynamic> json) =>
     _$WalletRechargeImpl(
       id: (json['id'] as num).toInt(),
-      montant: (json['montant'] as num).toDouble(),
+      montant: jsonToDouble(json['montant']),
       methode: json['methode'] as String,
       methodeDisplay: json['methode_display'] as String? ?? '',
       statut: json['statut'] as String,

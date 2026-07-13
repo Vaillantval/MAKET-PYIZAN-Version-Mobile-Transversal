@@ -14,9 +14,11 @@ _$PosSaleImpl _$$PosSaleImplFromJson(Map<String, dynamic> json) =>
               ?.map((e) => PosItem.fromJson(e as Map<String, dynamic>))
               .toList() ??
           const [],
-      montantTotal: (json['montant_total'] as num).toDouble(),
+      montantTotal: jsonToDouble(json['montant_total']),
       methodePaiement: json['methode_paiement'] as String? ?? 'cash',
-      montantWallet: (json['montant_wallet'] as num?)?.toDouble() ?? 0,
+      montantWallet: json['montant_wallet'] == null
+          ? 0
+          : jsonToDouble(json['montant_wallet']),
       statut: json['statut'] as String? ?? 'en_attente',
       vendueLe: json['vendue_le'] as String,
       syncStatus: json['syncStatus'] as String? ?? 'enAttente',
