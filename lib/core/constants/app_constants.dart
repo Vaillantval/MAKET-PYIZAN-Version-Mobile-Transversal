@@ -23,6 +23,7 @@ class AppConstants {
   static const String keyPosCatalogCache = 'pos_catalog_cache';
   static const String hivePosSessionBox  = 'pos_session';
   static const String hivePosSalesBox    = 'pos_sales';
+  static const String keyPosImpressionAuto = 'pos_impression_auto';
 
   // Cache TTL
   static const Duration catalogCacheTTL  = Duration(hours: 6);

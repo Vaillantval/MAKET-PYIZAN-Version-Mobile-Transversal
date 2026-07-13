@@ -37,6 +37,11 @@ class LocalStorage {
       _prefs.setInt(key, value);
   int? getInt(String key) => _prefs.getInt(key);
 
+  Future<void> setBool(String key, bool value) async =>
+      _prefs.setBool(key, value);
+  bool getBool(String key, {bool defaultValue = false}) =>
+      _prefs.getBool(key) ?? defaultValue;
+
   Future<void> setTimestamp(String key) async =>
       _prefs.setString(key, DateTime.now().toIso8601String());
 

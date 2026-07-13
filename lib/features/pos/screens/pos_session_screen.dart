@@ -70,7 +70,8 @@ class _PosSessionScreenState extends ConsumerState<PosSessionScreen> {
     final ecart = double.tryParse('${recap['ecart_caisse'] ?? 0}') ?? 0;
     final totalVentes = double.tryParse('${recap['total_ventes'] ?? 0}') ?? 0;
     final nbVentes = recap['nb_ventes'] ?? 0;
-    final repartition = recap['repartition_paiement'] as Map<String, dynamic>?;
+    // Structure backend : {methode: {nb, montant}}
+    final parMethode = recap['par_methode'] as Map<String, dynamic>?;
 
     showDialog(
       context: context,
@@ -83,9 +84,21 @@ class _PosSessionScreenState extends ConsumerState<PosSessionScreen> {
           children: [
             _RecapRow(label: 'Nombre de ventes', value: '$nbVentes'),
             _RecapRow(label: 'Total des ventes', value: FormatUtils.htg(totalVentes)),
-            if (repartition != null)
-              ...repartition.entries.map(
-                (e) => _RecapRow(label: e.key, value: FormatUtils.htg(e.value)),
+            const SizedBox(height: 8),
+            if (parMethode != null && parMethode.isNotEmpty)
+              ...parMethode.entries.map((e) {
+                final detail  = e.value as Map<String, dynamic>? ?? {};
+                final nb      = detail['nb'] ?? 0;
+                final montant = double.tryParse('${detail['montant'] ?? 0}') ?? 0;
+                return _RecapRow(
+                  label: '${e.key.toUpperCase()} ($nb)',
+                  value: FormatUtils.htg(montant),
+                );
+              })
+            else
+              const _RecapRow(
+                label: 'Répartition',
+                value: 'Répartition indisponible',
               ),
             const Divider(height: 20),
             _RecapRow(

@@ -1,18 +1,35 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../core/constants/app_constants.dart';
+import '../../../core/printing/pos_printer_service.dart';
+import '../../../core/storage/local_storage.dart';
 import '../../../providers/auth_provider.dart';
 import '../providers/pos_device_provider.dart';
 import '../providers/pos_session_provider.dart';
 
-class PosProfilScreen extends ConsumerWidget {
+class PosProfilScreen extends ConsumerStatefulWidget {
   const PosProfilScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<PosProfilScreen> createState() => _PosProfilScreenState();
+}
+
+class _PosProfilScreenState extends ConsumerState<PosProfilScreen> {
+  late bool _impressionAuto;
+
+  @override
+  void initState() {
+    super.initState();
+    _impressionAuto = ref.read(localStorageProvider).getBool(AppConstants.keyPosImpressionAuto);
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final user     = ref.watch(authProvider).user;
     final deviceUid = ref.watch(posDeviceUidProvider);
     final sessionOuverte = ref.watch(posSessionProvider.notifier).isOuverte;
+    final imprimanteState = ref.watch(posPrinterProvider);
 
     return Scaffold(
       backgroundColor: AppColors.grisClair,
@@ -44,6 +61,33 @@ class PosProfilScreen extends ConsumerWidget {
                   label: 'Session',
                   value: sessionOuverte ? 'Ouverte' : 'Aucune',
                   valueColor: sessionOuverte ? AppColors.vertVif : AppColors.orange,
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 16),
+          Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(14),
+            ),
+            child: Column(
+              children: [
+                SwitchListTile(
+                  secondary: const Icon(Icons.print_outlined, color: AppColors.vertFonce),
+                  title: const Text('Impression automatique'),
+                  subtitle: Text(
+                    imprimanteState.disponible
+                        ? 'Imprime le reçu dès la confirmation de la vente'
+                        : 'Imprimante indisponible sur cet appareil',
+                    style: const TextStyle(fontSize: 12),
+                  ),
+                  value: _impressionAuto,
+                  activeThumbColor: AppColors.vertVif,
+                  onChanged: (v) async {
+                    await ref.read(localStorageProvider).setBool(AppConstants.keyPosImpressionAuto, v);
+                    setState(() => _impressionAuto = v);
+                  },
                 ),
               ],
             ),

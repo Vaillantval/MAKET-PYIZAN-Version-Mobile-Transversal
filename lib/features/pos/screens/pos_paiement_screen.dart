@@ -2,9 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../core/constants/app_constants.dart';
 import '../../../core/offline/connectivity_service.dart';
+import '../../../core/printing/pos_printer_service.dart';
+import '../../../core/storage/local_storage.dart';
 import '../../../core/utils/format_utils.dart';
 import '../../../models/pos_sale.dart';
+import '../../../providers/auth_provider.dart';
+import '../providers/pos_device_provider.dart';
 import '../providers/pos_exceptions.dart';
 import '../providers/pos_panier_provider.dart';
 import '../providers/pos_vente_provider.dart';
@@ -37,6 +42,8 @@ class _PosPaiementScreenState extends ConsumerState<PosPaiementScreen> {
 
   bool _loading = false;
   PosSale? _venteConfirmee;
+  String? _clientNomVente;
+  double? _montantRecuVente;
 
   @override
   void dispose() {
@@ -55,11 +62,13 @@ class _PosPaiementScreenState extends ConsumerState<PosPaiementScreen> {
     double montantWallet = 0,
     String? codePaiement,
     String? referenceTransaction,
+    double? montantRecuPourTicket,
   }) async {
     setState(() => _loading = true);
 
     final panier = ref.read(posPanierProvider);
     final total  = _total;
+    final clientNomSnapshot = _clientWallet?.nom;
 
     try {
       final sale = await ref.read(posHistoriqueProvider.notifier).vendre(
@@ -73,8 +82,10 @@ class _PosPaiementScreenState extends ConsumerState<PosPaiementScreen> {
       ref.read(posPanierProvider.notifier).vider();
       if (!mounted) return;
       setState(() {
-        _venteConfirmee = sale;
-        _loading = false;
+        _venteConfirmee     = sale;
+        _clientNomVente     = clientNomSnapshot;
+        _montantRecuVente   = montantRecuPourTicket;
+        _loading            = false;
       });
     } on PosVenteException catch (e) {
       if (!mounted) return;
@@ -188,6 +199,8 @@ class _PosPaiementScreenState extends ConsumerState<PosPaiementScreen> {
     if (_venteConfirmee != null) {
       return _EcranConfirmation(
         sale: _venteConfirmee!,
+        clientNom: _clientNomVente,
+        montantRecu: _montantRecuVente,
         onNouvelleVente: () => context.go('/pos/vente'),
       );
     }
@@ -258,7 +271,11 @@ class _PosPaiementScreenState extends ConsumerState<PosPaiementScreen> {
                 total: total,
                 recuCtrl: _recuCashCtrl,
                 loading: _loading,
-                onConfirmer: () => _soumettre(methodePaiement: 'cash'),
+                onConfirmer: () => _soumettre(
+                  methodePaiement: 'cash',
+                  montantRecuPourTicket:
+                      double.tryParse(_recuCashCtrl.text.trim().replaceAll(',', '.')),
+                ),
               )
             else if (_methode == 'moncash' || _methode == 'natcash')
               _SectionDeclaratif(
@@ -817,15 +834,80 @@ class _PaveNumerique extends StatelessWidget {
 
 // ── Écran de confirmation post-vente ─────────────────────────────────
 
-class _EcranConfirmation extends StatelessWidget {
+class _EcranConfirmation extends ConsumerStatefulWidget {
   final PosSale sale;
+  final String? clientNom;
+  final double? montantRecu;
   final VoidCallback onNouvelleVente;
-  const _EcranConfirmation({required this.sale, required this.onNouvelleVente});
+  const _EcranConfirmation({
+    required this.sale,
+    this.clientNom,
+    this.montantRecu,
+    required this.onNouvelleVente,
+  });
+
+  @override
+  ConsumerState<_EcranConfirmation> createState() => _EcranConfirmationState();
+}
+
+class _EcranConfirmationState extends ConsumerState<_EcranConfirmation> {
+  bool _impressionEnCours = false;
+  bool _autoImprimeTente  = false;
+
+  @override
+  void initState() {
+    super.initState();
+    Future.microtask(_tenterImpressionAuto);
+  }
+
+  Future<void> _tenterImpressionAuto() async {
+    if (_autoImprimeTente) return;
+    _autoImprimeTente = true;
+    final auto  = ref.read(localStorageProvider).getBool(AppConstants.keyPosImpressionAuto);
+    final dispo = ref.read(posPrinterProvider).disponible;
+    if (auto && dispo) await _imprimer();
+  }
+
+  Future<void> _imprimer() async {
+    if (!mounted) return;
+    setState(() => _impressionEnCours = true);
+
+    final user       = ref.read(authProvider).user;
+    final deviceUid  = ref.read(posDeviceUidProvider);
+    final nomComplet = '${user?.firstName ?? ''} ${user?.lastName ?? ''}'.trim();
+
+    final resultat = await ref.read(posPrinterProvider.notifier).imprimerRecu(
+      widget.sale,
+      nomOperateur: nomComplet.isNotEmpty ? nomComplet : (user?.username ?? 'Opérateur'),
+      nomCaisse: deviceUid ?? 'POS',
+      nomClient: widget.clientNom,
+      montantRecu: widget.montantRecu,
+    );
+
+    if (!mounted) return;
+    setState(() => _impressionEnCours = false);
+
+    if (resultat.indisponible) return; // no-op silencieux
+
+    if (!resultat.succes) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text(resultat.erreur ?? 'Erreur d\'impression du reçu.'),
+        backgroundColor: AppColors.rouge,
+        action: SnackBarAction(
+          label: 'Réessayer',
+          textColor: Colors.white,
+          onPressed: _imprimer,
+        ),
+      ));
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    final sale = widget.sale;
     final hasWallet = sale.montantWallet > 0;
     final complement = sale.montantTotal - sale.montantWallet;
+    final imprimanteDisponible = ref.watch(posPrinterProvider).disponible;
 
     return Scaffold(
       backgroundColor: AppColors.grisClair,
@@ -900,7 +982,7 @@ class _EcranConfirmation extends StatelessWidget {
             ),
             const SizedBox(height: 24),
             ElevatedButton.icon(
-              onPressed: onNouvelleVente,
+              onPressed: widget.onNouvelleVente,
               icon: const Icon(Icons.add_shopping_cart),
               label: const Text('Nouvelle vente'),
               style: ElevatedButton.styleFrom(
@@ -909,13 +991,20 @@ class _EcranConfirmation extends StatelessWidget {
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               ),
             ),
-            const SizedBox(height: 10),
-            OutlinedButton.icon(
-              onPressed: null,
-              icon: const Icon(Icons.print_outlined),
-              label: const Text('Imprimer le reçu (bientôt disponible)'),
-              style: OutlinedButton.styleFrom(minimumSize: const Size(double.infinity, 54)),
-            ),
+            if (imprimanteDisponible) ...[
+              const SizedBox(height: 10),
+              OutlinedButton.icon(
+                onPressed: _impressionEnCours ? null : _imprimer,
+                icon: _impressionEnCours
+                    ? const SizedBox(
+                        height: 18, width: 18,
+                        child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.vertFonce),
+                      )
+                    : const Icon(Icons.print_outlined),
+                label: const Text('Imprimer le reçu'),
+                style: OutlinedButton.styleFrom(minimumSize: const Size(double.infinity, 54)),
+              ),
+            ],
           ],
         ),
       ),

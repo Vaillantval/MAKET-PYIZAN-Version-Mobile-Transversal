@@ -51,6 +51,9 @@ dependencies:
   # Paiement MonCash
   webview_flutter: ^4.10.0
 
+  # Impression reçus POS (terminaux Sunmi, Android uniquement)
+  sunmi_printer_plus: ^4.1.1
+
   # UI
   flutter_svg: ^2.0.10
   lottie: ^3.1.2

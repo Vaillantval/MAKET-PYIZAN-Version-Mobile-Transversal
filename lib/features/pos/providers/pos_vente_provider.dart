@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
 import '../../../core/api/api_client.dart';
@@ -67,10 +68,17 @@ class PosHistoriqueNotifier extends StateNotifier<AsyncValue<List<PosSale>>> {
       final data = res.data as Map<String, dynamic>;
       if (data['success'] != true) return;
 
+      // Contrat backend : data['data']['ventes'] = [{idempotency_key, numero_vente, statut}, ...]
       final rawData = data['data'];
-      final serverVentes = rawData is List
-          ? rawData
-          : (rawData as Map<String, dynamic>?)?['ventes'] as List? ?? const [];
+      final ventesData = rawData is Map<String, dynamic> ? rawData['ventes'] : null;
+      if (ventesData is! List) {
+        debugPrint(
+          '[POS] Réconciliation : clé "ventes" absente de la réponse '
+          'de ${AppEndpoints.posRapports}?date=$dateStr',
+        );
+        return;
+      }
+      final serverVentes = ventesData;
 
       for (final raw in serverVentes) {
         final m   = raw as Map<String, dynamic>;
