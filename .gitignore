@@ -51,3 +51,6 @@ app.*.map.json
 /android/*.keystore
 **/*.jks
 **/*.keystore
+
+# Config Firebase — retiré du dépôt à la demande, garder en local pour builder
+/android/app/google-services.json
