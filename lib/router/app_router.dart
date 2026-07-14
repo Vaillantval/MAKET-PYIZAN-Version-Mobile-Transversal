@@ -54,20 +54,24 @@ final routerProvider = Provider<GoRouter>((ref) {
     redirect: (context, state) {
       final status  = authState.status;
       final path    = state.matchedLocation;
-      final isAuth  = ['/login', '/register', '/splash'].contains(path);
+      // '/splash' est volontairement exclu : c'est un écran de transit qui
+      // doit toujours être quitté dès que le statut d'auth est résolu (sinon
+      // l'app reste bloquée dessus indéfiniment une fois non-authentifié).
+      final isAuth  = ['/login', '/register'].contains(path);
 
       if (status == AuthStatus.unknown) {
         return path == '/splash' ? null : '/splash';
       }
 
       if (status == AuthStatus.unauthenticated) {
+        if (path == '/splash') return '/login';
         return isAuth ? null : '/login';
       }
 
       final role = authState.user?.role ?? 'acheteur';
 
       // Connecté
-      if (isAuth) {
+      if (isAuth || path == '/splash') {
         // Rediriger selon le rôle
         return _homeRouteForRole(role);
       }
