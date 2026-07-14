@@ -119,7 +119,9 @@ class AuthNotifier extends StateNotifier<AuthState> {
           isLoading: false,
         );
         try {
-          await _ref.read(fcmServiceProvider).initialize(role: user.role);
+          await _ref.read(fcmServiceProvider)
+              .initialize(role: user.role)
+              .timeout(const Duration(seconds: 5));
         } catch (_) {}
         return true;
       }
@@ -183,7 +185,9 @@ class AuthNotifier extends StateNotifier<AuthState> {
           isLoading: false,
         );
         try {
-          await _ref.read(fcmServiceProvider).initialize(role: user.role);
+          await _ref.read(fcmServiceProvider)
+              .initialize(role: user.role)
+              .timeout(const Duration(seconds: 5));
         } catch (_) {}
         return true;
       }
@@ -201,7 +205,9 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
   Future<void> logout() async {
     try {
-      await _ref.read(fcmServiceProvider).dispose();
+      await _ref.read(fcmServiceProvider).dispose().timeout(
+        const Duration(seconds: 5),
+      );
     } catch (_) {}
     final refresh = await _storage.getRefreshToken();
     try {

@@ -2,7 +2,7 @@ class AppConstants {
   // API
   static const String baseUrl = String.fromEnvironment(
     'BASE_URL',
-    defaultValue: 'https://maketpeyizan.up.railway.app',
+    defaultValue: 'https://maketpeyizan.ht',
   );
   static const Duration connectTimeout  = Duration(seconds: 30);
   static const Duration receiveTimeout  = Duration(seconds: 30);

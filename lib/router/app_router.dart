@@ -46,12 +46,29 @@ import '../features/admin/screens/admin_catalogue_screen.dart';
 import '../features/admin/screens/admin_users_screen.dart';
 import '../features/admin/screens/admin_collectes_screen.dart';
 
+// Notifie go_router à chaque changement d'authState pour qu'il réévalue
+// son `redirect`, SANS reconstruire l'objet GoRouter lui-même. Recréer tout
+// le router à chaque changement d'état (ce qu'un Provider<GoRouter> qui fait
+// ref.watch(authProvider) ferait) est un anti-pattern connu de go_router :
+// un nouvel objet GoRouter avec une toute nouvelle pile de navigation
+// interne peut désynchroniser la redirection réactive de la vraie
+// localisation courante de l'app.
+class _AuthRefreshNotifier extends ChangeNotifier {
+  _AuthRefreshNotifier(this._ref) {
+    _ref.listen<AuthState>(authProvider, (_, __) => notifyListeners());
+  }
+  final Ref _ref;
+}
+
 final routerProvider = Provider<GoRouter>((ref) {
-  final authState = ref.watch(authProvider);
+  final refreshNotifier = _AuthRefreshNotifier(ref);
+  ref.onDispose(refreshNotifier.dispose);
 
   return GoRouter(
     initialLocation: '/splash',
+    refreshListenable: refreshNotifier,
     redirect: (context, state) {
+      final authState = ref.read(authProvider);
       final status  = authState.status;
       final path    = state.matchedLocation;
       // '/splash' est volontairement exclu : c'est un écran de transit qui

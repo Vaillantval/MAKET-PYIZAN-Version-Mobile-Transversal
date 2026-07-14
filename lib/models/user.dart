@@ -9,15 +9,15 @@ class User with _$User {
     required int    id,
     required String username,
     required String email,
-    required String firstName,
-    required String lastName,
+    @JsonKey(name: 'first_name') required String firstName,
+    @JsonKey(name: 'last_name')  required String lastName,
     required String role,
     @Default('') String telephone,
     String? photo,
-    @Default(false) bool isVerified,
-    @Default(false) bool isSuperuser,
-    @Default(false) bool isStaff,
-    String? profilProducteurStatut,
+    @JsonKey(name: 'is_verified')  @Default(false) bool isVerified,
+    @JsonKey(name: 'is_superuser') @Default(false) bool isSuperuser,
+    @JsonKey(name: 'is_staff')     @Default(false) bool isStaff,
+    @JsonKey(name: 'profil_producteur_statut') String? profilProducteurStatut,
   }) = _User;
 
   factory User.fromJson(Map<String, dynamic> json) => _$UserFromJson(json);

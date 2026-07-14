@@ -23,14 +23,20 @@ mixin _$User {
   int get id => throw _privateConstructorUsedError;
   String get username => throw _privateConstructorUsedError;
   String get email => throw _privateConstructorUsedError;
+  @JsonKey(name: 'first_name')
   String get firstName => throw _privateConstructorUsedError;
+  @JsonKey(name: 'last_name')
   String get lastName => throw _privateConstructorUsedError;
   String get role => throw _privateConstructorUsedError;
   String get telephone => throw _privateConstructorUsedError;
   String? get photo => throw _privateConstructorUsedError;
+  @JsonKey(name: 'is_verified')
   bool get isVerified => throw _privateConstructorUsedError;
+  @JsonKey(name: 'is_superuser')
   bool get isSuperuser => throw _privateConstructorUsedError;
+  @JsonKey(name: 'is_staff')
   bool get isStaff => throw _privateConstructorUsedError;
+  @JsonKey(name: 'profil_producteur_statut')
   String? get profilProducteurStatut => throw _privateConstructorUsedError;
 
   /// Serializes this User to a JSON map.
@@ -51,14 +57,15 @@ abstract class $UserCopyWith<$Res> {
       {int id,
       String username,
       String email,
-      String firstName,
-      String lastName,
+      @JsonKey(name: 'first_name') String firstName,
+      @JsonKey(name: 'last_name') String lastName,
       String role,
       String telephone,
       String? photo,
-      bool isVerified,
-      bool isSuperuser,
-      bool isStaff,
+      @JsonKey(name: 'is_verified') bool isVerified,
+      @JsonKey(name: 'is_superuser') bool isSuperuser,
+      @JsonKey(name: 'is_staff') bool isStaff,
+      @JsonKey(name: 'profil_producteur_statut')
       String? profilProducteurStatut});
 }
 
@@ -154,14 +161,15 @@ abstract class _$$UserImplCopyWith<$Res> implements $UserCopyWith<$Res> {
       {int id,
       String username,
       String email,
-      String firstName,
-      String lastName,
+      @JsonKey(name: 'first_name') String firstName,
+      @JsonKey(name: 'last_name') String lastName,
       String role,
       String telephone,
       String? photo,
-      bool isVerified,
-      bool isSuperuser,
-      bool isStaff,
+      @JsonKey(name: 'is_verified') bool isVerified,
+      @JsonKey(name: 'is_superuser') bool isSuperuser,
+      @JsonKey(name: 'is_staff') bool isStaff,
+      @JsonKey(name: 'profil_producteur_statut')
       String? profilProducteurStatut});
 }
 
@@ -250,15 +258,15 @@ class _$UserImpl implements _User {
       {required this.id,
       required this.username,
       required this.email,
-      required this.firstName,
-      required this.lastName,
+      @JsonKey(name: 'first_name') required this.firstName,
+      @JsonKey(name: 'last_name') required this.lastName,
       required this.role,
       this.telephone = '',
       this.photo,
-      this.isVerified = false,
-      this.isSuperuser = false,
-      this.isStaff = false,
-      this.profilProducteurStatut});
+      @JsonKey(name: 'is_verified') this.isVerified = false,
+      @JsonKey(name: 'is_superuser') this.isSuperuser = false,
+      @JsonKey(name: 'is_staff') this.isStaff = false,
+      @JsonKey(name: 'profil_producteur_statut') this.profilProducteurStatut});
 
   factory _$UserImpl.fromJson(Map<String, dynamic> json) =>
       _$$UserImplFromJson(json);
@@ -270,8 +278,10 @@ class _$UserImpl implements _User {
   @override
   final String email;
   @override
+  @JsonKey(name: 'first_name')
   final String firstName;
   @override
+  @JsonKey(name: 'last_name')
   final String lastName;
   @override
   final String role;
@@ -281,15 +291,16 @@ class _$UserImpl implements _User {
   @override
   final String? photo;
   @override
-  @JsonKey()
+  @JsonKey(name: 'is_verified')
   final bool isVerified;
   @override
-  @JsonKey()
+  @JsonKey(name: 'is_superuser')
   final bool isSuperuser;
   @override
-  @JsonKey()
+  @JsonKey(name: 'is_staff')
   final bool isStaff;
   @override
+  @JsonKey(name: 'profil_producteur_statut')
   final String? profilProducteurStatut;
 
   @override
@@ -361,14 +372,15 @@ abstract class _User implements User {
       {required final int id,
       required final String username,
       required final String email,
-      required final String firstName,
-      required final String lastName,
+      @JsonKey(name: 'first_name') required final String firstName,
+      @JsonKey(name: 'last_name') required final String lastName,
       required final String role,
       final String telephone,
       final String? photo,
-      final bool isVerified,
-      final bool isSuperuser,
-      final bool isStaff,
+      @JsonKey(name: 'is_verified') final bool isVerified,
+      @JsonKey(name: 'is_superuser') final bool isSuperuser,
+      @JsonKey(name: 'is_staff') final bool isStaff,
+      @JsonKey(name: 'profil_producteur_statut')
       final String? profilProducteurStatut}) = _$UserImpl;
 
   factory _User.fromJson(Map<String, dynamic> json) = _$UserImpl.fromJson;
@@ -380,8 +392,10 @@ abstract class _User implements User {
   @override
   String get email;
   @override
+  @JsonKey(name: 'first_name')
   String get firstName;
   @override
+  @JsonKey(name: 'last_name')
   String get lastName;
   @override
   String get role;
@@ -390,12 +404,16 @@ abstract class _User implements User {
   @override
   String? get photo;
   @override
+  @JsonKey(name: 'is_verified')
   bool get isVerified;
   @override
+  @JsonKey(name: 'is_superuser')
   bool get isSuperuser;
   @override
+  @JsonKey(name: 'is_staff')
   bool get isStaff;
   @override
+  @JsonKey(name: 'profil_producteur_statut')
   String? get profilProducteurStatut;
 
   /// Create a copy of User
