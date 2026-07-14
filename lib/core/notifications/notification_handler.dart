@@ -1,6 +1,9 @@
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../providers/auth_provider.dart';
+import '../utils/role_utils.dart';
 
 /// Navigue vers le bon écran selon le type de notification
 class NotificationHandler {
@@ -9,6 +12,16 @@ class NotificationHandler {
     BuildContext context,
   ) {
     final data = message.data;
+
+    // Notifications wallet (cashback crédité, bonus parrainage, retrait
+    // payé, recharge validée…) pointent toutes vers l'écran portefeuille.
+    if (data['screen'] == 'wallet') {
+      final role = ProviderScope.containerOf(context, listen: false)
+          .read(authProvider).user?.role;
+      context.go('${walletBasePath(role)}/wallet');
+      return;
+    }
+
     final type = data['type'] as String? ?? '';
 
     switch (type) {

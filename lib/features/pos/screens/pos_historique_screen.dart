@@ -192,6 +192,30 @@ class _VenteTileState extends ConsumerState<_VenteTile> {
                     fontSize: 11, color: AppColors.vertFonce, fontWeight: FontWeight.w600),
                 ),
               ),
+            if (vente.stockConflict)
+              const Padding(
+                padding: EdgeInsets.only(top: 2),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.warning_amber_rounded, size: 13, color: AppColors.orange),
+                    SizedBox(width: 4),
+                    Text(
+                      'Conflit de stock détecté à la synchronisation',
+                      style: TextStyle(
+                        fontSize: 11, color: AppColors.orange, fontWeight: FontWeight.w600),
+                    ),
+                  ],
+                ),
+              ),
+            if (vente.syncStatus == 'rejetee' && vente.erreurSync != null)
+              Padding(
+                padding: const EdgeInsets.only(top: 2),
+                child: Text(
+                  vente.erreurSync!,
+                  style: const TextStyle(fontSize: 11, color: AppColors.rouge),
+                ),
+              ),
           ],
         ),
         trailing: Row(

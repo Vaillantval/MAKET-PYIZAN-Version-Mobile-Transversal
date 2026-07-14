@@ -4,7 +4,12 @@ import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../core/constants/app_constants.dart';
 import '../../../core/offline/connectivity_service.dart';
+import '../../../core/storage/local_storage.dart';
+import '../../../core/utils/role_utils.dart';
+import '../../../models/wallet.dart';
+import '../../../providers/auth_provider.dart';
 import '../providers/wallet_provider.dart';
 import 'wallet_screen.dart' show EcranWalletHorsLigne;
 
@@ -74,6 +79,17 @@ class _WalletRechargeScreenState
         return;
       }
 
+      // Persister AVANT la redirection : si l'app est tuée pendant le
+      // passage par l'appli MonCash/NatCash (fréquent sur Android), on
+      // pourra reprendre la vérification au retour sur l'écran wallet.
+      if (rechargeId != null) {
+        await ref.read(localStorageProvider).setInt(
+          AppConstants.keyWalletRechargeEnCours,
+          rechargeId,
+        );
+      }
+      if (!mounted) return;
+
       // Ouvrir WebView Plopplop
       await Navigator.push(
         context,
@@ -82,19 +98,27 @@ class _WalletRechargeScreenState
             url:        redirectUrl,
             rechargeId: rechargeId,
             onRetour: (success) async {
+              var confirme = false;
               if (success && rechargeId != null) {
-                await ref
+                confirme = await ref
                     .read(walletProvider.notifier)
-                    .verifierRecharge(rechargeId);
+                    .verifierRechargeAvecRetry(rechargeId);
               }
+              await ref.read(localStorageProvider)
+                  .remove(AppConstants.keyWalletRechargeEnCours);
               if (mounted) {
                 _showSnack(
-                  success
+                  confirme
                       ? '✅ Recharge effectuée avec succès !'
-                      : '❌ Recharge annulée ou échouée.',
+                      : success
+                          ? '⏳ Paiement reçu — confirmation en cours, '
+                            'vérifiez votre solde dans quelques instants.'
+                          : '❌ Recharge annulée ou échouée.',
                   isError: !success,
                 );
-                if (success) context.go('/acheteur/wallet');
+                if (success) {
+                  context.go('${walletBasePath(ref.read(authProvider).user?.role)}/wallet');
+                }
               }
             },
           ),
@@ -144,7 +168,9 @@ class _WalletRechargeScreenState
           : '❌ Erreur lors de la soumission',
       isError: !ok,
     );
-    if (ok) context.go('/acheteur/wallet');
+    if (ok) {
+      context.go('${walletBasePath(ref.read(authProvider).user?.role)}/wallet');
+    }
   }
 
   void _showSnack(String msg, {bool isError = false}) {
@@ -158,6 +184,7 @@ class _WalletRechargeScreenState
   @override
   Widget build(BuildContext context) {
     final isOnline = ref.watch(isOnlineProvider);
+    final depot     = ref.watch(walletProvider).valueOrNull?.depotHorsLigne;
 
     return Scaffold(
       appBar: AppBar(
@@ -188,6 +215,7 @@ class _WalletRechargeScreenState
                   montantCtrl:   _montantHLCtrl,
                   preuve:        _preuve,
                   loading:       _loadingHL,
+                  depot:         depot,
                   onChoisirPreuve:  _choisirPreuve,
                   onSoumettre:   _soumettreHorsLigne,
                 ),
@@ -298,6 +326,7 @@ class _OngletHorsLigne extends StatelessWidget {
   final TextEditingController montantCtrl;
   final XFile? preuve;
   final bool   loading;
+  final WalletDepotHorsLigne? depot;
   final VoidCallback onChoisirPreuve;
   final VoidCallback onSoumettre;
 
@@ -305,6 +334,7 @@ class _OngletHorsLigne extends StatelessWidget {
     required this.montantCtrl,
     required this.preuve,
     required this.loading,
+    this.depot,
     required this.onChoisirPreuve,
     required this.onSoumettre,
   });
@@ -315,6 +345,30 @@ class _OngletHorsLigne extends StatelessWidget {
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        if (depot?.numeroMoncash != null || depot?.numeroNatcash != null)
+          Container(
+            margin: const EdgeInsets.only(bottom: 12),
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: AppColors.vertVif.withValues(alpha: 0.3)),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text('Numéros de dépôt',
+                    style: TextStyle(fontWeight: FontWeight.w700, color: AppColors.vertFonce)),
+                const SizedBox(height: 8),
+                if (depot?.numeroMoncash != null)
+                  Text('📱 MonCash : ${depot!.numeroMoncash}',
+                      style: const TextStyle(fontSize: 13)),
+                if (depot?.numeroNatcash != null)
+                  Text('💳 NatCash : ${depot!.numeroNatcash}',
+                      style: const TextStyle(fontSize: 13)),
+              ],
+            ),
+          ),
         Container(
           padding: const EdgeInsets.all(14),
           decoration: BoxDecoration(

@@ -229,7 +229,8 @@ class _BonsCadeauxScreenState
 class _OngletBonsAchetes extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final state = ref.watch(bonsAchetesProvider);
+    final state    = ref.watch(bonsAchetesProvider);
+    final notifier = ref.read(bonsAchetesProvider.notifier);
     return state.when(
       loading: () => const Center(
           child: CircularProgressIndicator(color: AppColors.vertVif)),
@@ -249,10 +250,31 @@ class _OngletBonsAchetes extends ConsumerWidget {
                 ],
               ),
             )
-          : ListView.builder(
-              padding: const EdgeInsets.all(12),
-              itemCount: bons.length,
-              itemBuilder: (_, i) => _BonTile(bon: bons[i]),
+          : NotificationListener<ScrollNotification>(
+              onNotification: (n) {
+                if (n.metrics.pixels >= n.metrics.maxScrollExtent - 200) {
+                  notifier.chargerPlus();
+                }
+                return false;
+              },
+              child: ListView.builder(
+                padding: const EdgeInsets.all(12),
+                itemCount: bons.length + (notifier.hasPlus ? 1 : 0),
+                itemBuilder: (_, i) {
+                  if (i >= bons.length) {
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      child: Center(
+                        child: notifier.chargementPlus
+                            ? const CircularProgressIndicator(
+                                color: AppColors.vertVif, strokeWidth: 2)
+                            : const SizedBox.shrink(),
+                      ),
+                    );
+                  }
+                  return _BonTile(bon: bons[i]);
+                },
+              ),
             ),
     );
   }
@@ -263,7 +285,8 @@ class _OngletBonsAchetes extends ConsumerWidget {
 class _OngletBonsRecus extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final state = ref.watch(bonsRecusProvider);
+    final state    = ref.watch(bonsRecusProvider);
+    final notifier = ref.read(bonsRecusProvider.notifier);
     return state.when(
       loading: () => const Center(
           child: CircularProgressIndicator(color: AppColors.vertVif)),
@@ -283,11 +306,31 @@ class _OngletBonsRecus extends ConsumerWidget {
                 ],
               ),
             )
-          : ListView.builder(
-              padding: const EdgeInsets.all(12),
-              itemCount: bons.length,
-              itemBuilder: (_, i) =>
-                  _BonTile(bon: bons[i], showEncaisser: true),
+          : NotificationListener<ScrollNotification>(
+              onNotification: (n) {
+                if (n.metrics.pixels >= n.metrics.maxScrollExtent - 200) {
+                  notifier.chargerPlus();
+                }
+                return false;
+              },
+              child: ListView.builder(
+                padding: const EdgeInsets.all(12),
+                itemCount: bons.length + (notifier.hasPlus ? 1 : 0),
+                itemBuilder: (_, i) {
+                  if (i >= bons.length) {
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      child: Center(
+                        child: notifier.chargementPlus
+                            ? const CircularProgressIndicator(
+                                color: AppColors.vertVif, strokeWidth: 2)
+                            : const SizedBox.shrink(),
+                      ),
+                    );
+                  }
+                  return _BonTile(bon: bons[i], showEncaisser: true);
+                },
+              ),
             ),
     );
   }

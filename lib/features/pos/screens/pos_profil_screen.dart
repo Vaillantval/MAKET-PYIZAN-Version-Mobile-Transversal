@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/printing/pos_printer_service.dart';
@@ -55,7 +56,12 @@ class _PosProfilScreenState extends ConsumerState<PosProfilScreen> {
                 const SizedBox(height: 16),
                 const Divider(height: 1),
                 const SizedBox(height: 16),
-                _InfoRow(label: 'Terminal', value: deviceUid ?? 'Non appairé'),
+                _InfoRow(
+                  label: 'Terminal',
+                  value: deviceUid == null
+                      ? '…'
+                      : '${deviceUid.substring(0, 8)}…',
+                ),
                 const SizedBox(height: 10),
                 _InfoRow(
                   label: 'Session',
@@ -63,6 +69,23 @@ class _PosProfilScreenState extends ConsumerState<PosProfilScreen> {
                   valueColor: sessionOuverte ? AppColors.vertVif : AppColors.orange,
                 ),
               ],
+            ),
+          ),
+          const SizedBox(height: 16),
+          Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(14),
+            ),
+            child: ListTile(
+              leading: const Icon(Icons.qr_code, color: AppColors.vertFonce),
+              title: const Text('Identifiant du terminal'),
+              subtitle: const Text(
+                'Voir / copier l\'identifiant pour l\'enregistrement admin',
+                style: TextStyle(fontSize: 12),
+              ),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => context.push('/pos/appairage'),
             ),
           ),
           const SizedBox(height: 16),

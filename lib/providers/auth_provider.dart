@@ -146,6 +146,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
     required String firstName,
     required String lastName,
     String telephone = '',
+    String? codeParrainage,
   }) async {
     state = state.copyWith(isLoading: true, error: null);
     try {
@@ -155,10 +156,13 @@ class AuthNotifier extends StateNotifier<AuthState> {
           'username':   username,
           'email':      email,
           'password':   password,
+          'password2':  password, // requis par le backend
           'role':       role,
           'first_name': firstName,
           'last_name':  lastName,
           'telephone':  telephone,
+          if (codeParrainage != null && codeParrainage.isNotEmpty)
+            'code_parrainage': codeParrainage,
         },
       );
       final data = response.data as Map<String, dynamic>;

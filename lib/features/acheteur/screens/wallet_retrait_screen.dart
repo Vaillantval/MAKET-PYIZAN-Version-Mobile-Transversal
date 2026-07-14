@@ -19,12 +19,14 @@ class _WalletRetraitScreenState
     extends ConsumerState<WalletRetraitScreen> {
   final _montantCtrl    = TextEditingController();
   final _telephoneCtrl  = TextEditingController();
+  final _scrollController = ScrollController();
   String _canal         = 'moncash';
   bool   _loading       = false;
 
   @override
   void initState() {
     super.initState();
+    _scrollController.addListener(_onScroll);
     Future.microtask(() =>
         ref.read(walletRetraitsProvider.notifier).charger());
   }
@@ -33,7 +35,17 @@ class _WalletRetraitScreenState
   void dispose() {
     _montantCtrl.dispose();
     _telephoneCtrl.dispose();
+    _scrollController.removeListener(_onScroll);
+    _scrollController.dispose();
     super.dispose();
+  }
+
+  void _onScroll() {
+    if (!_scrollController.hasClients) return;
+    if (_scrollController.position.pixels >=
+        _scrollController.position.maxScrollExtent - 200) {
+      ref.read(walletRetraitsProvider.notifier).chargerPlus();
+    }
   }
 
   Future<void> _demanderRetrait() async {
@@ -99,6 +111,7 @@ class _WalletRetraitScreenState
       appBar: AppBar(title: const Text('Retrait de fonds')),
       body: isOnline
           ? SingleChildScrollView(
+              controller: _scrollController,
               padding: const EdgeInsets.all(16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -250,6 +263,14 @@ class _WalletRetraitScreenState
                                 _RetraitTile(retrait: retraits[i]),
                           ),
                   ),
+                  if (ref.read(walletRetraitsProvider.notifier).chargementPlus)
+                    const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 16),
+                      child: Center(
+                        child: CircularProgressIndicator(
+                            color: AppColors.vertVif, strokeWidth: 2),
+                      ),
+                    ),
 
                   const SizedBox(height: 40),
                 ],

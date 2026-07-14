@@ -1,30 +1,30 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/api/api_client.dart';
 import '../../../core/api/api_endpoints.dart';
-import '../../../core/constants/app_constants.dart';
 import '../../../core/offline/connectivity_service.dart';
 import '../../../core/offline/offline_manager.dart';
-import '../../../core/storage/local_storage.dart';
 import '../../../core/storage/pos_local_storage.dart';
 import '../../../models/pos_session.dart';
+import 'pos_device_provider.dart';
+import 'pos_vente_provider.dart';
 
 final posSessionProvider =
     StateNotifierProvider<PosSessionNotifier, AsyncValue<PosSession?>>((ref) {
   return PosSessionNotifier(
     ref.read(apiClientProvider),
-    ref.read(localStorageProvider),
     ref.read(posLocalStorageProvider),
     ref.read(offlineManagerProvider),
+    ref,
   );
 });
 
 class PosSessionNotifier extends StateNotifier<AsyncValue<PosSession?>> {
   final ApiClient        _api;
-  final LocalStorage     _localStorage;
   final PosLocalStorage  _posStorage;
   final OfflineManager   _offline;
+  final Ref              _ref;
 
-  PosSessionNotifier(this._api, this._localStorage, this._posStorage, this._offline)
+  PosSessionNotifier(this._api, this._posStorage, this._offline, this._ref)
       : super(const AsyncValue.loading()) {
     _restaurer();
   }
@@ -43,9 +43,10 @@ class PosSessionNotifier extends StateNotifier<AsyncValue<PosSession?>> {
       return "L'ouverture de session nécessite une connexion internet.";
     }
 
-    final deviceUid = _localStorage.getString(AppConstants.keyPosDeviceUid);
+    final deviceUid = _ref.read(posDeviceUidProvider);
     if (deviceUid == null || deviceUid.isEmpty) {
-      return 'Terminal non appairé.';
+      return "Identifiant du terminal non disponible — réessayez dans "
+          "quelques instants.";
     }
 
     try {
@@ -74,7 +75,9 @@ class PosSessionNotifier extends StateNotifier<AsyncValue<PosSession?>> {
       return {'error': 'La fermeture de session nécessite une connexion internet.'};
     }
 
-    // Forcer une synchronisation complète avant de fermer
+    // Forcer une synchronisation complète avant de fermer : d'abord les
+    // ventes POS (résultat détaillé par vente), puis le reste de la file.
+    await _ref.read(posHistoriqueProvider.notifier).synchroniserVentesPos();
     await _offline.syncAll();
     final pendantes = _posStorage.countBySyncStatus('enAttente');
     if (pendantes > 0) {

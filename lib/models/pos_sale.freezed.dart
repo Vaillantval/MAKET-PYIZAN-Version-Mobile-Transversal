@@ -35,7 +35,12 @@ mixin _$PosSale {
   @JsonKey(name: 'vendue_le')
   String get vendueLe =>
       throw _privateConstructorUsedError; // Statut LOCAL de synchronisation : enAttente | synchronisee | rejetee
-  String get syncStatus => throw _privateConstructorUsedError;
+  String get syncStatus =>
+      throw _privateConstructorUsedError; // Champs LOCAUX renseignés par la réponse de POST /api/pos/sync/
+  @JsonKey(name: 'stock_conflict')
+  bool get stockConflict => throw _privateConstructorUsedError;
+  @JsonKey(name: 'erreur_sync')
+  String? get erreurSync => throw _privateConstructorUsedError;
 
   /// Serializes this PosSale to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -62,7 +67,9 @@ abstract class $PosSaleCopyWith<$Res> {
       double montantWallet,
       String statut,
       @JsonKey(name: 'vendue_le') String vendueLe,
-      String syncStatus});
+      String syncStatus,
+      @JsonKey(name: 'stock_conflict') bool stockConflict,
+      @JsonKey(name: 'erreur_sync') String? erreurSync});
 }
 
 /// @nodoc
@@ -89,6 +96,8 @@ class _$PosSaleCopyWithImpl<$Res, $Val extends PosSale>
     Object? statut = null,
     Object? vendueLe = null,
     Object? syncStatus = null,
+    Object? stockConflict = null,
+    Object? erreurSync = freezed,
   }) {
     return _then(_value.copyWith(
       idempotencyKey: null == idempotencyKey
@@ -127,6 +136,14 @@ class _$PosSaleCopyWithImpl<$Res, $Val extends PosSale>
           ? _value.syncStatus
           : syncStatus // ignore: cast_nullable_to_non_nullable
               as String,
+      stockConflict: null == stockConflict
+          ? _value.stockConflict
+          : stockConflict // ignore: cast_nullable_to_non_nullable
+              as bool,
+      erreurSync: freezed == erreurSync
+          ? _value.erreurSync
+          : erreurSync // ignore: cast_nullable_to_non_nullable
+              as String?,
     ) as $Val);
   }
 }
@@ -149,7 +166,9 @@ abstract class _$$PosSaleImplCopyWith<$Res> implements $PosSaleCopyWith<$Res> {
       double montantWallet,
       String statut,
       @JsonKey(name: 'vendue_le') String vendueLe,
-      String syncStatus});
+      String syncStatus,
+      @JsonKey(name: 'stock_conflict') bool stockConflict,
+      @JsonKey(name: 'erreur_sync') String? erreurSync});
 }
 
 /// @nodoc
@@ -174,6 +193,8 @@ class __$$PosSaleImplCopyWithImpl<$Res>
     Object? statut = null,
     Object? vendueLe = null,
     Object? syncStatus = null,
+    Object? stockConflict = null,
+    Object? erreurSync = freezed,
   }) {
     return _then(_$PosSaleImpl(
       idempotencyKey: null == idempotencyKey
@@ -212,6 +233,14 @@ class __$$PosSaleImplCopyWithImpl<$Res>
           ? _value.syncStatus
           : syncStatus // ignore: cast_nullable_to_non_nullable
               as String,
+      stockConflict: null == stockConflict
+          ? _value.stockConflict
+          : stockConflict // ignore: cast_nullable_to_non_nullable
+              as bool,
+      erreurSync: freezed == erreurSync
+          ? _value.erreurSync
+          : erreurSync // ignore: cast_nullable_to_non_nullable
+              as String?,
     ));
   }
 }
@@ -230,7 +259,9 @@ class _$PosSaleImpl implements _PosSale {
       this.montantWallet = 0,
       this.statut = 'en_attente',
       @JsonKey(name: 'vendue_le') required this.vendueLe,
-      this.syncStatus = 'enAttente'})
+      this.syncStatus = 'enAttente',
+      @JsonKey(name: 'stock_conflict') this.stockConflict = false,
+      @JsonKey(name: 'erreur_sync') this.erreurSync})
       : _items = items;
 
   factory _$PosSaleImpl.fromJson(Map<String, dynamic> json) =>
@@ -270,10 +301,17 @@ class _$PosSaleImpl implements _PosSale {
   @override
   @JsonKey()
   final String syncStatus;
+// Champs LOCAUX renseignés par la réponse de POST /api/pos/sync/
+  @override
+  @JsonKey(name: 'stock_conflict')
+  final bool stockConflict;
+  @override
+  @JsonKey(name: 'erreur_sync')
+  final String? erreurSync;
 
   @override
   String toString() {
-    return 'PosSale(idempotencyKey: $idempotencyKey, numeroVente: $numeroVente, items: $items, montantTotal: $montantTotal, methodePaiement: $methodePaiement, montantWallet: $montantWallet, statut: $statut, vendueLe: $vendueLe, syncStatus: $syncStatus)';
+    return 'PosSale(idempotencyKey: $idempotencyKey, numeroVente: $numeroVente, items: $items, montantTotal: $montantTotal, methodePaiement: $methodePaiement, montantWallet: $montantWallet, statut: $statut, vendueLe: $vendueLe, syncStatus: $syncStatus, stockConflict: $stockConflict, erreurSync: $erreurSync)';
   }
 
   @override
@@ -296,7 +334,11 @@ class _$PosSaleImpl implements _PosSale {
             (identical(other.vendueLe, vendueLe) ||
                 other.vendueLe == vendueLe) &&
             (identical(other.syncStatus, syncStatus) ||
-                other.syncStatus == syncStatus));
+                other.syncStatus == syncStatus) &&
+            (identical(other.stockConflict, stockConflict) ||
+                other.stockConflict == stockConflict) &&
+            (identical(other.erreurSync, erreurSync) ||
+                other.erreurSync == erreurSync));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -311,7 +353,9 @@ class _$PosSaleImpl implements _PosSale {
       montantWallet,
       statut,
       vendueLe,
-      syncStatus);
+      syncStatus,
+      stockConflict,
+      erreurSync);
 
   /// Create a copy of PosSale
   /// with the given fields replaced by the non-null parameter values.
@@ -341,7 +385,9 @@ abstract class _PosSale implements PosSale {
       final double montantWallet,
       final String statut,
       @JsonKey(name: 'vendue_le') required final String vendueLe,
-      final String syncStatus}) = _$PosSaleImpl;
+      final String syncStatus,
+      @JsonKey(name: 'stock_conflict') final bool stockConflict,
+      @JsonKey(name: 'erreur_sync') final String? erreurSync}) = _$PosSaleImpl;
 
   factory _PosSale.fromJson(Map<String, dynamic> json) = _$PosSaleImpl.fromJson;
 
@@ -369,7 +415,14 @@ abstract class _PosSale implements PosSale {
   String
       get vendueLe; // Statut LOCAL de synchronisation : enAttente | synchronisee | rejetee
   @override
-  String get syncStatus;
+  String
+      get syncStatus; // Champs LOCAUX renseignés par la réponse de POST /api/pos/sync/
+  @override
+  @JsonKey(name: 'stock_conflict')
+  bool get stockConflict;
+  @override
+  @JsonKey(name: 'erreur_sync')
+  String? get erreurSync;
 
   /// Create a copy of PosSale
   /// with the given fields replaced by the non-null parameter values.

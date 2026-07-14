@@ -1,49 +1,39 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../core/constants/app_constants.dart';
+import '../../../core/storage/local_storage.dart';
 import '../providers/pos_device_provider.dart';
 
-class PosAppairageScreen extends ConsumerStatefulWidget {
+/// Écran d'accueil du terminal POS : affiche l'identifiant (UUID)
+/// généré automatiquement et stocké en stockage sécurisé, à
+/// communiquer à un superadmin pour enregistrer ce terminal côté
+/// administration avant de pouvoir encaisser.
+class PosAppairageScreen extends ConsumerWidget {
   const PosAppairageScreen({super.key});
 
-  @override
-  ConsumerState<PosAppairageScreen> createState() => _PosAppairageScreenState();
-}
-
-class _PosAppairageScreenState extends ConsumerState<PosAppairageScreen> {
-  final _deviceUidCtrl = TextEditingController();
-  bool _loading = false;
-
-  @override
-  void dispose() {
-    _deviceUidCtrl.dispose();
-    super.dispose();
+  Future<void> _continuer(BuildContext context, WidgetRef ref) async {
+    await ref.read(localStorageProvider).setBool(AppConstants.keyPosOnboardingVu, true);
+    if (context.mounted) context.go('/pos/vente');
   }
 
-  Future<void> _appairer() async {
-    final deviceUid = _deviceUidCtrl.text.trim();
-    if (deviceUid.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text('Veuillez saisir l\'identifiant du terminal (device_uid).'),
-        backgroundColor: AppColors.rouge,
-      ));
-      return;
-    }
-
-    setState(() => _loading = true);
-    await ref.read(posDeviceUidProvider.notifier).appairer(deviceUid);
-    setState(() => _loading = false);
-
-    if (!mounted) return;
-    context.go('/pos/vente');
+  void _copier(BuildContext context, String uid) {
+    Clipboard.setData(ClipboardData(text: uid));
+    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+      content: Text('Identifiant copié dans le presse-papiers'),
+      duration: Duration(seconds: 2),
+    ));
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final deviceUid = ref.watch(posDeviceUidProvider);
+
     return Scaffold(
       backgroundColor: AppColors.grisClair,
-      appBar: AppBar(title: const Text('Appairage du terminal POS')),
+      appBar: AppBar(title: const Text('Terminal POS')),
       body: Padding(
         padding: const EdgeInsets.all(24),
         child: Column(
@@ -53,7 +43,7 @@ class _PosAppairageScreenState extends ConsumerState<PosAppairageScreen> {
             const Icon(Icons.point_of_sale, size: 64, color: AppColors.vertFonce),
             const SizedBox(height: 16),
             const Text(
-              'Appairer ce terminal',
+              'Enregistrement du terminal',
               style: TextStyle(
                 fontSize: 20, fontWeight: FontWeight.w800,
                 color: AppColors.vertFonce,
@@ -62,39 +52,51 @@ class _PosAppairageScreenState extends ConsumerState<PosAppairageScreen> {
             ),
             const SizedBox(height: 8),
             const Text(
-              'Saisissez l\'identifiant (device_uid) du terminal POS assigné '
-              'à ce compte. Il doit être actif côté administration.',
+              'Communiquez l\'identifiant ci-dessous à votre administrateur '
+              'pour qu\'il enregistre ce terminal. Sans cela, les ventes '
+              'seront refusées par le serveur.',
               style: TextStyle(fontSize: 13, color: AppColors.grisTexte),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 28),
-            TextField(
-              controller: _deviceUidCtrl,
-              decoration: InputDecoration(
-                labelText: 'Device UID',
-                hintText: 'Ex : POS-COMPTOIR-01',
-                filled: true,
-                fillColor: Colors.white,
-                border: OutlineInputBorder(
+            if (deviceUid == null)
+              const Center(child: CircularProgressIndicator(color: AppColors.vertVif))
+            else
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.white,
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide.none,
+                  border: Border.all(color: AppColors.vertVif.withValues(alpha: 0.3)),
+                ),
+                child: Column(
+                  children: [
+                    SelectableText(
+                      deviceUid,
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        fontSize: 16, fontWeight: FontWeight.w700,
+                        fontFamily: 'monospace',
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    OutlinedButton.icon(
+                      onPressed: () => _copier(context, deviceUid),
+                      icon: const Icon(Icons.copy, size: 18),
+                      label: const Text('Copier l\'identifiant'),
+                    ),
+                  ],
                 ),
               ),
-            ),
             const SizedBox(height: 24),
             ElevatedButton(
-              onPressed: _loading ? null : _appairer,
+              onPressed: deviceUid == null ? null : () => _continuer(context, ref),
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.vertFonce,
                 minimumSize: const Size(double.infinity, 54),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               ),
-              child: _loading
-                  ? const SizedBox(
-                      height: 22, width: 22,
-                      child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
-                    )
-                  : const Text('Appairer ce terminal', style: TextStyle(fontSize: 16)),
+              child: const Text('Continuer', style: TextStyle(fontSize: 16)),
             ),
           ],
         ),

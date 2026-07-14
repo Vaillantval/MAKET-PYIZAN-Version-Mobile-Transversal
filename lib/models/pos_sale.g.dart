@@ -22,6 +22,8 @@ _$PosSaleImpl _$$PosSaleImplFromJson(Map<String, dynamic> json) =>
       statut: json['statut'] as String? ?? 'en_attente',
       vendueLe: json['vendue_le'] as String,
       syncStatus: json['syncStatus'] as String? ?? 'enAttente',
+      stockConflict: json['stock_conflict'] as bool? ?? false,
+      erreurSync: json['erreur_sync'] as String?,
     );
 
 Map<String, dynamic> _$$PosSaleImplToJson(_$PosSaleImpl instance) =>
@@ -35,4 +37,6 @@ Map<String, dynamic> _$$PosSaleImplToJson(_$PosSaleImpl instance) =>
       'statut': instance.statut,
       'vendue_le': instance.vendueLe,
       'syncStatus': instance.syncStatus,
+      'stock_conflict': instance.stockConflict,
+      'erreur_sync': instance.erreurSync,
     };

@@ -125,6 +125,12 @@ class ProfilProducteurScreen extends ConsumerWidget {
                         context.go('/producteur/commandes'),
                   ),
                   _MenuItem(
+                    icon:  Icons.account_balance_wallet_outlined,
+                    label: 'Mon Portefeuille',
+                    onTap: () =>
+                        context.push('/producteur/wallet'),
+                  ),
+                  _MenuItem(
                     icon:  Icons.lock_outline,
                     label: 'Changer le mot de passe',
                     onTap: () {

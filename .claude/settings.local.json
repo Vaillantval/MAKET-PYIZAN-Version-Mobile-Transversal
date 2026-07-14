@@ -21,7 +21,8 @@
       "Read(//tmp/**)",
       "Bash(curl -s -X POST https://maketpeyizan.ht/api/auth/register/ -H 'Content-Type: application/json' -d '{\"username\":\"claude_test___CMDSUB_OUTPUT__\",\"email\":\"claude.test.__CMDSUB_OUTPUT__@maketpeyizan.ht\",\"password\":\"TestClaude2026!\",\"password2\":\"TestClaude2026!\",\"role\":\"acheteur\",\"first_name\":\"Claude\",\"last_name\":\"Test\",\"telephone\":\"50912345678\"}' -o /tmp/register_resp.json -w '\\\\nHTTP %{http_code}\\\\n')",
       "Bash(python3 *)",
-      "Bash(python *)"
+      "Bash(python *)",
+      "Bash(xargs grep -ln \"class Share\")"
     ]
   }
 }

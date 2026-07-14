@@ -19,6 +19,9 @@ class PosSale with _$PosSale {
     @JsonKey(name: 'vendue_le')       required String vendueLe,
     // Statut LOCAL de synchronisation : enAttente | synchronisee | rejetee
     @Default('enAttente') String syncStatus,
+    // Champs LOCAUX renseignés par la réponse de POST /api/pos/sync/
+    @JsonKey(name: 'stock_conflict') @Default(false) bool stockConflict,
+    @JsonKey(name: 'erreur_sync')    String? erreurSync,
   }) = _PosSale;
 
   factory PosSale.fromJson(Map<String, dynamic> json) =>

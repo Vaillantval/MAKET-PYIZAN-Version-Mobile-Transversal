@@ -19,11 +19,15 @@ class AppConstants {
   static const String keyLastSync      = 'last_sync';
 
   // POS
-  static const String keyPosDeviceUid    = 'pos_device_uid';
+  static const String keyPosDeviceUid    = 'pos_device_uid'; // secure storage
+  static const String keyPosOnboardingVu = 'pos_onboarding_vu';
   static const String keyPosCatalogCache = 'pos_catalog_cache';
   static const String hivePosSessionBox  = 'pos_session';
   static const String hivePosSalesBox    = 'pos_sales';
   static const String keyPosImpressionAuto = 'pos_impression_auto';
+
+  // Wallet
+  static const String keyWalletRechargeEnCours = 'wallet_recharge_en_cours';
 
   // Cache TTL
   static const Duration catalogCacheTTL  = Duration(hours: 6);

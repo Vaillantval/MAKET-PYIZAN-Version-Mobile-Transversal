@@ -84,12 +84,13 @@ final routerProvider = Provider<GoRouter>((ref) {
         return '/producteur/en-attente';
       }
 
-      // POS : terminal non appairé → forcer l'écran d'appairage
+      // POS : premier lancement → forcer l'écran d'enregistrement du
+      // terminal (le device_uid, lui, est toujours généré automatiquement)
       if (role == 'pos_operator' && path != '/pos/appairage') {
-        final deviceUid = ref
+        final onboardingVu = ref
             .read(localStorageProvider)
-            .getString(AppConstants.keyPosDeviceUid);
-        if (deviceUid == null || deviceUid.isEmpty) {
+            .getBool(AppConstants.keyPosOnboardingVu);
+        if (!onboardingVu) {
           return '/pos/appairage';
         }
       }
@@ -162,6 +163,12 @@ final routerProvider = Provider<GoRouter>((ref) {
           GoRoute(path: '/producteur/catalogue', builder: (_, __) => const MesProduitsScreen()),
           GoRoute(path: '/producteur/collectes', builder: (_, __) => const CollectesProducteurScreen()),
           GoRoute(path: '/producteur/profil',    builder: (_, __) => const ProfilProducteurScreen()),
+          // ── Wallet (mêmes écrans que côté acheteur) ────────
+          GoRoute(path: '/producteur/wallet',          builder: (_, __) => const WalletScreen()),
+          GoRoute(path: '/producteur/wallet/recharge', builder: (_, __) => const WalletRechargeScreen()),
+          GoRoute(path: '/producteur/wallet/retrait',  builder: (_, __) => const WalletRetraitScreen()),
+          GoRoute(path: '/producteur/wallet/bons',     builder: (_, __) => const BonsCadeauxScreen()),
+          GoRoute(path: '/producteur/wallet/code-paiement', builder: (_, __) => const WalletCodePaiementScreen()),
         ],
       ),
 

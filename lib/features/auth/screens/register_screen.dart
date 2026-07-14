@@ -19,6 +19,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   final _firstNameCtrl = TextEditingController();
   final _lastNameCtrl  = TextEditingController();
   final _telCtrl       = TextEditingController();
+  final _parrainageCtrl = TextEditingController();
   String _role         = 'acheteur';
   bool   _obscure      = true;
 
@@ -30,6 +31,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     _firstNameCtrl.dispose();
     _lastNameCtrl.dispose();
     _telCtrl.dispose();
+    _parrainageCtrl.dispose();
     super.dispose();
   }
 
@@ -43,6 +45,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       firstName:  _firstNameCtrl.text.trim(),
       lastName:   _lastNameCtrl.text.trim(),
       telephone:  _telCtrl.text.trim(),
+      codeParrainage: _parrainageCtrl.text.trim().isEmpty
+          ? null : _parrainageCtrl.text.trim(),
     );
     if (!success && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -187,6 +191,16 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                   ),
                   validator: (v) => (v?.length ?? 0) < 8
                       ? 'Min. 8 caractères' : null,
+                ),
+                const SizedBox(height: 16),
+
+                TextFormField(
+                  controller: _parrainageCtrl,
+                  textCapitalization: TextCapitalization.characters,
+                  decoration: const InputDecoration(
+                    labelText:  'Code de parrainage (optionnel)',
+                    prefixIcon: Icon(Icons.card_giftcard_outlined),
+                  ),
                 ),
                 const SizedBox(height: 28),
 

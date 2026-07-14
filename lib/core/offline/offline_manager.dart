@@ -78,7 +78,14 @@ class OfflineManager {
     int synced = 0;
     int failed = 0;
 
-    final actions = _queue.getAll();
+    // Les ventes POS ont un contrat de réponse par-item (créée/duplicata/
+    // rejetée/conflit de stock) traité exclusivement par
+    // PosHistoriqueNotifier.synchroniserVentesPos() — ce gestionnaire
+    // générique ne doit jamais les toucher pour éviter une double
+    // synchronisation (course entre les deux mécanismes).
+    final actions = _queue.getAll()
+        .where((a) => a.type != SyncActionType.posSale)
+        .toList();
 
     for (final action in actions) {
       if (action.retries >= AppConstants.maxSyncRetries) {

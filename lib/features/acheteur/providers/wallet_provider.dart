@@ -21,6 +21,40 @@ List<dynamic> _extraireListe(dynamic data) {
   return const [];
 }
 
+/// Résultat d'une page (initiale ou suivante) d'une liste paginée.
+class _PageResult<T> {
+  final List<T> items;
+  final String? next;
+  final String? erreur;
+  const _PageResult({required this.items, this.next, this.erreur});
+}
+
+/// Charge une page depuis [url] (chemin relatif ou URL absolue — le
+/// `next` renvoyé par le backend est une URL absolue, Dio la gère
+/// nativement sans repasser par la baseUrl).
+Future<_PageResult<T>> _chargerPage<T>(
+  ApiClient api,
+  String url,
+  T Function(Map<String, dynamic>) fromJson,
+  String erreurDefaut,
+) async {
+  try {
+    final res  = await api.get(url);
+    final data = res.data as Map<String, dynamic>;
+    if (data['success'] != true) {
+      return _PageResult(items: const [], erreur: data['error']?.toString() ?? erreurDefaut);
+    }
+    final page  = data['data'];
+    final items = _extraireListe(page)
+        .map((e) => fromJson(e as Map<String, dynamic>))
+        .toList();
+    final next = page is Map<String, dynamic> ? page['next'] as String? : null;
+    return _PageResult(items: items, next: next);
+  } catch (e) {
+    return _PageResult(items: const [], erreur: e.toString());
+  }
+}
+
 // ── Provider principal — solde wallet ─────────────────────────────────
 
 final walletProvider =
@@ -28,7 +62,7 @@ final walletProvider =
   return WalletNotifier(ref.read(apiClientProvider));
 });
 
-// ── Providers de listes ────────────────────────────────────────────────
+// ── Providers de listes (paginées, infinite scroll) ────────────────────
 
 final walletTransactionsProvider =
     StateNotifierProvider<WalletTransactionsNotifier,
@@ -132,6 +166,21 @@ class WalletNotifier extends StateNotifier<AsyncValue<Wallet>> {
         return true;
       }
     } catch (_) {}
+    return false;
+  }
+
+  /// Vérifie une recharge en réessayant plusieurs fois, espacé : la
+  /// confirmation du fournisseur de paiement (webhook) peut arriver
+  /// avec un léger décalage après le retour de l'utilisateur sur l'app.
+  Future<bool> verifierRechargeAvecRetry(
+    int rechargeId, {
+    int tentatives = 4,
+    Duration delai = const Duration(seconds: 2),
+  }) async {
+    for (var i = 0; i < tentatives; i++) {
+      if (await verifierRecharge(rechargeId)) return true;
+      if (i < tentatives - 1) await Future.delayed(delai);
+    }
     return false;
   }
 
@@ -282,156 +331,201 @@ class WalletNotifier extends StateNotifier<AsyncValue<Wallet>> {
 }
 
 // ═══════════════════════════════════════════════════════════════════════
-// Notifiers pour les listes
+// Notifiers pour les listes — infinite scroll via le curseur `next`
 // ═══════════════════════════════════════════════════════════════════════
 
 class WalletTransactionsNotifier
     extends StateNotifier<AsyncValue<List<WalletTransaction>>> {
   final ApiClient _api;
+  String? _nextUrl;
+  bool    _chargementPlus = false;
 
   WalletTransactionsNotifier(this._api)
       : super(const AsyncValue.loading()) {
     charger();
   }
 
+  bool get hasPlus => _nextUrl != null;
+  bool get chargementPlus => _chargementPlus;
+
   Future<void> charger() async {
     state = const AsyncValue.loading();
-    try {
-      final res  = await _api.get(AppEndpoints.walletTransactions);
-      final data = res.data as Map<String, dynamic>;
-      if (data['success'] == true) {
-        final list = _extraireListe(data['data'])
-            .map((e) => WalletTransaction.fromJson(e as Map<String, dynamic>))
-            .toList();
-        state = AsyncValue.data(list);
-      } else {
-        state = AsyncValue.error(
-          data['error']?.toString() ?? 'Erreur transactions',
-          StackTrace.current,
-        );
-      }
-    } catch (e, st) {
-      state = AsyncValue.error(e, st);
+    final r = await _chargerPage(
+      _api, AppEndpoints.walletTransactions, WalletTransaction.fromJson, 'Erreur transactions');
+    _nextUrl = r.next;
+    state = (r.erreur != null && r.items.isEmpty)
+        ? AsyncValue.error(r.erreur!, StackTrace.current)
+        : AsyncValue.data(r.items);
+  }
+
+  Future<void> chargerPlus() async {
+    if (_nextUrl == null || _chargementPlus) return;
+    _chargementPlus = true;
+    state = AsyncValue.data(List.of(state.valueOrNull ?? const []));
+
+    final r = await _chargerPage(
+      _api, _nextUrl!, WalletTransaction.fromJson, 'Erreur transactions');
+    _nextUrl = r.next;
+    if (r.erreur == null) {
+      state = AsyncValue.data([...(state.valueOrNull ?? const []), ...r.items]);
     }
+    _chargementPlus = false;
+    state = AsyncValue.data(List.of(state.valueOrNull ?? const []));
   }
 }
 
 class WalletRechargesNotifier
     extends StateNotifier<AsyncValue<List<WalletRecharge>>> {
   final ApiClient _api;
+  String? _nextUrl;
+  bool    _chargementPlus = false;
 
   WalletRechargesNotifier(this._api) : super(const AsyncValue.loading()) {
     charger();
   }
 
+  bool get hasPlus => _nextUrl != null;
+  bool get chargementPlus => _chargementPlus;
+
   Future<void> charger() async {
     state = const AsyncValue.loading();
-    try {
-      final res  = await _api.get(AppEndpoints.walletRecharges);
-      final data = res.data as Map<String, dynamic>;
-      if (data['success'] == true) {
-        final list = _extraireListe(data['data'])
-            .map((e) => WalletRecharge.fromJson(e as Map<String, dynamic>))
-            .toList();
-        state = AsyncValue.data(list);
-      } else {
-        state = AsyncValue.error(
-          data['error']?.toString() ?? 'Erreur recharges',
-          StackTrace.current,
-        );
-      }
-    } catch (e, st) {
-      state = AsyncValue.error(e, st);
+    final r = await _chargerPage(
+      _api, AppEndpoints.walletRecharges, WalletRecharge.fromJson, 'Erreur recharges');
+    _nextUrl = r.next;
+    state = (r.erreur != null && r.items.isEmpty)
+        ? AsyncValue.error(r.erreur!, StackTrace.current)
+        : AsyncValue.data(r.items);
+  }
+
+  Future<void> chargerPlus() async {
+    if (_nextUrl == null || _chargementPlus) return;
+    _chargementPlus = true;
+    state = AsyncValue.data(List.of(state.valueOrNull ?? const []));
+
+    final r = await _chargerPage(
+      _api, _nextUrl!, WalletRecharge.fromJson, 'Erreur recharges');
+    _nextUrl = r.next;
+    if (r.erreur == null) {
+      state = AsyncValue.data([...(state.valueOrNull ?? const []), ...r.items]);
     }
+    _chargementPlus = false;
+    state = AsyncValue.data(List.of(state.valueOrNull ?? const []));
   }
 }
 
 class WalletRetraitsNotifier
     extends StateNotifier<AsyncValue<List<WalletRetrait>>> {
   final ApiClient _api;
+  String? _nextUrl;
+  bool    _chargementPlus = false;
 
   WalletRetraitsNotifier(this._api) : super(const AsyncValue.loading()) {
     charger();
   }
 
+  bool get hasPlus => _nextUrl != null;
+  bool get chargementPlus => _chargementPlus;
+
   Future<void> charger() async {
     state = const AsyncValue.loading();
-    try {
-      final res  = await _api.get(AppEndpoints.walletRetraits);
-      final data = res.data as Map<String, dynamic>;
-      if (data['success'] == true) {
-        final list = _extraireListe(data['data'])
-            .map((e) => WalletRetrait.fromJson(e as Map<String, dynamic>))
-            .toList();
-        state = AsyncValue.data(list);
-      } else {
-        state = AsyncValue.error(
-          data['error']?.toString() ?? 'Erreur retraits',
-          StackTrace.current,
-        );
-      }
-    } catch (e, st) {
-      state = AsyncValue.error(e, st);
+    final r = await _chargerPage(
+      _api, AppEndpoints.walletRetraits, WalletRetrait.fromJson, 'Erreur retraits');
+    _nextUrl = r.next;
+    state = (r.erreur != null && r.items.isEmpty)
+        ? AsyncValue.error(r.erreur!, StackTrace.current)
+        : AsyncValue.data(r.items);
+  }
+
+  Future<void> chargerPlus() async {
+    if (_nextUrl == null || _chargementPlus) return;
+    _chargementPlus = true;
+    state = AsyncValue.data(List.of(state.valueOrNull ?? const []));
+
+    final r = await _chargerPage(
+      _api, _nextUrl!, WalletRetrait.fromJson, 'Erreur retraits');
+    _nextUrl = r.next;
+    if (r.erreur == null) {
+      state = AsyncValue.data([...(state.valueOrNull ?? const []), ...r.items]);
     }
+    _chargementPlus = false;
+    state = AsyncValue.data(List.of(state.valueOrNull ?? const []));
   }
 }
 
 class BonsAchetesNotifier
     extends StateNotifier<AsyncValue<List<BonCadeau>>> {
   final ApiClient _api;
+  String? _nextUrl;
+  bool    _chargementPlus = false;
 
   BonsAchetesNotifier(this._api) : super(const AsyncValue.loading()) {
     charger();
   }
 
+  bool get hasPlus => _nextUrl != null;
+  bool get chargementPlus => _chargementPlus;
+
   Future<void> charger() async {
     state = const AsyncValue.loading();
-    try {
-      final res  = await _api.get(AppEndpoints.walletBons);
-      final data = res.data as Map<String, dynamic>;
-      if (data['success'] == true) {
-        final list = _extraireListe(data['data'])
-            .map((e) => BonCadeau.fromJson(e as Map<String, dynamic>))
-            .toList();
-        state = AsyncValue.data(list);
-      } else {
-        state = AsyncValue.error(
-          data['error']?.toString() ?? 'Erreur bons achetés',
-          StackTrace.current,
-        );
-      }
-    } catch (e, st) {
-      state = AsyncValue.error(e, st);
+    final r = await _chargerPage(
+      _api, AppEndpoints.walletBons, BonCadeau.fromJson, 'Erreur bons achetés');
+    _nextUrl = r.next;
+    state = (r.erreur != null && r.items.isEmpty)
+        ? AsyncValue.error(r.erreur!, StackTrace.current)
+        : AsyncValue.data(r.items);
+  }
+
+  Future<void> chargerPlus() async {
+    if (_nextUrl == null || _chargementPlus) return;
+    _chargementPlus = true;
+    state = AsyncValue.data(List.of(state.valueOrNull ?? const []));
+
+    final r = await _chargerPage(
+      _api, _nextUrl!, BonCadeau.fromJson, 'Erreur bons achetés');
+    _nextUrl = r.next;
+    if (r.erreur == null) {
+      state = AsyncValue.data([...(state.valueOrNull ?? const []), ...r.items]);
     }
+    _chargementPlus = false;
+    state = AsyncValue.data(List.of(state.valueOrNull ?? const []));
   }
 }
 
 class BonsRecusNotifier
     extends StateNotifier<AsyncValue<List<BonCadeau>>> {
   final ApiClient _api;
+  String? _nextUrl;
+  bool    _chargementPlus = false;
 
   BonsRecusNotifier(this._api) : super(const AsyncValue.loading()) {
     charger();
   }
 
+  bool get hasPlus => _nextUrl != null;
+  bool get chargementPlus => _chargementPlus;
+
   Future<void> charger() async {
     state = const AsyncValue.loading();
-    try {
-      final res  = await _api.get(AppEndpoints.walletBonsRecus);
-      final data = res.data as Map<String, dynamic>;
-      if (data['success'] == true) {
-        final list = _extraireListe(data['data'])
-            .map((e) => BonCadeau.fromJson(e as Map<String, dynamic>))
-            .toList();
-        state = AsyncValue.data(list);
-      } else {
-        state = AsyncValue.error(
-          data['error']?.toString() ?? 'Erreur bons reçus',
-          StackTrace.current,
-        );
-      }
-    } catch (e, st) {
-      state = AsyncValue.error(e, st);
+    final r = await _chargerPage(
+      _api, AppEndpoints.walletBonsRecus, BonCadeau.fromJson, 'Erreur bons reçus');
+    _nextUrl = r.next;
+    state = (r.erreur != null && r.items.isEmpty)
+        ? AsyncValue.error(r.erreur!, StackTrace.current)
+        : AsyncValue.data(r.items);
+  }
+
+  Future<void> chargerPlus() async {
+    if (_nextUrl == null || _chargementPlus) return;
+    _chargementPlus = true;
+    state = AsyncValue.data(List.of(state.valueOrNull ?? const []));
+
+    final r = await _chargerPage(
+      _api, _nextUrl!, BonCadeau.fromJson, 'Erreur bons reçus');
+    _nextUrl = r.next;
+    if (r.erreur == null) {
+      state = AsyncValue.data([...(state.valueOrNull ?? const []), ...r.items]);
     }
+    _chargementPlus = false;
+    state = AsyncValue.data(List.of(state.valueOrNull ?? const []));
   }
 }

@@ -54,6 +54,9 @@ dependencies:
   # Impression reçus POS (terminaux Sunmi, Android uniquement)
   sunmi_printer_plus: ^4.1.1
 
+  # Partage natif (lien de parrainage)
+  share_plus: ^10.1.4
+
   # UI
   flutter_svg: ^2.0.10
   lottie: ^3.1.2

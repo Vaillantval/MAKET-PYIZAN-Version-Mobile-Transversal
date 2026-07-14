@@ -3,18 +3,16 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 import '../constants/app_constants.dart';
 import '../storage/secure_storage.dart';
-import '../storage/local_storage.dart';
 
 final apiClientProvider = Provider<ApiClient>((ref) {
-  return ApiClient(ref.read(secureStorageProvider), ref.read(localStorageProvider));
+  return ApiClient(ref.read(secureStorageProvider));
 });
 
 class ApiClient {
   late final Dio _dio;
   final SecureStorage _storage;
-  final LocalStorage  _localStorage;
 
-  ApiClient(this._storage, this._localStorage) {
+  ApiClient(this._storage) {
     _dio = Dio(
       BaseOptions(
         baseUrl:        AppConstants.baseUrl,
@@ -51,10 +49,10 @@ class ApiClient {
       options.headers['Authorization'] = 'Bearer $token';
     }
 
-    // Terminal POS : joindre le device_uid appairé à toutes les requêtes
+    // Terminal POS : joindre le device_uid du terminal à toutes les requêtes
     final role = await _storage.getUserRole();
     if (role == 'pos_operator') {
-      final deviceUid = _localStorage.getString(AppConstants.keyPosDeviceUid);
+      final deviceUid = await _storage.getString(AppConstants.keyPosDeviceUid);
       if (deviceUid != null && deviceUid.isNotEmpty) {
         options.headers['X-POS-Device'] = deviceUid;
       }

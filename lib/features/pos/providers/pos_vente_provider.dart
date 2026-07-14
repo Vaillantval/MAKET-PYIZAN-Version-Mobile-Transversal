@@ -12,6 +12,7 @@ import '../../../models/pos_item.dart';
 import '../../../models/pos_sale.dart';
 import 'pos_catalogue_provider.dart';
 import 'pos_exceptions.dart';
+import 'pos_session_provider.dart';
 
 final posHistoriqueProvider =
     StateNotifierProvider<PosHistoriqueNotifier, AsyncValue<List<PosSale>>>((ref) {
@@ -36,11 +37,13 @@ class PosHistoriqueNotifier extends StateNotifier<AsyncValue<List<PosSale>>> {
     charger();
   }
 
-  /// Recharge l'historique local et, si en ligne, tente de réconcilier
-  /// les ventes encore "enAttente" avec le rapport serveur (numéro de
-  /// vente attribué, statut final).
+  /// Recharge l'historique local. Si en ligne, synchronise d'abord les
+  /// ventes POS en attente (résultat détaillé par vente), puis tente
+  /// une réconciliation best-effort via le rapport serveur pour tout
+  /// ce qui resterait "enAttente".
   Future<void> charger() async {
     if (ConnectivityService().isOnline) {
+      await synchroniserVentesPos();
       await _reconcilierAvecServeur();
     }
 
@@ -52,6 +55,80 @@ class PosHistoriqueNotifier extends StateNotifier<AsyncValue<List<PosSale>>> {
     state = AsyncValue.data(ventes);
   }
 
+  /// Synchronise spécifiquement les ventes POS en attente en traitant
+  /// le résultat PAR VENTE renvoyé par POST /api/pos/sync/ (contrat
+  /// confirmé) :
+  /// - created / duplicate → vente confirmée localement (purge de la
+  ///   file) ; si stock_conflict: true, la vente reste créée mais un
+  ///   badge d'avertissement est affiché.
+  /// - rejected → DÉFINITIF, jamais re-queuée (ex : paiement wallet
+  ///   refusé) — l'opérateur est alerté via le statut "Rejetée".
+  /// - erreur réseau → l'action reste en file pour une prochaine
+  ///   tentative (retry incrémenté).
+  ///
+  /// Ne touche jamais aux autres types d'action de la SyncQueue
+  /// partagée (OfflineManager.syncAll() s'en charge, et ignore lui-même
+  /// les ventes POS pour éviter toute course entre les deux).
+  Future<void> synchroniserVentesPos() async {
+    if (!ConnectivityService().isOnline) return;
+
+    final actions = _queue.getAll()
+        .where((a) => a.type == SyncActionType.posSale)
+        .toList();
+    if (actions.isEmpty) return;
+
+    for (final action in actions) {
+      try {
+        final res  = await _api.post(action.endpoint, data: action.payload);
+        final data = res.data as Map<String, dynamic>;
+        final resultats = data['resultats'] as List? ?? const [];
+
+        for (final raw in resultats) {
+          final r   = raw as Map<String, dynamic>;
+          final key = r['idempotency_key']?.toString();
+          if (key == null) continue;
+
+          final localSale = _local.getAllSales()
+              .map((e) => PosSale.fromJson(e))
+              .where((s) => s.idempotencyKey == key)
+              .firstOrNull;
+          if (localSale == null) continue;
+
+          switch (r['status']?.toString()) {
+            case 'created':
+            case 'duplicate':
+              await _local.saveSale(localSale.copyWith(
+                numeroVente:   r['numero_vente']?.toString() ?? localSale.numeroVente,
+                statut:        'validee',
+                syncStatus:    'synchronisee',
+                stockConflict: r['stock_conflict'] == true,
+              ).toJson());
+              break;
+            case 'rejected':
+              await _local.saveSale(localSale.copyWith(
+                statut:     'rejetee',
+                syncStatus: 'rejetee',
+                erreurSync: r['erreur']?.toString(),
+              ).toJson());
+              break;
+          }
+        }
+
+        await _queue.remove(action.id);
+      } catch (e) {
+        if (_isNetworkError(e)) {
+          await _queue.incrementRetry(action.id);
+          break; // Réseau instable — on arrête, on réessaiera plus tard
+        } else {
+          // Erreur inattendue (ni réseau, ni un rejet métier normal déjà
+          // couvert par 'resultats') : on retente plus tard plutôt que
+          // de perdre discrètement la vente.
+          await _queue.incrementRetry(action.id);
+        }
+      }
+    }
+  }
+
   Future<void> _reconcilierAvecServeur() async {
     final pendantes = _local.getAllSales()
         .map((e) => PosSale.fromJson(e))
@@ -60,11 +137,22 @@ class PosHistoriqueNotifier extends StateNotifier<AsyncValue<List<PosSale>>> {
     if (pendantes.isEmpty) return;
 
     try {
-      final today = DateTime.now();
-      final dateStr = '${today.year.toString().padLeft(4, '0')}-'
-          '${today.month.toString().padLeft(2, '0')}-'
-          '${today.day.toString().padLeft(2, '0')}';
-      final res = await _api.get(AppEndpoints.posRapports, queryParameters: {'date': dateStr});
+      // Priorité à session_id (contrat backend) quand une session est
+      // suivie localement ; repli sur date sinon (ex: ventes orphelines
+      // d'une session déjà fermée localement).
+      final sessionId = _ref.read(posSessionProvider).valueOrNull?.id;
+      final Map<String, dynamic> queryParams;
+      if (sessionId != null) {
+        queryParams = {'session_id': sessionId};
+      } else {
+        final today = DateTime.now();
+        final dateStr = '${today.year.toString().padLeft(4, '0')}-'
+            '${today.month.toString().padLeft(2, '0')}-'
+            '${today.day.toString().padLeft(2, '0')}';
+        queryParams = {'date': dateStr};
+      }
+
+      final res = await _api.get(AppEndpoints.posRapports, queryParameters: queryParams);
       final data = res.data as Map<String, dynamic>;
       if (data['success'] != true) return;
 
@@ -72,9 +160,10 @@ class PosHistoriqueNotifier extends StateNotifier<AsyncValue<List<PosSale>>> {
       final rawData = data['data'];
       final ventesData = rawData is Map<String, dynamic> ? rawData['ventes'] : null;
       if (ventesData is! List) {
+        final queryStr = queryParams.entries.map((e) => '${e.key}=${e.value}').join('&');
         debugPrint(
           '[POS] Réconciliation : clé "ventes" absente de la réponse '
-          'de ${AppEndpoints.posRapports}?date=$dateStr',
+          'de ${AppEndpoints.posRapports}?$queryStr',
         );
         return;
       }
@@ -168,10 +257,8 @@ class PosHistoriqueNotifier extends StateNotifier<AsyncValue<List<PosSale>>> {
         final data = res.data as Map<String, dynamic>;
         if (data['success'] != true) {
           final erreur = data['error']?.toString();
-          throw PosVenteException(
-            _classifierErreurWallet(erreur),
-            erreur ?? 'Erreur lors du paiement par portefeuille.',
-          );
+          final code   = _classifierErreurWallet(erreur);
+          throw PosVenteException(code, _messageErreurWallet(code, erreur));
         }
         final d = data['data'] as Map<String, dynamic>;
         sale = sale.copyWith(
@@ -230,6 +317,19 @@ class PosHistoriqueNotifier extends StateNotifier<AsyncValue<List<PosSale>>> {
     if (e.contains('CODE')) return 'CODE_INVALIDE';
     if (e.contains('SOLDE') || e.contains('INSUFFISANT')) return 'SOLDE_INSUFFISANT';
     return 'AUTRE';
+  }
+
+  String _messageErreurWallet(String code, String? erreurBrute) {
+    switch (code) {
+      case 'CODE_INVALIDE':
+        return 'Code invalide ou expiré — demandez au client de générer '
+            'un nouveau code.';
+      case 'SOLDE_INSUFFISANT':
+        return 'Solde insuffisant — le code reste valable : le client peut '
+            'recharger son portefeuille puis vous pouvez réessayer.';
+      default:
+        return erreurBrute ?? 'Erreur lors du paiement par portefeuille.';
+    }
   }
 
   Future<void> _mettreEnQueue(String idempotencyKey, Map<String, dynamic> payloadVente) {
