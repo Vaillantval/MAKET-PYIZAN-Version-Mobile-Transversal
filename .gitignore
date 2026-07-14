@@ -43,3 +43,11 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Signature de release — NE JAMAIS committer (perte = impossible de
+# mettre à jour l'app publiée sous la même identité sur le Play Store)
+/android/key.properties
+/android/*.jks
+/android/*.keystore
+**/*.jks
+**/*.keystore
