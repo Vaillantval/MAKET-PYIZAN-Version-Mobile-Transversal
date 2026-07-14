@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/api/api_client.dart';
 import '../../../core/api/api_endpoints.dart';
 import '../../../core/offline/cache_manager.dart';
-import '../../../core/offline/connectivity_service.dart';
 import '../../../core/utils/string_utils.dart';
 import '../../../models/pos_produit_catalogue.dart';
 
@@ -28,8 +27,12 @@ class PosCatalogueNotifier extends StateNotifier<AsyncValue<List<PosProduitCatal
       state = AsyncValue.data(_parse(cached));
     }
 
-    if (!ConnectivityService().isOnline) return; // rester sur le cache
-
+    // Pas de pré-vérification isOnline ici : cette heuristique peut donner
+    // un faux négatif durable sur certains réseaux, ce qui laissait cet
+    // écran bloqué indéfiniment sur le chargement sans jamais rien
+    // tenter ni afficher d'erreur. Le try/catch ci-dessous gère déjà
+    // correctement un vrai échec réseau (repli sur le cache, ou erreur
+    // affichée si aucun cache).
     try {
       final etag = _cache.getPosCatalogueEtag();
       final res = await _api.get(

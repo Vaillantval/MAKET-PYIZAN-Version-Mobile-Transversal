@@ -23,18 +23,21 @@ class ApiClient {
     );
 
     _dio.interceptors.addAll([
+      // JWT + device POS : doit tourner avant le logger, sinon celui-ci
+      // affiche les headers tels qu'ils étaient AVANT ajout (Authorization
+      // et X-POS-Device y semblent alors toujours absents, même quand ils
+      // sont correctement envoyés).
+      InterceptorsWrapper(
+        onRequest: _onRequest,
+        onError:   _onError,
+      ),
       // Logger (debug uniquement)
       PrettyDioLogger(
-        requestHeader: false,
+        requestHeader: true,
         requestBody:   true,
         responseBody:  true,
         error:         true,
         compact:       true,
-      ),
-      // JWT intercepteur
-      InterceptorsWrapper(
-        onRequest: _onRequest,
-        onError:   _onError,
       ),
     ]);
   }

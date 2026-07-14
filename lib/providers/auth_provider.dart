@@ -66,9 +66,16 @@ class AuthNotifier extends StateNotifier<AuthState> {
     // Charger le profil depuis le cache
     final cachedUser = _cache.getUser();
     if (cachedUser != null) {
+      final user = User.fromJson(cachedUser);
+      // Persister role/id ici aussi : ce statut "authenticated" déclenche
+      // déjà la redirection (donc de possibles appels API immédiats,
+      // ex: header X-POS-Device) avant même que le rafraîchissement
+      // réseau ci-dessous n'ait eu le temps de le faire.
+      await _storage.saveUserRole(user.role);
+      await _storage.saveUserId(user.id);
       state = state.copyWith(
         status: AuthStatus.authenticated,
-        user:   User.fromJson(cachedUser),
+        user:   user,
       );
     }
 
@@ -80,6 +87,10 @@ class AuthNotifier extends StateNotifier<AuthState> {
         final user = User.fromJson(
           data['data'] as Map<String, dynamic>
         );
+        // Persister role/id : l'intercepteur API (header X-POS-Device
+        // notamment) les lit directement du storage, pas de AuthState.
+        await _storage.saveUserRole(user.role);
+        await _storage.saveUserId(user.id);
         await _cache.saveUser(data['data'] as Map<String, dynamic>);
         state = state.copyWith(
           status: AuthStatus.authenticated,
