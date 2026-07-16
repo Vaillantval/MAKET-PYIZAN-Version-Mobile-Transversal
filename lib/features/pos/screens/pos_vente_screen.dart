@@ -115,8 +115,12 @@ class _PosVenteScreenState extends ConsumerState<PosVenteScreen> {
           ? null
           : FloatingActionButton.extended(
               backgroundColor: AppColors.vertFonce,
+              foregroundColor: Colors.white,
               icon: const Icon(Icons.shopping_cart),
-              label: Text('${panier.length} — ${FormatUtils.htg(ref.read(posPanierProvider.notifier).total)}'),
+              label: Text(
+                '${panier.length} — ${FormatUtils.htg(ref.read(posPanierProvider.notifier).total)}',
+                style: const TextStyle(fontWeight: FontWeight.w700),
+              ),
               onPressed: () => _ouvrirPanier(context),
             ),
     );

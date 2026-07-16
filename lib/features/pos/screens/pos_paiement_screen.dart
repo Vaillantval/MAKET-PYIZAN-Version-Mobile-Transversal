@@ -237,31 +237,36 @@ class _PosPaiementScreenState extends ConsumerState<PosPaiementScreen> {
             const SizedBox(height: 16),
 
             // ── Sélecteur de méthode ─────────────────────────────
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
+            Row(
               children: [
-                _MethodeChip(
-                  label: '💵 Cash',
+                Expanded(child: _MethodeTile(
+                  label: 'Cash',
+                  asset: 'assets/images/cash.jpg',
                   selected: _methode == 'cash',
                   onTap: () => setState(() => _methode = 'cash'),
-                ),
-                _MethodeChip(
-                  label: '📱 MonCash',
+                )),
+                const SizedBox(width: 8),
+                Expanded(child: _MethodeTile(
+                  label: 'MonCash',
+                  asset: 'assets/images/MC_button.png',
                   selected: _methode == 'moncash',
                   onTap: () => setState(() => _methode = 'moncash'),
-                ),
-                _MethodeChip(
-                  label: '💳 NatCash',
+                )),
+                const SizedBox(width: 8),
+                Expanded(child: _MethodeTile(
+                  label: 'NatCash',
+                  asset: 'assets/images/natcash.png',
                   selected: _methode == 'natcash',
                   onTap: () => setState(() => _methode = 'natcash'),
-                ),
-                _MethodeChip(
-                  label: '👛 Wallet',
+                )),
+                const SizedBox(width: 8),
+                Expanded(child: _MethodeTile(
+                  label: 'Wallet',
+                  asset: 'assets/images/wallet.png',
                   selected: _methode == 'wallet',
                   disabled: !isOnline,
                   onTap: () => setState(() => _methode = 'wallet'),
-                ),
+                )),
               ],
             ),
             const SizedBox(height: 20),
@@ -328,32 +333,66 @@ class _PosPaiementScreenState extends ConsumerState<PosPaiementScreen> {
   }
 }
 
-// ── Chip méthode ──────────────────────────────────────────────────────
+// ── Tuile méthode de paiement ─────────────────────────────────────────
 
-class _MethodeChip extends StatelessWidget {
+class _MethodeTile extends StatelessWidget {
   final String label;
+  final String asset;
   final bool selected;
   final bool disabled;
   final VoidCallback onTap;
-  const _MethodeChip({
+  const _MethodeTile({
     required this.label,
+    required this.asset,
     required this.selected,
     required this.onTap,
     this.disabled = false,
   });
 
   @override
-  Widget build(BuildContext context) => ChoiceChip(
-    label: Text(label),
-    selected: selected,
-    onSelected: disabled ? null : (_) => onTap(),
-    selectedColor: AppColors.vertVif,
-    disabledColor: Colors.white,
-    labelStyle: TextStyle(
-      color: disabled
-          ? AppColors.grisTexte
-          : (selected ? Colors.white : AppColors.noir),
-      fontWeight: FontWeight.w600,
+  Widget build(BuildContext context) => GestureDetector(
+    onTap: disabled ? null : onTap,
+    child: AnimatedContainer(
+      duration: const Duration(milliseconds: 150),
+      padding: const EdgeInsets.symmetric(vertical: 10),
+      decoration: BoxDecoration(
+        color: selected ? AppColors.vertMenthe : Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: selected ? AppColors.vertVif : const Color(0xFFE0E0E0),
+          width: selected ? 2 : 1,
+        ),
+      ),
+      child: Opacity(
+        opacity: disabled ? 0.4 : 1,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Boîte fixe identique pour toutes les méthodes : les fichiers
+            // sources ont des dimensions hétérogènes (jpg photo, logos png).
+            ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: Image.asset(
+                asset,
+                width: 44,
+                height: 44,
+                // contain (et non cover) : les logos larges (ex: MonCash)
+                // seraient rognés par un recadrage.
+                fit: BoxFit.contain,
+              ),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: selected ? FontWeight.w800 : FontWeight.w600,
+                color: selected ? AppColors.vertFonce : AppColors.noir,
+              ),
+            ),
+          ],
+        ),
+      ),
     ),
   );
 }
@@ -612,16 +651,19 @@ class _SectionWallet extends StatelessWidget {
               spacing: 8,
               children: [
                 ChoiceChip(
+                  avatar: _miniLogo('assets/images/cash.jpg'),
                   label: const Text('Cash'),
                   selected: methodeComplement == 'cash',
                   onSelected: (_) => onChangerMethodeComplement('cash'),
                 ),
                 ChoiceChip(
+                  avatar: _miniLogo('assets/images/MC_button.png'),
                   label: const Text('MonCash'),
                   selected: methodeComplement == 'moncash',
                   onSelected: (_) => onChangerMethodeComplement('moncash'),
                 ),
                 ChoiceChip(
+                  avatar: _miniLogo('assets/images/natcash.png'),
                   label: const Text('NatCash'),
                   selected: methodeComplement == 'natcash',
                   onSelected: (_) => onChangerMethodeComplement('natcash'),
@@ -729,6 +771,12 @@ class _BoutonConfirmerHybride extends StatelessWidget {
 }
 
 // ── Petits widgets partagés ──────────────────────────────────────────
+
+// Vignette carrée uniforme pour un logo de méthode de paiement.
+Widget _miniLogo(String asset) => ClipRRect(
+  borderRadius: BorderRadius.circular(4),
+  child: Image.asset(asset, width: 20, height: 20, fit: BoxFit.contain),
+);
 
 class _Carte extends StatelessWidget {
   final Widget child;
