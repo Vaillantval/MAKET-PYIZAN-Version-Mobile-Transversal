@@ -234,6 +234,8 @@ mixin _$PosProduitCatalogue {
   String get uniteVente => throw _privateConstructorUsedError;
   @JsonKey(name: 'stock_disponible', fromJson: jsonToDouble)
   double get stockDisponible => throw _privateConstructorUsedError;
+  @JsonKey(name: 'photo_url')
+  String? get photoUrl => throw _privateConstructorUsedError;
   List<PosLot> get lots => throw _privateConstructorUsedError;
 
   /// Serializes this PosProduitCatalogue to a JSON map.
@@ -263,6 +265,7 @@ abstract class $PosProduitCatalogueCopyWith<$Res> {
       @JsonKey(name: 'unite_vente') String uniteVente,
       @JsonKey(name: 'stock_disponible', fromJson: jsonToDouble)
       double stockDisponible,
+      @JsonKey(name: 'photo_url') String? photoUrl,
       List<PosLot> lots});
 }
 
@@ -288,6 +291,7 @@ class _$PosProduitCatalogueCopyWithImpl<$Res, $Val extends PosProduitCatalogue>
     Object? categorie = null,
     Object? uniteVente = null,
     Object? stockDisponible = null,
+    Object? photoUrl = freezed,
     Object? lots = null,
   }) {
     return _then(_value.copyWith(
@@ -319,6 +323,10 @@ class _$PosProduitCatalogueCopyWithImpl<$Res, $Val extends PosProduitCatalogue>
           ? _value.stockDisponible
           : stockDisponible // ignore: cast_nullable_to_non_nullable
               as double,
+      photoUrl: freezed == photoUrl
+          ? _value.photoUrl
+          : photoUrl // ignore: cast_nullable_to_non_nullable
+              as String?,
       lots: null == lots
           ? _value.lots
           : lots // ignore: cast_nullable_to_non_nullable
@@ -346,6 +354,7 @@ abstract class _$$PosProduitCatalogueImplCopyWith<$Res>
       @JsonKey(name: 'unite_vente') String uniteVente,
       @JsonKey(name: 'stock_disponible', fromJson: jsonToDouble)
       double stockDisponible,
+      @JsonKey(name: 'photo_url') String? photoUrl,
       List<PosLot> lots});
 }
 
@@ -369,6 +378,7 @@ class __$$PosProduitCatalogueImplCopyWithImpl<$Res>
     Object? categorie = null,
     Object? uniteVente = null,
     Object? stockDisponible = null,
+    Object? photoUrl = freezed,
     Object? lots = null,
   }) {
     return _then(_$PosProduitCatalogueImpl(
@@ -400,6 +410,10 @@ class __$$PosProduitCatalogueImplCopyWithImpl<$Res>
           ? _value.stockDisponible
           : stockDisponible // ignore: cast_nullable_to_non_nullable
               as double,
+      photoUrl: freezed == photoUrl
+          ? _value.photoUrl
+          : photoUrl // ignore: cast_nullable_to_non_nullable
+              as String?,
       lots: null == lots
           ? _value._lots
           : lots // ignore: cast_nullable_to_non_nullable
@@ -422,6 +436,7 @@ class _$PosProduitCatalogueImpl implements _PosProduitCatalogue {
       @JsonKey(name: 'unite_vente') this.uniteVente = '',
       @JsonKey(name: 'stock_disponible', fromJson: jsonToDouble)
       this.stockDisponible = 0,
+      @JsonKey(name: 'photo_url') this.photoUrl,
       final List<PosLot> lots = const []})
       : _lots = lots;
 
@@ -447,6 +462,9 @@ class _$PosProduitCatalogueImpl implements _PosProduitCatalogue {
   @override
   @JsonKey(name: 'stock_disponible', fromJson: jsonToDouble)
   final double stockDisponible;
+  @override
+  @JsonKey(name: 'photo_url')
+  final String? photoUrl;
   final List<PosLot> _lots;
   @override
   @JsonKey()
@@ -458,7 +476,7 @@ class _$PosProduitCatalogueImpl implements _PosProduitCatalogue {
 
   @override
   String toString() {
-    return 'PosProduitCatalogue(id: $id, nom: $nom, prixDetail: $prixDetail, prixGros: $prixGros, categorie: $categorie, uniteVente: $uniteVente, stockDisponible: $stockDisponible, lots: $lots)';
+    return 'PosProduitCatalogue(id: $id, nom: $nom, prixDetail: $prixDetail, prixGros: $prixGros, categorie: $categorie, uniteVente: $uniteVente, stockDisponible: $stockDisponible, photoUrl: $photoUrl, lots: $lots)';
   }
 
   @override
@@ -478,6 +496,8 @@ class _$PosProduitCatalogueImpl implements _PosProduitCatalogue {
                 other.uniteVente == uniteVente) &&
             (identical(other.stockDisponible, stockDisponible) ||
                 other.stockDisponible == stockDisponible) &&
+            (identical(other.photoUrl, photoUrl) ||
+                other.photoUrl == photoUrl) &&
             const DeepCollectionEquality().equals(other._lots, _lots));
   }
 
@@ -492,6 +512,7 @@ class _$PosProduitCatalogueImpl implements _PosProduitCatalogue {
       categorie,
       uniteVente,
       stockDisponible,
+      photoUrl,
       const DeepCollectionEquality().hash(_lots));
 
   /// Create a copy of PosProduitCatalogue
@@ -524,6 +545,7 @@ abstract class _PosProduitCatalogue implements PosProduitCatalogue {
       @JsonKey(name: 'unite_vente') final String uniteVente,
       @JsonKey(name: 'stock_disponible', fromJson: jsonToDouble)
       final double stockDisponible,
+      @JsonKey(name: 'photo_url') final String? photoUrl,
       final List<PosLot> lots}) = _$PosProduitCatalogueImpl;
 
   factory _PosProduitCatalogue.fromJson(Map<String, dynamic> json) =
@@ -548,6 +570,9 @@ abstract class _PosProduitCatalogue implements PosProduitCatalogue {
   @override
   @JsonKey(name: 'stock_disponible', fromJson: jsonToDouble)
   double get stockDisponible;
+  @override
+  @JsonKey(name: 'photo_url')
+  String? get photoUrl;
   @override
   List<PosLot> get lots;
 

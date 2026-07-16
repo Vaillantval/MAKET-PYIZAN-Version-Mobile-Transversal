@@ -35,6 +35,7 @@ _$PosProduitCatalogueImpl _$$PosProduitCatalogueImplFromJson(
       stockDisponible: json['stock_disponible'] == null
           ? 0
           : jsonToDouble(json['stock_disponible']),
+      photoUrl: json['photo_url'] as String?,
       lots: (json['lots'] as List<dynamic>?)
               ?.map((e) => PosLot.fromJson(e as Map<String, dynamic>))
               .toList() ??
@@ -51,5 +52,6 @@ Map<String, dynamic> _$$PosProduitCatalogueImplToJson(
       'categorie': instance.categorie,
       'unite_vente': instance.uniteVente,
       'stock_disponible': instance.stockDisponible,
+      'photo_url': instance.photoUrl,
       'lots': instance.lots,
     };

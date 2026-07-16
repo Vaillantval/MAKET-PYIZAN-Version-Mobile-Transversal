@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:shimmer/shimmer.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/utils/format_utils.dart';
+import '../../../core/utils/image_utils.dart';
 import '../../../models/pos_produit_catalogue.dart';
 import '../providers/pos_catalogue_provider.dart';
 import '../providers/pos_panier_provider.dart';
@@ -144,10 +147,12 @@ class _ProduitTile extends ConsumerWidget {
     // lots affichait donc toujours 0.
     final stockTotal = produit.stockDisponible;
 
+    final imageUrl = ImageUtils.imageUrl(produit.photoUrl);
+
     return GestureDetector(
       onTap: () => _ouvrirDialogueAjout(context, ref),
       child: Container(
-        padding: const EdgeInsets.all(12),
+        padding: const EdgeInsets.all(10),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(14),
@@ -155,21 +160,54 @@ class _ProduitTile extends ConsumerWidget {
             BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 6),
           ],
         ),
-        child: Column(
+        child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(
-              produit.nom,
-              style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 15),
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
+            ClipRRect(
+              borderRadius: BorderRadius.circular(10),
+              child: imageUrl.isNotEmpty
+                  ? CachedNetworkImage(
+                      imageUrl: imageUrl,
+                      width:  56,
+                      height: 56,
+                      fit:    BoxFit.cover,
+                      placeholder: (_, __) => Shimmer.fromColors(
+                        baseColor:      Colors.grey[300]!,
+                        highlightColor: Colors.grey[100]!,
+                        child: Container(width: 56, height: 56, color: Colors.white),
+                      ),
+                      errorWidget: (_, __, ___) => Container(
+                        width: 56, height: 56,
+                        color: AppColors.vertMenthe,
+                        child: const Center(child: Text('🌿', style: TextStyle(fontSize: 22))),
+                      ),
+                    )
+                  : Container(
+                      width: 56, height: 56,
+                      color: AppColors.vertMenthe,
+                      child: const Center(child: Text('🌿', style: TextStyle(fontSize: 22))),
+                    ),
             ),
-            Text(
-              'Stock : ${stockTotal.toStringAsFixed(0)}',
-              style: const TextStyle(fontSize: 11, color: AppColors.grisTexte),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    produit.nom,
+                    style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 15),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  Text(
+                    'Stock : ${stockTotal.toStringAsFixed(0)}',
+                    style: const TextStyle(fontSize: 11, color: AppColors.grisTexte),
+                  ),
+                  HtgLabel(produit.prixDetail),
+                ],
+              ),
             ),
-            HtgLabel(produit.prixDetail),
           ],
         ),
       ),

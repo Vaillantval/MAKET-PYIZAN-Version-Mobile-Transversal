@@ -35,6 +35,7 @@ class PosProduitCatalogue with _$PosProduitCatalogue {
     @JsonKey(name: 'categorie', fromJson: _categorieNomFromJson) @Default('') String categorie,
     @JsonKey(name: 'unite_vente')       @Default('') String uniteVente,
     @JsonKey(name: 'stock_disponible', fromJson: jsonToDouble) @Default(0) double stockDisponible,
+    @JsonKey(name: 'photo_url') String? photoUrl,
     @Default([]) List<PosLot> lots,
   }) = _PosProduitCatalogue;
 
