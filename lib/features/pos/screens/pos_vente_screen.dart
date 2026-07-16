@@ -139,7 +139,10 @@ class _ProduitTile extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final stockTotal = produit.lots.fold<double>(0, (s, l) => s + l.quantiteActuelle);
+    // stock_disponible (scalaire) est la source de vérité du catalogue
+    // POS ; 'lots' est renvoyé vide par ce contrat backend — sommer les
+    // lots affichait donc toujours 0.
+    final stockTotal = produit.stockDisponible;
 
     return GestureDetector(
       onTap: () => _ouvrirDialogueAjout(context, ref),

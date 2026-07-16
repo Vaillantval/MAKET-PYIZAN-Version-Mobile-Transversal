@@ -63,23 +63,21 @@ class PosCatalogueNotifier extends StateNotifier<AsyncValue<List<PosProduitCatal
   List<PosProduitCatalogue> _parse(List<dynamic> raw) =>
       raw.map((e) => PosProduitCatalogue.fromJson(e as Map<String, dynamic>)).toList();
 
-  /// Décrémente le stock du lot (ou du 1er lot du produit) EN CACHE,
-  /// pour une cohérence visuelle immédiate entre deux synchronisations.
+  /// Décrémente le stock du produit EN CACHE, pour une cohérence visuelle
+  /// immédiate entre deux synchronisations.
+  ///
+  /// stock_disponible (scalaire) est la source de vérité de ce contrat
+  /// backend ; 'lots' est toujours renvoyé vide, donc ignoré ici (lotId
+  /// n'est conservé dans la signature que pour compatibilité avec l'appel
+  /// existant côté vente).
   Future<void> decrementerStock(int produitId, int? lotId, double quantite) async {
     final current = state.valueOrNull;
     if (current == null) return;
 
     final updated = current.map((p) {
-      if (p.id != produitId || p.lots.isEmpty) return p;
-      var dejaDecremente = false;
-      final lots = p.lots.map((l) {
-        if (dejaDecremente) return l;
-        if (lotId != null && l.id != lotId) return l;
-        dejaDecremente = true;
-        final nouvelleQte = l.quantiteActuelle - quantite;
-        return l.copyWith(quantiteActuelle: nouvelleQte < 0 ? 0 : nouvelleQte);
-      }).toList();
-      return p.copyWith(lots: lots);
+      if (p.id != produitId) return p;
+      final nouveauStock = p.stockDisponible - quantite;
+      return p.copyWith(stockDisponible: nouveauStock < 0 ? 0 : nouveauStock);
     }).toList();
 
     state = AsyncValue.data(updated);
