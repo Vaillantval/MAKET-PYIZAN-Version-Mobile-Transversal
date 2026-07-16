@@ -99,7 +99,7 @@ class _PosVenteScreenState extends ConsumerState<PosVenteScreen> {
                         padding: const EdgeInsets.fromLTRB(12, 0, 12, 100),
                         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                           crossAxisCount: 2,
-                          childAspectRatio: 1.3,
+                          childAspectRatio: 1.55,
                           crossAxisSpacing: 10,
                           mainAxisSpacing: 10,
                         ),
@@ -152,59 +152,77 @@ class _ProduitTile extends ConsumerWidget {
     return GestureDetector(
       onTap: () => _ouvrirDialogueAjout(context, ref),
       child: Container(
-        padding: const EdgeInsets.all(10),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(16),
           boxShadow: [
-            BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 6),
+            BoxShadow(color: Colors.black.withValues(alpha: 0.06), blurRadius: 8, offset: const Offset(0, 2)),
           ],
         ),
-        child: Row(
+        child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            ClipRRect(
-              borderRadius: BorderRadius.circular(10),
-              child: imageUrl.isNotEmpty
-                  ? CachedNetworkImage(
-                      imageUrl: imageUrl,
-                      width:  56,
-                      height: 56,
-                      fit:    BoxFit.cover,
-                      placeholder: (_, __) => Shimmer.fromColors(
-                        baseColor:      Colors.grey[300]!,
-                        highlightColor: Colors.grey[100]!,
-                        child: Container(width: 56, height: 56, color: Colors.white),
-                      ),
-                      errorWidget: (_, __, ___) => Container(
-                        width: 56, height: 56,
-                        color: AppColors.vertMenthe,
-                        child: const Center(child: Text('🌿', style: TextStyle(fontSize: 22))),
-                      ),
-                    )
-                  : Container(
-                      width: 56, height: 56,
-                      color: AppColors.vertMenthe,
-                      child: const Center(child: Text('🌿', style: TextStyle(fontSize: 22))),
+            Stack(
+              children: [
+                ClipRRect(
+                  borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+                  child: imageUrl.isNotEmpty
+                      ? CachedNetworkImage(
+                          imageUrl: imageUrl,
+                          height: 120,
+                          width:  double.infinity,
+                          fit:    BoxFit.cover,
+                          placeholder: (_, __) => Shimmer.fromColors(
+                            baseColor:      Colors.grey[300]!,
+                            highlightColor: Colors.grey[100]!,
+                            child: Container(height: 120, color: Colors.white),
+                          ),
+                          errorWidget: (_, __, ___) => Container(
+                            height: 120,
+                            color: AppColors.vertMenthe,
+                            child: const Center(child: Text('🌿', style: TextStyle(fontSize: 32))),
+                          ),
+                        )
+                      : Container(
+                          height: 120,
+                          width: double.infinity,
+                          color: AppColors.vertMenthe,
+                          child: const Center(child: Text('🌿', style: TextStyle(fontSize: 32))),
+                        ),
+                ),
+                Positioned(
+                  top: 8, right: 8,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: Colors.black.withValues(alpha: 0.55),
+                      borderRadius: BorderRadius.circular(20),
                     ),
+                    child: Text(
+                      'Stock ${stockTotal.toStringAsFixed(0)}',
+                      style: const TextStyle(
+                        fontSize: 10, fontWeight: FontWeight.w700, color: Colors.white,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(width: 10),
-            Expanded(
+            Padding(
+              padding: const EdgeInsets.fromLTRB(10, 10, 10, 12),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
                     produit.nom,
-                    style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 15),
-                    maxLines: 2,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w700, fontSize: 14, color: AppColors.noir,
+                    ),
+                    maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  Text(
-                    'Stock : ${stockTotal.toStringAsFixed(0)}',
-                    style: const TextStyle(fontSize: 11, color: AppColors.grisTexte),
-                  ),
-                  HtgLabel(produit.prixDetail),
+                  const SizedBox(height: 6),
+                  HtgLabel(produit.prixDetail, fontSize: 17),
                 ],
               ),
             ),
@@ -224,12 +242,13 @@ class _ProduitTile extends ConsumerWidget {
 
 class HtgLabel extends StatelessWidget {
   final double montant;
-  const HtgLabel(this.montant, {super.key});
+  final double fontSize;
+  const HtgLabel(this.montant, {this.fontSize = 14, super.key});
 
   @override
   Widget build(BuildContext context) => Text(
     FormatUtils.htg(montant),
-    style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 14, color: AppColors.vertFonce),
+    style: TextStyle(fontWeight: FontWeight.w800, fontSize: fontSize, color: AppColors.vertFonce),
   );
 }
 
