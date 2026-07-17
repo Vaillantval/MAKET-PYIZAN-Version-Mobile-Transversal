@@ -30,8 +30,10 @@ class PosLocalStorage {
 
   // ── Historique des ventes ────────────────────────────────────────
 
+  // La clé est 'idempotency_key' (snake_case) : c'est ce que produit
+  // PosSale.toJson() via @JsonKey — pas le nom Dart camelCase.
   Future<void> saveSale(Map<String, dynamic> sale) =>
-      _salesBox.put(sale['idempotencyKey'] as String, sale);
+      _salesBox.put(sale['idempotency_key'] as String, sale);
 
   List<Map<String, dynamic>> getAllSales() => _salesBox.values
       .map((e) => _deepMap(e))

@@ -28,7 +28,8 @@
       "PowerShell(Write-Output $env:TEMP)",
       "PowerShell(npm *)",
       "PowerShell(firebase *)",
-      "PowerShell(Get-PnpDevice *)"
+      "PowerShell(Get-PnpDevice *)",
+      "Bash(gh auth *)"
     ]
   }
 }

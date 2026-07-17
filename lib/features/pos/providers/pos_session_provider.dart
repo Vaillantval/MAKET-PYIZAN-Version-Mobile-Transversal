@@ -95,7 +95,20 @@ class PosSessionNotifier extends StateNotifier<AsyncValue<PosSession?>> {
       if (data['success'] == true) {
         await _posStorage.clearSession();
         state = const AsyncValue.data(null);
-        return data['data'] as Map<String, dynamic>? ?? {};
+        // Contrat backend : data = {session: {...}, recap: {nb_ventes,
+        // total_ventes, total_cash, par_methode}}. L'écran attend un map
+        // plat avec en plus ecart_caisse, qui vit dans session.
+        final d = data['data'] as Map<String, dynamic>? ?? {};
+        final recap = d['recap'];
+        if (recap is Map<String, dynamic>) {
+          final session = d['session'];
+          return {
+            ...recap,
+            if (session is Map<String, dynamic>)
+              'ecart_caisse': session['ecart_caisse'],
+          };
+        }
+        return d; // repli : ancien contrat plat
       }
       return {'error': data['error']?.toString() ?? 'Erreur lors de la fermeture de la session'};
     } catch (_) {

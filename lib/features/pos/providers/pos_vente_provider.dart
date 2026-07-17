@@ -81,7 +81,12 @@ class PosHistoriqueNotifier extends StateNotifier<AsyncValue<List<PosSale>>> {
       try {
         final res  = await _api.post(action.endpoint, data: action.payload);
         final data = res.data as Map<String, dynamic>;
-        final resultats = data['resultats'] as List? ?? const [];
+        // Contrat backend : data['data']['resultats'] (repli sur l'ancien
+        // emplacement plat data['resultats'] par tolérance).
+        final d = data['data'];
+        final resultats = (d is Map<String, dynamic>
+            ? d['resultats']
+            : data['resultats']) as List? ?? const [];
 
         for (final raw in resultats) {
           final r   = raw as Map<String, dynamic>;
@@ -260,10 +265,10 @@ class PosHistoriqueNotifier extends StateNotifier<AsyncValue<List<PosSale>>> {
           final code   = _classifierErreurWallet(erreur);
           throw PosVenteException(code, _messageErreurWallet(code, erreur));
         }
-        final d = data['data'] as Map<String, dynamic>;
+        final v = _extraireVente(data);
         sale = sale.copyWith(
-          numeroVente: d['numero_vente']?.toString(),
-          statut:      d['statut']?.toString() ?? 'validee',
+          numeroVente: v['numero_vente']?.toString(),
+          statut:      v['statut']?.toString() ?? 'validee',
           syncStatus:  'synchronisee',
         );
       } on PosVenteException {
@@ -280,10 +285,10 @@ class PosHistoriqueNotifier extends StateNotifier<AsyncValue<List<PosSale>>> {
         final res  = await _api.post(AppEndpoints.posVente, data: payloadVente);
         final data = res.data as Map<String, dynamic>;
         if (data['success'] == true) {
-          final d = data['data'] as Map<String, dynamic>;
+          final v = _extraireVente(data);
           sale = sale.copyWith(
-            numeroVente: d['numero_vente']?.toString(),
-            statut:      d['statut']?.toString() ?? 'validee',
+            numeroVente: v['numero_vente']?.toString(),
+            statut:      v['statut']?.toString() ?? 'validee',
             syncStatus:  'synchronisee',
           );
         } else {
@@ -310,6 +315,15 @@ class PosHistoriqueNotifier extends StateNotifier<AsyncValue<List<PosSale>>> {
 
     await charger();
     return sale;
+  }
+
+  /// POST /api/pos/vente/ imbrique la vente sous data['data']['vente']
+  /// (avec un frère 'created'). Repli sur data['data'] directement au
+  /// cas où un ancien contrat plat serait encore servi.
+  Map<String, dynamic> _extraireVente(Map<String, dynamic> data) {
+    final d = data['data'] as Map<String, dynamic>;
+    final v = d['vente'];
+    return v is Map<String, dynamic> ? v : d;
   }
 
   String _classifierErreurWallet(String? erreur) {
