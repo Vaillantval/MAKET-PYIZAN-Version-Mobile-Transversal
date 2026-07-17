@@ -12,10 +12,10 @@ _$AdresseImpl _$$AdresseImplFromJson(Map<String, dynamic> json) =>
       rue: json['rue'] as String,
       commune: json['commune'] as String,
       departement: json['departement'] as String,
-      sectionCommunale: json['sectionCommunale'] as String? ?? '',
+      sectionCommunale: json['section_communale'] as String? ?? '',
       telephone: json['telephone'] as String? ?? '',
-      instructions: json['instructions'] as String? ?? '',
-      isDefault: json['isDefault'] as bool? ?? false,
+      instructions: json['details'] as String? ?? '',
+      isDefault: json['is_default'] as bool? ?? false,
     );
 
 Map<String, dynamic> _$$AdresseImplToJson(_$AdresseImpl instance) =>
@@ -24,8 +24,8 @@ Map<String, dynamic> _$$AdresseImplToJson(_$AdresseImpl instance) =>
       'rue': instance.rue,
       'commune': instance.commune,
       'departement': instance.departement,
-      'sectionCommunale': instance.sectionCommunale,
+      'section_communale': instance.sectionCommunale,
       'telephone': instance.telephone,
-      'instructions': instance.instructions,
-      'isDefault': instance.isDefault,
+      'details': instance.instructions,
+      'is_default': instance.isDefault,
     };

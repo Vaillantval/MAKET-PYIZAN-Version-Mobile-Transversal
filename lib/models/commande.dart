@@ -1,3 +1,4 @@
+// ignore_for_file: invalid_annotation_target
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'commande.freezed.dart';
@@ -6,17 +7,19 @@ part 'commande.g.dart';
 @freezed
 class Commande with _$Commande {
   const factory Commande({
-    required String numeroCommande,
-    required String producteur,
+    @JsonKey(name: 'numero_commande')  required String numeroCommande,
+    // Le backend expose 'producteur_nom' (pas d'objet 'producteur') sur
+    // les listes acheteur/producteur (CommandeProducteurSerializer).
+    @JsonKey(name: 'producteur_nom')   @Default('') String producteur,
     required String total,
     required String statut,
-    required String statutLabel,
-    required String statutPaiement,
-    @Default('') String methodePaiement,
-    String? modeLivraison,
-    String? adresseLivraison,
-    String? notesAcheteur,
-    String? createdAt,
+    @JsonKey(name: 'statut_label')     required String statutLabel,
+    @JsonKey(name: 'statut_paiement')  required String statutPaiement,
+    @JsonKey(name: 'methode_paiement') @Default('') String methodePaiement,
+    @JsonKey(name: 'mode_livraison')   String? modeLivraison,
+    @JsonKey(name: 'adresse_livraison') String? adresseLivraison,
+    @JsonKey(name: 'notes_acheteur')   String? notesAcheteur,
+    @JsonKey(name: 'created_at')       String? createdAt,
     @Default([]) List<Map<String, dynamic>> details,
   }) = _Commande;
 

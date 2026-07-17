@@ -1,3 +1,4 @@
+// ignore_for_file: invalid_annotation_target
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'adresse.freezed.dart';
@@ -10,10 +11,11 @@ class Adresse with _$Adresse {
     required String rue,
     required String commune,
     required String departement,
-    @Default('') String sectionCommunale,
+    @JsonKey(name: 'section_communale') @Default('') String sectionCommunale,
     @Default('') String telephone,
-    @Default('') String instructions,
-    @Default(false) bool isDefault,
+    // Backend : champ libre 'details' (pas 'instructions')
+    @JsonKey(name: 'details') @Default('') String instructions,
+    @JsonKey(name: 'is_default') @Default(false) bool isDefault,
   }) = _Adresse;
 
   factory Adresse.fromJson(Map<String, dynamic> json) =>

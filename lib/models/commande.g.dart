@@ -8,17 +8,17 @@ part of 'commande.dart';
 
 _$CommandeImpl _$$CommandeImplFromJson(Map<String, dynamic> json) =>
     _$CommandeImpl(
-      numeroCommande: json['numeroCommande'] as String,
-      producteur: json['producteur'] as String,
+      numeroCommande: json['numero_commande'] as String,
+      producteur: json['producteur_nom'] as String? ?? '',
       total: json['total'] as String,
       statut: json['statut'] as String,
-      statutLabel: json['statutLabel'] as String,
-      statutPaiement: json['statutPaiement'] as String,
-      methodePaiement: json['methodePaiement'] as String? ?? '',
-      modeLivraison: json['modeLivraison'] as String?,
-      adresseLivraison: json['adresseLivraison'] as String?,
-      notesAcheteur: json['notesAcheteur'] as String?,
-      createdAt: json['createdAt'] as String?,
+      statutLabel: json['statut_label'] as String,
+      statutPaiement: json['statut_paiement'] as String,
+      methodePaiement: json['methode_paiement'] as String? ?? '',
+      modeLivraison: json['mode_livraison'] as String?,
+      adresseLivraison: json['adresse_livraison'] as String?,
+      notesAcheteur: json['notes_acheteur'] as String?,
+      createdAt: json['created_at'] as String?,
       details: (json['details'] as List<dynamic>?)
               ?.map((e) => e as Map<String, dynamic>)
               .toList() ??
@@ -27,16 +27,16 @@ _$CommandeImpl _$$CommandeImplFromJson(Map<String, dynamic> json) =>
 
 Map<String, dynamic> _$$CommandeImplToJson(_$CommandeImpl instance) =>
     <String, dynamic>{
-      'numeroCommande': instance.numeroCommande,
-      'producteur': instance.producteur,
+      'numero_commande': instance.numeroCommande,
+      'producteur_nom': instance.producteur,
       'total': instance.total,
       'statut': instance.statut,
-      'statutLabel': instance.statutLabel,
-      'statutPaiement': instance.statutPaiement,
-      'methodePaiement': instance.methodePaiement,
-      'modeLivraison': instance.modeLivraison,
-      'adresseLivraison': instance.adresseLivraison,
-      'notesAcheteur': instance.notesAcheteur,
-      'createdAt': instance.createdAt,
+      'statut_label': instance.statutLabel,
+      'statut_paiement': instance.statutPaiement,
+      'methode_paiement': instance.methodePaiement,
+      'mode_livraison': instance.modeLivraison,
+      'adresse_livraison': instance.adresseLivraison,
+      'notes_acheteur': instance.notesAcheteur,
+      'created_at': instance.createdAt,
       'details': instance.details,
     };

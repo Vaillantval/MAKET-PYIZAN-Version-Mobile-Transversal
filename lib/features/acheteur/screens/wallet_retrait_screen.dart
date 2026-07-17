@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/offline/connectivity_service.dart';
 import '../../../core/utils/format_utils.dart';
 import '../providers/wallet_provider.dart';
+import '../../../shared/widgets/logo_paiement.dart';
 import 'wallet_screen.dart' show EcranWalletHorsLigne;
 
 class WalletRetraitScreen extends ConsumerStatefulWidget {
@@ -185,13 +185,19 @@ class _WalletRetraitScreenState
                     child: Column(
                       children: [
                         for (final c in [
-                          ('moncash', '📱 MonCash'),
-                          ('natcash', '💳 NatCash'),
+                          ('moncash', 'MonCash'),
+                          ('natcash', 'NatCash'),
                         ])
                           RadioListTile<String>(
                             value:      c.$1,
                             groupValue: _canal,
-                            title:      Text(c.$2),
+                            title: Row(
+                              children: [
+                                LogoPaiement(c.$1),
+                                const SizedBox(width: 10),
+                                Text(c.$2),
+                              ],
+                            ),
                             activeColor: AppColors.vertVif,
                             onChanged: (v) =>
                                 setState(() => _canal = v!),

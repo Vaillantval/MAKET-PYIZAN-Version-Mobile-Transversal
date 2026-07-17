@@ -9,6 +9,7 @@ import '../providers/adresse_provider.dart';
 import '../providers/panier_provider.dart';
 import '../providers/wallet_provider.dart';
 import '../../../shared/widgets/htg_text.dart';
+import '../../../shared/widgets/logo_paiement.dart';
 
 class CheckoutScreen extends ConsumerStatefulWidget {
   const CheckoutScreen({super.key});
@@ -178,14 +179,20 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
               child: Column(
                 children: [
                   for (final m in [
-                    ('cash',      '💵 Espèces'),
-                    ('moncash',   '📱 MonCash'),
-                    ('hors_ligne','🏦 Virement / Dépôt'),
+                    ('cash',      'Espèces'),
+                    ('moncash',   'MonCash'),
+                    ('hors_ligne','Virement / Dépôt'),
                   ])
                     RadioListTile<String>(
                       value:      m.$1,
                       groupValue: _methodePaiement,
-                      title:      Text(m.$2),
+                      title: Row(
+                        children: [
+                          LogoPaiement(m.$1),
+                          const SizedBox(width: 10),
+                          Text(m.$2),
+                        ],
+                      ),
                       activeColor: AppColors.vertVif,
                       onChanged: (v) => setState(() {
                         _methodePaiement = v!;
@@ -199,11 +206,19 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                     RadioListTile<String>(
                       value:      'wallet',
                       groupValue: _methodePaiement,
-                      title: Text(
-                        '👛 Portefeuille — solde : ${FormatUtils.htg(soldeWallet)}',
-                        style: TextStyle(
-                          color: walletCouvreTout ? null : AppColors.grisTexte,
-                        ),
+                      title: Row(
+                        children: [
+                          const LogoPaiement('wallet'),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Text(
+                              'Portefeuille — solde : ${FormatUtils.htg(soldeWallet)}',
+                              style: TextStyle(
+                                color: walletCouvreTout ? null : AppColors.grisTexte,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                       activeColor: AppColors.vertVif,
                       onChanged: walletCouvreTout
@@ -374,13 +389,23 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                         color: Colors.white, strokeWidth: 2,
                       ),
                     )
-                  : Text(
-                      _methodePaiement == 'wallet'
-                          ? '👛 Payer avec mon Portefeuille'
-                          : _methodePaiement == 'moncash'
-                              ? '📱 Payer avec MonCash'
-                              : '✅ Confirmer la commande',
-                      style: const TextStyle(fontSize: 16),
+                  : Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        if (_methodePaiement == 'wallet' ||
+                            _methodePaiement == 'moncash') ...[
+                          LogoPaiement(_methodePaiement, taille: 22),
+                          const SizedBox(width: 10),
+                        ],
+                        Text(
+                          _methodePaiement == 'wallet'
+                              ? 'Payer avec mon Portefeuille'
+                              : _methodePaiement == 'moncash'
+                                  ? 'Payer avec MonCash'
+                                  : 'Confirmer la commande',
+                          style: const TextStyle(fontSize: 16),
+                        ),
+                      ],
                     ),
             ),
             const SizedBox(height: 32),

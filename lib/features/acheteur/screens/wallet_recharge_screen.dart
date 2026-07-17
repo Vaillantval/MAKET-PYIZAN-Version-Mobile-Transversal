@@ -11,6 +11,7 @@ import '../../../core/utils/role_utils.dart';
 import '../../../models/wallet.dart';
 import '../../../providers/auth_provider.dart';
 import '../providers/wallet_provider.dart';
+import '../../../shared/widgets/logo_paiement.dart';
 import 'wallet_screen.dart' show EcranWalletHorsLigne;
 
 class WalletRechargeScreen extends ConsumerStatefulWidget {
@@ -285,13 +286,19 @@ class _OnglLigne extends StatelessWidget {
         ),
         const SizedBox(height: 8),
         for (final m in [
-          ('moncash', '📱 MonCash'),
-          ('natcash', '💳 NatCash'),
+          ('moncash', 'MonCash'),
+          ('natcash', 'NatCash'),
         ])
           RadioListTile<String>(
             value:      m.$1,
             groupValue: methode,
-            title:      Text(m.$2),
+            title: Row(
+              children: [
+                LogoPaiement(m.$1),
+                const SizedBox(width: 10),
+                Text(m.$2),
+              ],
+            ),
             activeColor: AppColors.vertVif,
             onChanged:  onMethodeChanged,
             contentPadding: EdgeInsets.zero,
@@ -361,11 +368,26 @@ class _OngletHorsLigne extends StatelessWidget {
                     style: TextStyle(fontWeight: FontWeight.w700, color: AppColors.vertFonce)),
                 const SizedBox(height: 8),
                 if (depot?.numeroMoncash != null)
-                  Text('📱 MonCash : ${depot!.numeroMoncash}',
-                      style: const TextStyle(fontSize: 13)),
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 6),
+                    child: Row(
+                      children: [
+                        const LogoPaiement('moncash', taille: 20),
+                        const SizedBox(width: 8),
+                        Text('MonCash : ${depot!.numeroMoncash}',
+                            style: const TextStyle(fontSize: 13)),
+                      ],
+                    ),
+                  ),
                 if (depot?.numeroNatcash != null)
-                  Text('💳 NatCash : ${depot!.numeroNatcash}',
-                      style: const TextStyle(fontSize: 13)),
+                  Row(
+                    children: [
+                      const LogoPaiement('natcash', taille: 20),
+                      const SizedBox(width: 8),
+                      Text('NatCash : ${depot!.numeroNatcash}',
+                          style: const TextStyle(fontSize: 13)),
+                    ],
+                  ),
               ],
             ),
           ),

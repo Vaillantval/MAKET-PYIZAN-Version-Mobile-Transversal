@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Vert Makèt Peyizan (fond de l'icône officielle) -->
+    <color name="ic_launcher_background">#1B4A2F</color>
+    <!-- Teinte appliquée à l'icône de notification (silhouette blanche) -->
+    <color name="notification_color">#1B4A2F</color>
+</resources>

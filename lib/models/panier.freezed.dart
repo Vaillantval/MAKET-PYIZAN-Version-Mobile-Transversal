@@ -24,12 +24,18 @@ mixin _$LignePanier {
   String get slug => throw _privateConstructorUsedError;
   String get nom => throw _privateConstructorUsedError;
   int get quantite => throw _privateConstructorUsedError;
+  @JsonKey(name: 'prix_unitaire')
   String get prixUnitaire => throw _privateConstructorUsedError;
+  @JsonKey(name: 'sous_total', fromJson: jsonToDouble)
   double get sousTotal => throw _privateConstructorUsedError;
+  @JsonKey(name: 'unite_vente')
   String get uniteVente => throw _privateConstructorUsedError;
+  @JsonKey(name: 'producteur_id')
   int get producteurId => throw _privateConstructorUsedError;
+  @JsonKey(name: 'producteur_nom')
   String get producteurNom => throw _privateConstructorUsedError;
   String? get image => throw _privateConstructorUsedError;
+  @JsonKey(name: 'stock_reel')
   int get stockReel => throw _privateConstructorUsedError;
 
   /// Serializes this LignePanier to a JSON map.
@@ -53,13 +59,13 @@ abstract class $LignePanierCopyWith<$Res> {
       String slug,
       String nom,
       int quantite,
-      String prixUnitaire,
-      double sousTotal,
-      String uniteVente,
-      int producteurId,
-      String producteurNom,
+      @JsonKey(name: 'prix_unitaire') String prixUnitaire,
+      @JsonKey(name: 'sous_total', fromJson: jsonToDouble) double sousTotal,
+      @JsonKey(name: 'unite_vente') String uniteVente,
+      @JsonKey(name: 'producteur_id') int producteurId,
+      @JsonKey(name: 'producteur_nom') String producteurNom,
       String? image,
-      int stockReel});
+      @JsonKey(name: 'stock_reel') int stockReel});
 }
 
 /// @nodoc
@@ -151,13 +157,13 @@ abstract class _$$LignePanierImplCopyWith<$Res>
       String slug,
       String nom,
       int quantite,
-      String prixUnitaire,
-      double sousTotal,
-      String uniteVente,
-      int producteurId,
-      String producteurNom,
+      @JsonKey(name: 'prix_unitaire') String prixUnitaire,
+      @JsonKey(name: 'sous_total', fromJson: jsonToDouble) double sousTotal,
+      @JsonKey(name: 'unite_vente') String uniteVente,
+      @JsonKey(name: 'producteur_id') int producteurId,
+      @JsonKey(name: 'producteur_nom') String producteurNom,
       String? image,
-      int stockReel});
+      @JsonKey(name: 'stock_reel') int stockReel});
 }
 
 /// @nodoc
@@ -242,13 +248,14 @@ class _$LignePanierImpl implements _LignePanier {
       required this.slug,
       required this.nom,
       required this.quantite,
-      required this.prixUnitaire,
+      @JsonKey(name: 'prix_unitaire') required this.prixUnitaire,
+      @JsonKey(name: 'sous_total', fromJson: jsonToDouble)
       required this.sousTotal,
-      required this.uniteVente,
-      required this.producteurId,
-      required this.producteurNom,
+      @JsonKey(name: 'unite_vente') required this.uniteVente,
+      @JsonKey(name: 'producteur_id') required this.producteurId,
+      @JsonKey(name: 'producteur_nom') required this.producteurNom,
       this.image,
-      this.stockReel = 0});
+      @JsonKey(name: 'stock_reel') this.stockReel = 0});
 
   factory _$LignePanierImpl.fromJson(Map<String, dynamic> json) =>
       _$$LignePanierImplFromJson(json);
@@ -262,19 +269,24 @@ class _$LignePanierImpl implements _LignePanier {
   @override
   final int quantite;
   @override
+  @JsonKey(name: 'prix_unitaire')
   final String prixUnitaire;
   @override
+  @JsonKey(name: 'sous_total', fromJson: jsonToDouble)
   final double sousTotal;
   @override
+  @JsonKey(name: 'unite_vente')
   final String uniteVente;
   @override
+  @JsonKey(name: 'producteur_id')
   final int producteurId;
   @override
+  @JsonKey(name: 'producteur_nom')
   final String producteurNom;
   @override
   final String? image;
   @override
-  @JsonKey()
+  @JsonKey(name: 'stock_reel')
   final int stockReel;
 
   @override
@@ -345,13 +357,14 @@ abstract class _LignePanier implements LignePanier {
       required final String slug,
       required final String nom,
       required final int quantite,
-      required final String prixUnitaire,
+      @JsonKey(name: 'prix_unitaire') required final String prixUnitaire,
+      @JsonKey(name: 'sous_total', fromJson: jsonToDouble)
       required final double sousTotal,
-      required final String uniteVente,
-      required final int producteurId,
-      required final String producteurNom,
+      @JsonKey(name: 'unite_vente') required final String uniteVente,
+      @JsonKey(name: 'producteur_id') required final int producteurId,
+      @JsonKey(name: 'producteur_nom') required final String producteurNom,
       final String? image,
-      final int stockReel}) = _$LignePanierImpl;
+      @JsonKey(name: 'stock_reel') final int stockReel}) = _$LignePanierImpl;
 
   factory _LignePanier.fromJson(Map<String, dynamic> json) =
       _$LignePanierImpl.fromJson;
@@ -365,18 +378,24 @@ abstract class _LignePanier implements LignePanier {
   @override
   int get quantite;
   @override
+  @JsonKey(name: 'prix_unitaire')
   String get prixUnitaire;
   @override
+  @JsonKey(name: 'sous_total', fromJson: jsonToDouble)
   double get sousTotal;
   @override
+  @JsonKey(name: 'unite_vente')
   String get uniteVente;
   @override
+  @JsonKey(name: 'producteur_id')
   int get producteurId;
   @override
+  @JsonKey(name: 'producteur_nom')
   String get producteurNom;
   @override
   String? get image;
   @override
+  @JsonKey(name: 'stock_reel')
   int get stockReel;
 
   /// Create a copy of LignePanier
@@ -394,8 +413,11 @@ Panier _$PanierFromJson(Map<String, dynamic> json) {
 /// @nodoc
 mixin _$Panier {
   List<LignePanier> get items => throw _privateConstructorUsedError;
+  @JsonKey(fromJson: jsonToDouble)
   double get total => throw _privateConstructorUsedError;
+  @JsonKey(name: 'nb_articles')
   int get nbArticles => throw _privateConstructorUsedError;
+  @JsonKey(name: 'nb_items')
   int get nbItems => throw _privateConstructorUsedError;
   List<Map<String, dynamic>> get producteurs =>
       throw _privateConstructorUsedError;
@@ -416,9 +438,9 @@ abstract class $PanierCopyWith<$Res> {
   @useResult
   $Res call(
       {List<LignePanier> items,
-      double total,
-      int nbArticles,
-      int nbItems,
+      @JsonKey(fromJson: jsonToDouble) double total,
+      @JsonKey(name: 'nb_articles') int nbArticles,
+      @JsonKey(name: 'nb_items') int nbItems,
       List<Map<String, dynamic>> producteurs});
 }
 
@@ -477,9 +499,9 @@ abstract class _$$PanierImplCopyWith<$Res> implements $PanierCopyWith<$Res> {
   @useResult
   $Res call(
       {List<LignePanier> items,
-      double total,
-      int nbArticles,
-      int nbItems,
+      @JsonKey(fromJson: jsonToDouble) double total,
+      @JsonKey(name: 'nb_articles') int nbArticles,
+      @JsonKey(name: 'nb_items') int nbItems,
       List<Map<String, dynamic>> producteurs});
 }
 
@@ -532,9 +554,9 @@ class __$$PanierImplCopyWithImpl<$Res>
 class _$PanierImpl implements _Panier {
   const _$PanierImpl(
       {final List<LignePanier> items = const [],
-      this.total = 0.0,
-      this.nbArticles = 0,
-      this.nbItems = 0,
+      @JsonKey(fromJson: jsonToDouble) this.total = 0.0,
+      @JsonKey(name: 'nb_articles') this.nbArticles = 0,
+      @JsonKey(name: 'nb_items') this.nbItems = 0,
       final List<Map<String, dynamic>> producteurs = const []})
       : _items = items,
         _producteurs = producteurs;
@@ -552,13 +574,13 @@ class _$PanierImpl implements _Panier {
   }
 
   @override
-  @JsonKey()
+  @JsonKey(fromJson: jsonToDouble)
   final double total;
   @override
-  @JsonKey()
+  @JsonKey(name: 'nb_articles')
   final int nbArticles;
   @override
-  @JsonKey()
+  @JsonKey(name: 'nb_items')
   final int nbItems;
   final List<Map<String, dynamic>> _producteurs;
   @override
@@ -617,9 +639,9 @@ class _$PanierImpl implements _Panier {
 abstract class _Panier implements Panier {
   const factory _Panier(
       {final List<LignePanier> items,
-      final double total,
-      final int nbArticles,
-      final int nbItems,
+      @JsonKey(fromJson: jsonToDouble) final double total,
+      @JsonKey(name: 'nb_articles') final int nbArticles,
+      @JsonKey(name: 'nb_items') final int nbItems,
       final List<Map<String, dynamic>> producteurs}) = _$PanierImpl;
 
   factory _Panier.fromJson(Map<String, dynamic> json) = _$PanierImpl.fromJson;
@@ -627,10 +649,13 @@ abstract class _Panier implements Panier {
   @override
   List<LignePanier> get items;
   @override
+  @JsonKey(fromJson: jsonToDouble)
   double get total;
   @override
+  @JsonKey(name: 'nb_articles')
   int get nbArticles;
   @override
+  @JsonKey(name: 'nb_items')
   int get nbItems;
   @override
   List<Map<String, dynamic>> get producteurs;

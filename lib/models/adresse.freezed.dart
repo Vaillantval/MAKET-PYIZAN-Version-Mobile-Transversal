@@ -24,9 +24,13 @@ mixin _$Adresse {
   String get rue => throw _privateConstructorUsedError;
   String get commune => throw _privateConstructorUsedError;
   String get departement => throw _privateConstructorUsedError;
+  @JsonKey(name: 'section_communale')
   String get sectionCommunale => throw _privateConstructorUsedError;
-  String get telephone => throw _privateConstructorUsedError;
+  String get telephone =>
+      throw _privateConstructorUsedError; // Backend : champ libre 'details' (pas 'instructions')
+  @JsonKey(name: 'details')
   String get instructions => throw _privateConstructorUsedError;
+  @JsonKey(name: 'is_default')
   bool get isDefault => throw _privateConstructorUsedError;
 
   /// Serializes this Adresse to a JSON map.
@@ -48,10 +52,10 @@ abstract class $AdresseCopyWith<$Res> {
       String rue,
       String commune,
       String departement,
-      String sectionCommunale,
+      @JsonKey(name: 'section_communale') String sectionCommunale,
       String telephone,
-      String instructions,
-      bool isDefault});
+      @JsonKey(name: 'details') String instructions,
+      @JsonKey(name: 'is_default') bool isDefault});
 }
 
 /// @nodoc
@@ -127,10 +131,10 @@ abstract class _$$AdresseImplCopyWith<$Res> implements $AdresseCopyWith<$Res> {
       String rue,
       String commune,
       String departement,
-      String sectionCommunale,
+      @JsonKey(name: 'section_communale') String sectionCommunale,
       String telephone,
-      String instructions,
-      bool isDefault});
+      @JsonKey(name: 'details') String instructions,
+      @JsonKey(name: 'is_default') bool isDefault});
 }
 
 /// @nodoc
@@ -200,10 +204,10 @@ class _$AdresseImpl implements _Adresse {
       required this.rue,
       required this.commune,
       required this.departement,
-      this.sectionCommunale = '',
+      @JsonKey(name: 'section_communale') this.sectionCommunale = '',
       this.telephone = '',
-      this.instructions = '',
-      this.isDefault = false});
+      @JsonKey(name: 'details') this.instructions = '',
+      @JsonKey(name: 'is_default') this.isDefault = false});
 
   factory _$AdresseImpl.fromJson(Map<String, dynamic> json) =>
       _$$AdresseImplFromJson(json);
@@ -217,16 +221,17 @@ class _$AdresseImpl implements _Adresse {
   @override
   final String departement;
   @override
-  @JsonKey()
+  @JsonKey(name: 'section_communale')
   final String sectionCommunale;
   @override
   @JsonKey()
   final String telephone;
+// Backend : champ libre 'details' (pas 'instructions')
   @override
-  @JsonKey()
+  @JsonKey(name: 'details')
   final String instructions;
   @override
-  @JsonKey()
+  @JsonKey(name: 'is_default')
   final bool isDefault;
 
   @override
@@ -281,10 +286,10 @@ abstract class _Adresse implements Adresse {
       required final String rue,
       required final String commune,
       required final String departement,
-      final String sectionCommunale,
+      @JsonKey(name: 'section_communale') final String sectionCommunale,
       final String telephone,
-      final String instructions,
-      final bool isDefault}) = _$AdresseImpl;
+      @JsonKey(name: 'details') final String instructions,
+      @JsonKey(name: 'is_default') final bool isDefault}) = _$AdresseImpl;
 
   factory _Adresse.fromJson(Map<String, dynamic> json) = _$AdresseImpl.fromJson;
 
@@ -297,12 +302,15 @@ abstract class _Adresse implements Adresse {
   @override
   String get departement;
   @override
+  @JsonKey(name: 'section_communale')
   String get sectionCommunale;
   @override
-  String get telephone;
+  String get telephone; // Backend : champ libre 'details' (pas 'instructions')
   @override
+  @JsonKey(name: 'details')
   String get instructions;
   @override
+  @JsonKey(name: 'is_default')
   bool get isDefault;
 
   /// Create a copy of Adresse

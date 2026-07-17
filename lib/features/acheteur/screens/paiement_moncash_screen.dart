@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../shared/widgets/logo_paiement.dart';
 
 class PaiementMoncashScreen extends StatefulWidget {
   final String redirectUrl;
@@ -60,7 +61,14 @@ class _PaiementMoncashScreenState
   @override
   Widget build(BuildContext context) => Scaffold(
     appBar: AppBar(
-      title: const Text('Paiement MonCash'),
+      title: const Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          LogoPaiement('moncash', taille: 24),
+          SizedBox(width: 10),
+          Text('Paiement MonCash'),
+        ],
+      ),
       leading: IconButton(
         icon: const Icon(Icons.close),
         onPressed: () => showDialog(

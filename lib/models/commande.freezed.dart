@@ -20,16 +20,27 @@ Commande _$CommandeFromJson(Map<String, dynamic> json) {
 
 /// @nodoc
 mixin _$Commande {
-  String get numeroCommande => throw _privateConstructorUsedError;
+  @JsonKey(name: 'numero_commande')
+  String get numeroCommande =>
+      throw _privateConstructorUsedError; // Le backend expose 'producteur_nom' (pas d'objet 'producteur') sur
+// les listes acheteur/producteur (CommandeProducteurSerializer).
+  @JsonKey(name: 'producteur_nom')
   String get producteur => throw _privateConstructorUsedError;
   String get total => throw _privateConstructorUsedError;
   String get statut => throw _privateConstructorUsedError;
+  @JsonKey(name: 'statut_label')
   String get statutLabel => throw _privateConstructorUsedError;
+  @JsonKey(name: 'statut_paiement')
   String get statutPaiement => throw _privateConstructorUsedError;
+  @JsonKey(name: 'methode_paiement')
   String get methodePaiement => throw _privateConstructorUsedError;
+  @JsonKey(name: 'mode_livraison')
   String? get modeLivraison => throw _privateConstructorUsedError;
+  @JsonKey(name: 'adresse_livraison')
   String? get adresseLivraison => throw _privateConstructorUsedError;
+  @JsonKey(name: 'notes_acheteur')
   String? get notesAcheteur => throw _privateConstructorUsedError;
+  @JsonKey(name: 'created_at')
   String? get createdAt => throw _privateConstructorUsedError;
   List<Map<String, dynamic>> get details => throw _privateConstructorUsedError;
 
@@ -49,17 +60,17 @@ abstract class $CommandeCopyWith<$Res> {
       _$CommandeCopyWithImpl<$Res, Commande>;
   @useResult
   $Res call(
-      {String numeroCommande,
-      String producteur,
+      {@JsonKey(name: 'numero_commande') String numeroCommande,
+      @JsonKey(name: 'producteur_nom') String producteur,
       String total,
       String statut,
-      String statutLabel,
-      String statutPaiement,
-      String methodePaiement,
-      String? modeLivraison,
-      String? adresseLivraison,
-      String? notesAcheteur,
-      String? createdAt,
+      @JsonKey(name: 'statut_label') String statutLabel,
+      @JsonKey(name: 'statut_paiement') String statutPaiement,
+      @JsonKey(name: 'methode_paiement') String methodePaiement,
+      @JsonKey(name: 'mode_livraison') String? modeLivraison,
+      @JsonKey(name: 'adresse_livraison') String? adresseLivraison,
+      @JsonKey(name: 'notes_acheteur') String? notesAcheteur,
+      @JsonKey(name: 'created_at') String? createdAt,
       List<Map<String, dynamic>> details});
 }
 
@@ -153,17 +164,17 @@ abstract class _$$CommandeImplCopyWith<$Res>
   @override
   @useResult
   $Res call(
-      {String numeroCommande,
-      String producteur,
+      {@JsonKey(name: 'numero_commande') String numeroCommande,
+      @JsonKey(name: 'producteur_nom') String producteur,
       String total,
       String statut,
-      String statutLabel,
-      String statutPaiement,
-      String methodePaiement,
-      String? modeLivraison,
-      String? adresseLivraison,
-      String? notesAcheteur,
-      String? createdAt,
+      @JsonKey(name: 'statut_label') String statutLabel,
+      @JsonKey(name: 'statut_paiement') String statutPaiement,
+      @JsonKey(name: 'methode_paiement') String methodePaiement,
+      @JsonKey(name: 'mode_livraison') String? modeLivraison,
+      @JsonKey(name: 'adresse_livraison') String? adresseLivraison,
+      @JsonKey(name: 'notes_acheteur') String? notesAcheteur,
+      @JsonKey(name: 'created_at') String? createdAt,
       List<Map<String, dynamic>> details});
 }
 
@@ -250,17 +261,17 @@ class __$$CommandeImplCopyWithImpl<$Res>
 @JsonSerializable()
 class _$CommandeImpl implements _Commande {
   const _$CommandeImpl(
-      {required this.numeroCommande,
-      required this.producteur,
+      {@JsonKey(name: 'numero_commande') required this.numeroCommande,
+      @JsonKey(name: 'producteur_nom') this.producteur = '',
       required this.total,
       required this.statut,
-      required this.statutLabel,
-      required this.statutPaiement,
-      this.methodePaiement = '',
-      this.modeLivraison,
-      this.adresseLivraison,
-      this.notesAcheteur,
-      this.createdAt,
+      @JsonKey(name: 'statut_label') required this.statutLabel,
+      @JsonKey(name: 'statut_paiement') required this.statutPaiement,
+      @JsonKey(name: 'methode_paiement') this.methodePaiement = '',
+      @JsonKey(name: 'mode_livraison') this.modeLivraison,
+      @JsonKey(name: 'adresse_livraison') this.adresseLivraison,
+      @JsonKey(name: 'notes_acheteur') this.notesAcheteur,
+      @JsonKey(name: 'created_at') this.createdAt,
       final List<Map<String, dynamic>> details = const []})
       : _details = details;
 
@@ -268,27 +279,37 @@ class _$CommandeImpl implements _Commande {
       _$$CommandeImplFromJson(json);
 
   @override
+  @JsonKey(name: 'numero_commande')
   final String numeroCommande;
+// Le backend expose 'producteur_nom' (pas d'objet 'producteur') sur
+// les listes acheteur/producteur (CommandeProducteurSerializer).
   @override
+  @JsonKey(name: 'producteur_nom')
   final String producteur;
   @override
   final String total;
   @override
   final String statut;
   @override
+  @JsonKey(name: 'statut_label')
   final String statutLabel;
   @override
+  @JsonKey(name: 'statut_paiement')
   final String statutPaiement;
   @override
-  @JsonKey()
+  @JsonKey(name: 'methode_paiement')
   final String methodePaiement;
   @override
+  @JsonKey(name: 'mode_livraison')
   final String? modeLivraison;
   @override
+  @JsonKey(name: 'adresse_livraison')
   final String? adresseLivraison;
   @override
+  @JsonKey(name: 'notes_acheteur')
   final String? notesAcheteur;
   @override
+  @JsonKey(name: 'created_at')
   final String? createdAt;
   final List<Map<String, dynamic>> _details;
   @override
@@ -367,43 +388,54 @@ class _$CommandeImpl implements _Commande {
 
 abstract class _Commande implements Commande {
   const factory _Commande(
-      {required final String numeroCommande,
-      required final String producteur,
+      {@JsonKey(name: 'numero_commande') required final String numeroCommande,
+      @JsonKey(name: 'producteur_nom') final String producteur,
       required final String total,
       required final String statut,
-      required final String statutLabel,
-      required final String statutPaiement,
-      final String methodePaiement,
-      final String? modeLivraison,
-      final String? adresseLivraison,
-      final String? notesAcheteur,
-      final String? createdAt,
+      @JsonKey(name: 'statut_label') required final String statutLabel,
+      @JsonKey(name: 'statut_paiement') required final String statutPaiement,
+      @JsonKey(name: 'methode_paiement') final String methodePaiement,
+      @JsonKey(name: 'mode_livraison') final String? modeLivraison,
+      @JsonKey(name: 'adresse_livraison') final String? adresseLivraison,
+      @JsonKey(name: 'notes_acheteur') final String? notesAcheteur,
+      @JsonKey(name: 'created_at') final String? createdAt,
       final List<Map<String, dynamic>> details}) = _$CommandeImpl;
 
   factory _Commande.fromJson(Map<String, dynamic> json) =
       _$CommandeImpl.fromJson;
 
   @override
-  String get numeroCommande;
+  @JsonKey(name: 'numero_commande')
+  String
+      get numeroCommande; // Le backend expose 'producteur_nom' (pas d'objet 'producteur') sur
+// les listes acheteur/producteur (CommandeProducteurSerializer).
   @override
+  @JsonKey(name: 'producteur_nom')
   String get producteur;
   @override
   String get total;
   @override
   String get statut;
   @override
+  @JsonKey(name: 'statut_label')
   String get statutLabel;
   @override
+  @JsonKey(name: 'statut_paiement')
   String get statutPaiement;
   @override
+  @JsonKey(name: 'methode_paiement')
   String get methodePaiement;
   @override
+  @JsonKey(name: 'mode_livraison')
   String? get modeLivraison;
   @override
+  @JsonKey(name: 'adresse_livraison')
   String? get adresseLivraison;
   @override
+  @JsonKey(name: 'notes_acheteur')
   String? get notesAcheteur;
   @override
+  @JsonKey(name: 'created_at')
   String? get createdAt;
   @override
   List<Map<String, dynamic>> get details;

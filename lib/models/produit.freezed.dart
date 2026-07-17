@@ -25,18 +25,27 @@ mixin _$Produit {
   String get slug => throw _privateConstructorUsedError;
   String get variete => throw _privateConstructorUsedError;
   String get description => throw _privateConstructorUsedError;
+  @JsonKey(name: 'prix_unitaire')
   String get prixUnitaire => throw _privateConstructorUsedError;
+  @JsonKey(name: 'prix_gros')
   String? get prixGros => throw _privateConstructorUsedError;
+  @JsonKey(name: 'unite_vente')
   String get uniteVente => throw _privateConstructorUsedError;
+  @JsonKey(name: 'unite_vente_label')
   String get uniteVenteLabel => throw _privateConstructorUsedError;
+  @JsonKey(name: 'quantite_min_commande')
   int get quantiteMinCommande => throw _privateConstructorUsedError;
+  @JsonKey(name: 'stock_reel')
   int get stockReel => throw _privateConstructorUsedError;
+  @JsonKey(name: 'is_featured')
   bool get isFeatured => throw _privateConstructorUsedError;
+  @JsonKey(name: 'image_principale')
   String? get imagePrincipale => throw _privateConstructorUsedError;
   Map<String, dynamic>? get categorie => throw _privateConstructorUsedError;
   Map<String, dynamic>? get producteur => throw _privateConstructorUsedError;
   String get origine => throw _privateConstructorUsedError;
   String get saison => throw _privateConstructorUsedError;
+  @JsonKey(name: 'created_at')
   String? get createdAt => throw _privateConstructorUsedError;
 
   /// Serializes this Produit to a JSON map.
@@ -59,19 +68,19 @@ abstract class $ProduitCopyWith<$Res> {
       String slug,
       String variete,
       String description,
-      String prixUnitaire,
-      String? prixGros,
-      String uniteVente,
-      String uniteVenteLabel,
-      int quantiteMinCommande,
-      int stockReel,
-      bool isFeatured,
-      String? imagePrincipale,
+      @JsonKey(name: 'prix_unitaire') String prixUnitaire,
+      @JsonKey(name: 'prix_gros') String? prixGros,
+      @JsonKey(name: 'unite_vente') String uniteVente,
+      @JsonKey(name: 'unite_vente_label') String uniteVenteLabel,
+      @JsonKey(name: 'quantite_min_commande') int quantiteMinCommande,
+      @JsonKey(name: 'stock_reel') int stockReel,
+      @JsonKey(name: 'is_featured') bool isFeatured,
+      @JsonKey(name: 'image_principale') String? imagePrincipale,
       Map<String, dynamic>? categorie,
       Map<String, dynamic>? producteur,
       String origine,
       String saison,
-      String? createdAt});
+      @JsonKey(name: 'created_at') String? createdAt});
 }
 
 /// @nodoc
@@ -198,19 +207,19 @@ abstract class _$$ProduitImplCopyWith<$Res> implements $ProduitCopyWith<$Res> {
       String slug,
       String variete,
       String description,
-      String prixUnitaire,
-      String? prixGros,
-      String uniteVente,
-      String uniteVenteLabel,
-      int quantiteMinCommande,
-      int stockReel,
-      bool isFeatured,
-      String? imagePrincipale,
+      @JsonKey(name: 'prix_unitaire') String prixUnitaire,
+      @JsonKey(name: 'prix_gros') String? prixGros,
+      @JsonKey(name: 'unite_vente') String uniteVente,
+      @JsonKey(name: 'unite_vente_label') String uniteVenteLabel,
+      @JsonKey(name: 'quantite_min_commande') int quantiteMinCommande,
+      @JsonKey(name: 'stock_reel') int stockReel,
+      @JsonKey(name: 'is_featured') bool isFeatured,
+      @JsonKey(name: 'image_principale') String? imagePrincipale,
       Map<String, dynamic>? categorie,
       Map<String, dynamic>? producteur,
       String origine,
       String saison,
-      String? createdAt});
+      @JsonKey(name: 'created_at') String? createdAt});
 }
 
 /// @nodoc
@@ -331,19 +340,19 @@ class _$ProduitImpl implements _Produit {
       required this.slug,
       this.variete = '',
       this.description = '',
-      required this.prixUnitaire,
-      this.prixGros,
-      required this.uniteVente,
-      required this.uniteVenteLabel,
-      this.quantiteMinCommande = 1,
-      this.stockReel = 0,
-      this.isFeatured = false,
-      this.imagePrincipale,
+      @JsonKey(name: 'prix_unitaire') required this.prixUnitaire,
+      @JsonKey(name: 'prix_gros') this.prixGros,
+      @JsonKey(name: 'unite_vente') required this.uniteVente,
+      @JsonKey(name: 'unite_vente_label') required this.uniteVenteLabel,
+      @JsonKey(name: 'quantite_min_commande') this.quantiteMinCommande = 1,
+      @JsonKey(name: 'stock_reel') this.stockReel = 0,
+      @JsonKey(name: 'is_featured') this.isFeatured = false,
+      @JsonKey(name: 'image_principale') this.imagePrincipale,
       final Map<String, dynamic>? categorie,
       final Map<String, dynamic>? producteur,
       this.origine = '',
       this.saison = '',
-      this.createdAt})
+      @JsonKey(name: 'created_at') this.createdAt})
       : _categorie = categorie,
         _producteur = producteur;
 
@@ -363,23 +372,28 @@ class _$ProduitImpl implements _Produit {
   @JsonKey()
   final String description;
   @override
+  @JsonKey(name: 'prix_unitaire')
   final String prixUnitaire;
   @override
+  @JsonKey(name: 'prix_gros')
   final String? prixGros;
   @override
+  @JsonKey(name: 'unite_vente')
   final String uniteVente;
   @override
+  @JsonKey(name: 'unite_vente_label')
   final String uniteVenteLabel;
   @override
-  @JsonKey()
+  @JsonKey(name: 'quantite_min_commande')
   final int quantiteMinCommande;
   @override
-  @JsonKey()
+  @JsonKey(name: 'stock_reel')
   final int stockReel;
   @override
-  @JsonKey()
+  @JsonKey(name: 'is_featured')
   final bool isFeatured;
   @override
+  @JsonKey(name: 'image_principale')
   final String? imagePrincipale;
   final Map<String, dynamic>? _categorie;
   @override
@@ -408,6 +422,7 @@ class _$ProduitImpl implements _Produit {
   @JsonKey()
   final String saison;
   @override
+  @JsonKey(name: 'created_at')
   final String? createdAt;
 
   @override
@@ -498,19 +513,19 @@ abstract class _Produit implements Produit {
       required final String slug,
       final String variete,
       final String description,
-      required final String prixUnitaire,
-      final String? prixGros,
-      required final String uniteVente,
-      required final String uniteVenteLabel,
-      final int quantiteMinCommande,
-      final int stockReel,
-      final bool isFeatured,
-      final String? imagePrincipale,
+      @JsonKey(name: 'prix_unitaire') required final String prixUnitaire,
+      @JsonKey(name: 'prix_gros') final String? prixGros,
+      @JsonKey(name: 'unite_vente') required final String uniteVente,
+      @JsonKey(name: 'unite_vente_label') required final String uniteVenteLabel,
+      @JsonKey(name: 'quantite_min_commande') final int quantiteMinCommande,
+      @JsonKey(name: 'stock_reel') final int stockReel,
+      @JsonKey(name: 'is_featured') final bool isFeatured,
+      @JsonKey(name: 'image_principale') final String? imagePrincipale,
       final Map<String, dynamic>? categorie,
       final Map<String, dynamic>? producteur,
       final String origine,
       final String saison,
-      final String? createdAt}) = _$ProduitImpl;
+      @JsonKey(name: 'created_at') final String? createdAt}) = _$ProduitImpl;
 
   factory _Produit.fromJson(Map<String, dynamic> json) = _$ProduitImpl.fromJson;
 
@@ -525,20 +540,28 @@ abstract class _Produit implements Produit {
   @override
   String get description;
   @override
+  @JsonKey(name: 'prix_unitaire')
   String get prixUnitaire;
   @override
+  @JsonKey(name: 'prix_gros')
   String? get prixGros;
   @override
+  @JsonKey(name: 'unite_vente')
   String get uniteVente;
   @override
+  @JsonKey(name: 'unite_vente_label')
   String get uniteVenteLabel;
   @override
+  @JsonKey(name: 'quantite_min_commande')
   int get quantiteMinCommande;
   @override
+  @JsonKey(name: 'stock_reel')
   int get stockReel;
   @override
+  @JsonKey(name: 'is_featured')
   bool get isFeatured;
   @override
+  @JsonKey(name: 'image_principale')
   String? get imagePrincipale;
   @override
   Map<String, dynamic>? get categorie;
@@ -549,6 +572,7 @@ abstract class _Produit implements Produit {
   @override
   String get saison;
   @override
+  @JsonKey(name: 'created_at')
   String? get createdAt;
 
   /// Create a copy of Produit

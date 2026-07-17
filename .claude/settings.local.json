@@ -29,7 +29,9 @@
       "PowerShell(npm *)",
       "PowerShell(firebase *)",
       "PowerShell(Get-PnpDevice *)",
-      "Bash(gh auth *)"
+      "Bash(gh auth *)",
+      "Bash(curl -sIL \"https://github.com/Vaillantval/MAKET-PYIZAN-Version-Mobile-Transversal/releases/latest/download/maket-peyizan.apk\")",
+      "PowerShell(& \"C:\\\\Users\\\\Tech\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\C--Users-Tech-Desktop-Ing-Vaillant-MAKET-PYIZAN-Version-Mobile-Transversal\\\\63d1da07-5c2e-419a-894a-c6117b6ed7c0\\\\scratchpad\\\\gen_icons.ps1\")"
     ]
   }
 }

@@ -1,4 +1,6 @@
+// ignore_for_file: invalid_annotation_target
 import 'package:freezed_annotation/freezed_annotation.dart';
+import '../core/utils/json_converters.dart';
 
 part 'panier.freezed.dart';
 part 'panier.g.dart';
@@ -10,13 +12,13 @@ class LignePanier with _$LignePanier {
     required String slug,
     required String nom,
     required int    quantite,
-    required String prixUnitaire,
-    required double sousTotal,
-    required String uniteVente,
-    required int    producteurId,
-    required String producteurNom,
+    @JsonKey(name: 'prix_unitaire')  required String prixUnitaire,
+    @JsonKey(name: 'sous_total', fromJson: jsonToDouble) required double sousTotal,
+    @JsonKey(name: 'unite_vente')    required String uniteVente,
+    @JsonKey(name: 'producteur_id')  required int producteurId,
+    @JsonKey(name: 'producteur_nom') required String producteurNom,
     String? image,
-    @Default(0) int stockReel,
+    @JsonKey(name: 'stock_reel')     @Default(0) int stockReel,
   }) = _LignePanier;
 
   factory LignePanier.fromJson(Map<String, dynamic> json) =>
@@ -27,9 +29,9 @@ class LignePanier with _$LignePanier {
 class Panier with _$Panier {
   const factory Panier({
     @Default([]) List<LignePanier> items,
-    @Default(0.0) double total,
-    @Default(0) int nbArticles,
-    @Default(0) int nbItems,
+    @JsonKey(fromJson: jsonToDouble) @Default(0.0) double total,
+    @JsonKey(name: 'nb_articles') @Default(0) int nbArticles,
+    @JsonKey(name: 'nb_items')    @Default(0) int nbItems,
     @Default([]) List<Map<String, dynamic>> producteurs,
   }) = _Panier;
 
