@@ -57,11 +57,10 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                   decoration: BoxDecoration(
                     color: AppColors.jaune,
                     borderRadius: BorderRadius.circular(50),
-                  ),
-                  child: const Icon(
-                    Icons.agriculture,
-                    size:  60,
-                    color: AppColors.vertFonce,
+                    image: const DecorationImage(
+                      image: AssetImage('assets/images/maketpeyizan.jpeg'),
+                      fit: BoxFit.cover,
+                    ),
                   ),
                 ),
                 const SizedBox(height: 24),

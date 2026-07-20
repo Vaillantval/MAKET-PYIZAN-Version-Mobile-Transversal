@@ -69,11 +69,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         decoration: BoxDecoration(
                           color:        AppColors.vertFonce,
                           borderRadius: BorderRadius.circular(40),
-                        ),
-                        child: const Icon(
-                          Icons.agriculture,
-                          size:  48,
-                          color: AppColors.jaune,
+                          image: const DecorationImage(
+                            image: AssetImage('assets/images/maketpeyizan.jpeg'),
+                            fit: BoxFit.cover,
+                          ),
                         ),
                       ),
                       const SizedBox(height: 16),
