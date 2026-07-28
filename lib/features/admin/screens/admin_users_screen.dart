@@ -112,7 +112,7 @@ class _AdminUsersScreenState
                         borderRadius: BorderRadius.circular(12),
                         boxShadow: [
                           BoxShadow(
-                            color:     Colors.black.withOpacity(0.04),
+                            color:     Colors.black.withValues(alpha: 0.04),
                             blurRadius: 5,
                           ),
                         ],
@@ -167,7 +167,7 @@ class _AdminUsersScreenState
                             onChanged: (_) => ref
                                 .read(adminUsersProvider.notifier)
                                 .toggle(u['id'] as int),
-                            activeColor: AppColors.vertVif,
+                            activeThumbColor: AppColors.vertVif,
                           ),
                         ],
                       ),

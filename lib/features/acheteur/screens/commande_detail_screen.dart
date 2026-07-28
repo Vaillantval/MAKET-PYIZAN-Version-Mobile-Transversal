@@ -129,9 +129,9 @@ class CommandeDetailScreen extends ConsumerWidget {
                     crossAxisAlignment:
                         CrossAxisAlignment.start,
                     children: [
-                      Text(
+                      const Text(
                         '🌾 Producteur',
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w700,
                           color: AppColors.vertFonce,
@@ -147,9 +147,9 @@ class CommandeDetailScreen extends ConsumerWidget {
                       ),
                       if (commande.details.isNotEmpty) ...[
                         const SizedBox(height: 16),
-                        Text(
+                        const Text(
                           'Articles',
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w700,
                             color: AppColors.vertFonce,

@@ -108,11 +108,11 @@ class _AlertesList extends StatelessWidget {
             color:        Colors.white,
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              color: niveauColor.withOpacity(0.3),
+              color: niveauColor.withValues(alpha: 0.3),
             ),
             boxShadow: [
               BoxShadow(
-                color:     Colors.black.withOpacity(0.05),
+                color:     Colors.black.withValues(alpha: 0.05),
                 blurRadius: 6,
               ),
             ],
@@ -162,7 +162,7 @@ class _AlertesList extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(
                     horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                  color:        niveauColor.withOpacity(0.1),
+                  color:        niveauColor.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
@@ -212,7 +212,7 @@ class _LotsList extends StatelessWidget {
             borderRadius: BorderRadius.circular(12),
             boxShadow: [
               BoxShadow(
-                color:     Colors.black.withOpacity(0.05),
+                color:     Colors.black.withValues(alpha: 0.05),
                 blurRadius: 6,
               ),
             ],

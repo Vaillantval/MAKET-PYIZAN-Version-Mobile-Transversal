@@ -199,10 +199,10 @@ class AccueilScreen extends ConsumerWidget {
                   ),
 
                   // ── Catégories ───────────────────────────────
-                  SliverToBoxAdapter(
+                  const SliverToBoxAdapter(
                     child: Padding(
-                      padding: const EdgeInsets.fromLTRB(16, 20, 16, 8),
-                      child: const Text(
+                      padding: EdgeInsets.fromLTRB(16, 20, 16, 8),
+                      child: Text(
                         'Catégories',
                         style: TextStyle(
                           fontSize: 17, fontWeight: FontWeight.w800,

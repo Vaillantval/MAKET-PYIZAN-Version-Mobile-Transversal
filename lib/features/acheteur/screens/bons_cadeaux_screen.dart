@@ -118,7 +118,7 @@ class _BonsCadeauxScreenState
               final ok = await ref
                   .read(walletProvider.notifier)
                   .encaisserBon(code);
-              if (!mounted) return;
+              if (!context.mounted) return;
               ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                 content: Text(ok
                     ? '✅ Bon encaissé — solde mis à jour !'

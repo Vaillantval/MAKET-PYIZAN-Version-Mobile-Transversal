@@ -234,8 +234,7 @@ class ProduitDetailScreen extends ConsumerWidget {
                     ),
 
                     // Description
-                    if (produit.description != null &&
-                        produit.description!.isNotEmpty)
+                    if (produit.description.isNotEmpty)
                       Container(
                         padding: const EdgeInsets.all(16),
                         margin: const EdgeInsets.symmetric(
@@ -257,7 +256,7 @@ class ProduitDetailScreen extends ConsumerWidget {
                               )),
                             const SizedBox(height: 8),
                             Text(
-                              produit.description!,
+                              produit.description,
                               style: const TextStyle(
                                 fontSize: 13,
                                 color: AppColors.grisTexte,

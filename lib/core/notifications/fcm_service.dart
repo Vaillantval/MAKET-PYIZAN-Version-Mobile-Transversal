@@ -30,7 +30,9 @@ class FcmService {
     );
 
     if (settings.authorizationStatus !=
-        AuthorizationStatus.authorized) return;
+        AuthorizationStatus.authorized) {
+      return;
+    }
 
     // Récupérer le token device
     final token = await _messaging.getToken();

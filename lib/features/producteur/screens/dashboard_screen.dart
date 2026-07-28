@@ -75,7 +75,7 @@ class DashboardProducteurScreen extends ConsumerWidget {
                                 ),
                                 CircleAvatar(
                                   backgroundColor:
-                                      Colors.white.withOpacity(0.15),
+                                      Colors.white.withValues(alpha: 0.15),
                                   child: Text(
                                     (user?.firstName ?? '?')[0]
                                         .toUpperCase(),
@@ -96,7 +96,7 @@ class DashboardProducteurScreen extends ConsumerWidget {
                                 padding: const EdgeInsets.all(16),
                                 decoration: BoxDecoration(
                                   color:        Colors.white
-                                      .withOpacity(0.12),
+                                      .withValues(alpha: 0.12),
                                   borderRadius:
                                       BorderRadius.circular(12),
                                 ),
@@ -159,10 +159,10 @@ class DashboardProducteurScreen extends ConsumerWidget {
                     ),
 
                     // ── Stats Commandes ───────────────────────
-                    SliverToBoxAdapter(
+                    const SliverToBoxAdapter(
                       child: Padding(
-                        padding: const EdgeInsets.fromLTRB(16, 20, 16, 8),
-                        child: const Text(
+                        padding: EdgeInsets.fromLTRB(16, 20, 16, 8),
+                        child: Text(
                           '🧾 Commandes',
                           style: TextStyle(
                             fontSize:   16,
@@ -228,10 +228,10 @@ class DashboardProducteurScreen extends ConsumerWidget {
                     ),
 
                     // ── Stats Produits & Stock ─────────────────
-                    SliverToBoxAdapter(
+                    const SliverToBoxAdapter(
                       child: Padding(
-                        padding: const EdgeInsets.fromLTRB(16, 20, 16, 8),
-                        child: const Text(
+                        padding: EdgeInsets.fromLTRB(16, 20, 16, 8),
+                        child: Text(
                           '🥬 Produits & Stock',
                           style: TextStyle(
                             fontSize:   16,
@@ -362,7 +362,7 @@ class _ActionBtn extends StatelessWidget {
       decoration: BoxDecoration(
         color:        AppColors.vertMenthe,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.vertVif.withOpacity(0.3)),
+        border: Border.all(color: AppColors.vertVif.withValues(alpha: 0.3)),
       ),
       child: Column(
         children: [

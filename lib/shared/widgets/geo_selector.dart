@@ -206,7 +206,7 @@ class _GeoSelectorState extends ConsumerState<GeoSelector> {
     required ValueChanged<T?>          onChanged,
     bool                               enabled = true,
   }) => DropdownButtonFormField<T>(
-    value:       value,
+    initialValue: value,
     items:       items,
     onChanged:   enabled ? onChanged : null,
     isExpanded:  true,

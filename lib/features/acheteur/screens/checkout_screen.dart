@@ -176,98 +176,94 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
             // ── Méthode de paiement ──────────────────────────
             _Section(
               titre: '💳 Méthode de paiement',
-              child: Column(
-                children: [
-                  for (final m in [
-                    ('cash',      'Espèces'),
-                    ('moncash',   'MonCash'),
-                    ('hors_ligne','Virement / Dépôt'),
-                  ])
-                    RadioListTile<String>(
-                      value:      m.$1,
-                      groupValue: _methodePaiement,
-                      title: Row(
-                        children: [
-                          LogoPaiement(m.$1),
-                          const SizedBox(width: 10),
-                          Text(m.$2),
-                        ],
+              child: RadioGroup<String>(
+                groupValue: _methodePaiement,
+                onChanged: (v) => setState(() {
+                  _methodePaiement = v!;
+                  _walletHybride   = false;
+                }),
+                child: Column(
+                  children: [
+                    for (final m in [
+                      ('cash',      'Espèces'),
+                      ('moncash',   'MonCash'),
+                      ('hors_ligne','Virement / Dépôt'),
+                    ])
+                      RadioListTile<String>(
+                        value: m.$1,
+                        title: Row(
+                          children: [
+                            LogoPaiement(m.$1),
+                            const SizedBox(width: 10),
+                            Text(m.$2),
+                          ],
+                        ),
+                        activeColor: AppColors.vertVif,
+                        contentPadding: EdgeInsets.zero,
                       ),
-                      activeColor: AppColors.vertVif,
-                      onChanged: (v) => setState(() {
-                        _methodePaiement = v!;
-                        _walletHybride   = false;
-                      }),
-                      contentPadding: EdgeInsets.zero,
-                    ),
 
-                  // ── Portefeuille (online + actif uniquement) ──
-                  if (walletDisponible)
-                    RadioListTile<String>(
-                      value:      'wallet',
-                      groupValue: _methodePaiement,
-                      title: Row(
-                        children: [
-                          const LogoPaiement('wallet'),
-                          const SizedBox(width: 10),
-                          Expanded(
-                            child: Text(
-                              'Portefeuille — solde : ${FormatUtils.htg(soldeWallet)}',
-                              style: TextStyle(
-                                color: walletCouvreTout ? null : AppColors.grisTexte,
+                    // ── Portefeuille (online + actif uniquement) ──
+                    if (walletDisponible)
+                      RadioListTile<String>(
+                        value: 'wallet',
+                        title: Row(
+                          children: [
+                            const LogoPaiement('wallet'),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: Text(
+                                'Portefeuille — solde : ${FormatUtils.htg(soldeWallet)}',
+                                style: TextStyle(
+                                  color: walletCouvreTout ? null : AppColors.grisTexte,
+                                ),
                               ),
                             ),
-                          ),
-                        ],
-                      ),
-                      activeColor: AppColors.vertVif,
-                      onChanged: walletCouvreTout
-                          ? (v) => setState(() {
-                                _methodePaiement = v!;
-                                _walletHybride   = false;
-                              })
-                          : null,
-                      contentPadding: EdgeInsets.zero,
-                    ),
-                  if (walletDisponible && soldeWallet == 0)
-                    Padding(
-                      padding: const EdgeInsets.only(left: 12, bottom: 4),
-                      child: Row(
-                        children: [
-                          const Text(
-                            'Portefeuille vide.',
-                            style: TextStyle(fontSize: 12, color: AppColors.grisTexte),
-                          ),
-                          TextButton(
-                            onPressed: () =>
-                                context.push('/acheteur/wallet/recharge'),
-                            child: const Text('Recharger',
-                                style: TextStyle(fontSize: 12)),
-                          ),
-                        ],
-                      ),
-                    ),
-
-                  // ── Paiement hybride : solde partiel + méthode principale ──
-                  if (walletPartiel && _methodePaiement != 'wallet')
-                    Padding(
-                      padding: const EdgeInsets.only(top: 4),
-                      child: CheckboxListTile(
-                        value: _walletHybride,
-                        onChanged: (v) =>
-                            setState(() => _walletHybride = v ?? false),
+                          ],
+                        ),
                         activeColor: AppColors.vertVif,
-                        controlAffinity: ListTileControlAffinity.leading,
+                        enabled: walletCouvreTout,
                         contentPadding: EdgeInsets.zero,
-                        title: Text(
-                          'Utiliser mon solde (${FormatUtils.htg(soldeWallet)}) et payer '
-                          'le reste (${FormatUtils.htg(total - soldeWallet)}) '
-                          'en ${_libelleMethode(_methodePaiement)}',
-                          style: const TextStyle(fontSize: 13),
+                      ),
+                    if (walletDisponible && soldeWallet == 0)
+                      Padding(
+                        padding: const EdgeInsets.only(left: 12, bottom: 4),
+                        child: Row(
+                          children: [
+                            const Text(
+                              'Portefeuille vide.',
+                              style: TextStyle(fontSize: 12, color: AppColors.grisTexte),
+                            ),
+                            TextButton(
+                              onPressed: () =>
+                                  context.push('/acheteur/wallet/recharge'),
+                              child: const Text('Recharger',
+                                  style: TextStyle(fontSize: 12)),
+                            ),
+                          ],
                         ),
                       ),
-                    ),
-                ],
+
+                    // ── Paiement hybride : solde partiel + méthode principale ──
+                    if (walletPartiel && _methodePaiement != 'wallet')
+                      Padding(
+                        padding: const EdgeInsets.only(top: 4),
+                        child: CheckboxListTile(
+                          value: _walletHybride,
+                          onChanged: (v) =>
+                              setState(() => _walletHybride = v ?? false),
+                          activeColor: AppColors.vertVif,
+                          controlAffinity: ListTileControlAffinity.leading,
+                          contentPadding: EdgeInsets.zero,
+                          title: Text(
+                            'Utiliser mon solde (${FormatUtils.htg(soldeWallet)}) et payer '
+                            'le reste (${FormatUtils.htg(total - soldeWallet)}) '
+                            'en ${_libelleMethode(_methodePaiement)}',
+                            style: const TextStyle(fontSize: 13),
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
               ),
             ),
             const SizedBox(height: 16),
@@ -275,23 +271,24 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
             // ── Mode de livraison ────────────────────────────
             _Section(
               titre: '🚚 Mode de livraison',
-              child: Column(
-                children: [
-                  for (final m in [
-                    ('domicile', '🏠 Livraison à domicile'),
-                    ('retrait',  '🌾 Retrait chez le producteur'),
-                    ('collecte', '📦 Point de collecte'),
-                  ])
-                    RadioListTile<String>(
-                      value:      m.$1,
-                      groupValue: _modeLivraison,
-                      title:      Text(m.$2),
-                      activeColor: AppColors.vertVif,
-                      onChanged: (v) =>
-                          setState(() => _modeLivraison = v!),
-                      contentPadding: EdgeInsets.zero,
-                    ),
-                ],
+              child: RadioGroup<String>(
+                groupValue: _modeLivraison,
+                onChanged: (v) => setState(() => _modeLivraison = v!),
+                child: Column(
+                  children: [
+                    for (final m in [
+                      ('domicile', '🏠 Livraison à domicile'),
+                      ('retrait',  '🌾 Retrait chez le producteur'),
+                      ('collecte', '📦 Point de collecte'),
+                    ])
+                      RadioListTile<String>(
+                        value: m.$1,
+                        title: Text(m.$2),
+                        activeColor: AppColors.vertVif,
+                        contentPadding: EdgeInsets.zero,
+                      ),
+                  ],
+                ),
               ),
             ),
             const SizedBox(height: 16),
@@ -316,17 +313,18 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                         ],
                       );
                     }
-                    return Column(
-                      children: adresses.map((a) => RadioListTile<int>(
-                        value:      a.id,
-                        groupValue: _adresseId ?? adresses.first.id,
-                        title:      Text('${a.rue}, ${a.commune}'),
-                        subtitle:   Text(a.departement),
-                        activeColor: AppColors.vertVif,
-                        onChanged: (v) =>
-                            setState(() => _adresseId = v),
-                        contentPadding: EdgeInsets.zero,
-                      )).toList(),
+                    return RadioGroup<int>(
+                      groupValue: _adresseId ?? adresses.first.id,
+                      onChanged: (v) => setState(() => _adresseId = v),
+                      child: Column(
+                        children: adresses.map((a) => RadioListTile<int>(
+                          value:    a.id,
+                          title:    Text('${a.rue}, ${a.commune}'),
+                          subtitle: Text(a.departement),
+                          activeColor: AppColors.vertVif,
+                          contentPadding: EdgeInsets.zero,
+                        )).toList(),
+                      ),
                     );
                   },
                 ),

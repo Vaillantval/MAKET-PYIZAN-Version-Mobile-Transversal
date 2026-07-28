@@ -61,7 +61,7 @@ class MesProduitsScreen extends ConsumerWidget {
                     borderRadius: BorderRadius.circular(12),
                     boxShadow: [
                       BoxShadow(
-                        color:     Colors.black.withOpacity(0.05),
+                        color:     Colors.black.withValues(alpha: 0.05),
                         blurRadius: 6,
                       ),
                     ],
@@ -202,9 +202,9 @@ class _StockBadge extends StatelessWidget {
       padding: const EdgeInsets.symmetric(
           horizontal: 8, vertical: 3),
       decoration: BoxDecoration(
-        color:        color.withOpacity(0.12),
+        color:        color.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(6),
-        border:       Border.all(color: color.withOpacity(0.3)),
+        border:       Border.all(color: color.withValues(alpha: 0.3)),
       ),
       child: Text(
         label,

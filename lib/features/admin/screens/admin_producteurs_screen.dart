@@ -101,7 +101,7 @@ class _ProducteursList extends ConsumerWidget {
                   borderRadius: BorderRadius.circular(12),
                   boxShadow: [
                     BoxShadow(
-                      color:     Colors.black.withOpacity(0.05),
+                      color:     Colors.black.withValues(alpha: 0.05),
                       blurRadius: 6,
                     ),
                   ],
@@ -244,9 +244,9 @@ class _StatutBadge extends StatelessWidget {
       padding: const EdgeInsets.symmetric(
           horizontal: 8, vertical: 3),
       decoration: BoxDecoration(
-        color:        color.withOpacity(0.12),
+        color:        color.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(20),
-        border:       Border.all(color: color.withOpacity(0.3)),
+        border:       Border.all(color: color.withValues(alpha: 0.3)),
       ),
       child: Text(label,
         style: TextStyle(
@@ -268,8 +268,8 @@ class _ActionChip extends StatelessWidget {
   Widget build(BuildContext context) => ActionChip(
     label:       Text(label),
     onPressed:   onTap,
-    backgroundColor: color.withOpacity(0.1),
-    side:        BorderSide(color: color.withOpacity(0.3)),
+    backgroundColor: color.withValues(alpha: 0.1),
+    side:        BorderSide(color: color.withValues(alpha: 0.3)),
     labelStyle:  TextStyle(
       color: color, fontWeight: FontWeight.w600, fontSize: 12,
     ),

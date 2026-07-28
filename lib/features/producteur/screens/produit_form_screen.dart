@@ -142,7 +142,7 @@ class _ProduitFormScreenState extends ConsumerState<ProduitFormScreen> {
                     color:        AppColors.vertMenthe,
                     borderRadius: BorderRadius.circular(12),
                     border:       Border.all(
-                      color: AppColors.vertVif.withOpacity(0.3),
+                      color: AppColors.vertVif.withValues(alpha: 0.3),
                     ),
                   ),
                   child: _imageFile != null
@@ -226,7 +226,7 @@ class _ProduitFormScreenState extends ConsumerState<ProduitFormScreen> {
                 const SizedBox(width: 12),
                 Expanded(
                   child: DropdownButtonFormField<String>(
-                    value:    _uniteVente,
+                    initialValue: _uniteVente,
                     items:    _unites.map((u) => DropdownMenuItem(
                       value: u.$1,
                       child: Text(u.$2,

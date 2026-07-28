@@ -44,7 +44,7 @@ class CollectesTerrainScreen extends ConsumerWidget {
                   borderRadius: BorderRadius.circular(14),
                   boxShadow: [
                     BoxShadow(
-                      color:     Colors.black.withOpacity(0.05),
+                      color:     Colors.black.withValues(alpha: 0.05),
                       blurRadius: 8,
                     ),
                   ],
@@ -161,9 +161,9 @@ class _StatutBadge extends StatelessWidget {
       padding: const EdgeInsets.symmetric(
           horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
-        color:        color.withOpacity(0.12),
+        color:        color.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(20),
-        border:       Border.all(color: color.withOpacity(0.3)),
+        border:       Border.all(color: color.withValues(alpha: 0.3)),
       ),
       child: Text(label,
         style: TextStyle(

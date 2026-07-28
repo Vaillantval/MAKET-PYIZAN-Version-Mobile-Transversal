@@ -32,9 +32,10 @@ class _MaketPeyizanAppState
 
     // Tap notification depuis background → naviguer
     FirebaseMessaging.onMessageOpenedApp.listen((message) {
+      if (!mounted) return;
       final ctx = ref.read(routerProvider)
           .routerDelegate.navigatorKey.currentContext;
-      if (ctx != null) {
+      if (ctx != null && ctx.mounted) {
         NotificationHandler.handle(message, ctx);
       }
     });

@@ -133,12 +133,12 @@ class AdminDashboardScreen extends ConsumerWidget {
                                 padding: const EdgeInsets.all(16),
                                 decoration: BoxDecoration(
                                   color:        Colors.white
-                                      .withOpacity(0.1),
+                                      .withValues(alpha: 0.1),
                                   borderRadius:
                                       BorderRadius.circular(12),
                                   border: Border.all(
                                     color: Colors.white
-                                        .withOpacity(0.2),
+                                        .withValues(alpha: 0.2),
                                   ),
                                 ),
                                 child: Row(
@@ -171,26 +171,30 @@ class AdminDashboardScreen extends ConsumerWidget {
                     stats.whenOrNull(
                       data: (s) {
                         final alerts = <_Alert>[];
-                        if (s.paiementsAVerifier > 0)
+                        if (s.paiementsAVerifier > 0) {
                           alerts.add(_Alert(
                             '💳 ${s.paiementsAVerifier} paiement(s) à vérifier',
                             () => context.go('/admin/paiements'),
                           ));
-                        if (s.producteursAttente > 0)
+                        }
+                        if (s.producteursAttente > 0) {
                           alerts.add(_Alert(
                             '🌾 ${s.producteursAttente} producteur(s) en attente',
                             () => context.go('/admin/producteurs'),
                           ));
-                        if (s.alertesStock > 0)
+                        }
+                        if (s.alertesStock > 0) {
                           alerts.add(_Alert(
                             '⚠️ ${s.alertesStock} alerte(s) de stock',
                             () => context.go('/admin/stocks'),
                           ));
-                        if (s.commandesLitige > 0)
+                        }
+                        if (s.commandesLitige > 0) {
                           alerts.add(_Alert(
                             '⚡ ${s.commandesLitige} commande(s) en litige',
                             () => context.go('/admin/commandes'),
                           ));
+                        }
 
                         if (alerts.isEmpty) return null;
 
@@ -220,12 +224,12 @@ class AdminDashboardScreen extends ConsumerWidget {
                                     ),
                                     decoration: BoxDecoration(
                                       color:        AppColors.rouge
-                                          .withOpacity(0.08),
+                                          .withValues(alpha: 0.08),
                                       borderRadius:
                                           BorderRadius.circular(8),
                                       border: Border.all(
                                         color: AppColors.rouge
-                                            .withOpacity(0.25),
+                                            .withValues(alpha: 0.25),
                                       ),
                                     ),
                                     child: Row(
@@ -257,13 +261,13 @@ class AdminDashboardScreen extends ConsumerWidget {
                       child: SizedBox.shrink()),
 
                     // ── KPIs Utilisateurs ────────────────────
-                    _SectionTitle('👥 Utilisateurs'),
+                    _sectionTitle('👥 Utilisateurs'),
                     stats.when(
                       loading: () => const SliverToBoxAdapter(
                         child: LoadingWidget()),
                       error: (e, _) => SliverToBoxAdapter(
                         child: Center(child: Text('$e'))),
-                      data: (s) => _KpiGrid([
+                      data: (s) => _kpiGrid([
                         KpiCard(
                           emoji:  '👤',
                           valeur: '${s.totalUsers}',
@@ -298,9 +302,9 @@ class AdminDashboardScreen extends ConsumerWidget {
                     ),
 
                     // ── KPIs Commandes ───────────────────────
-                    _SectionTitle('📦 Commandes'),
+                    _sectionTitle('📦 Commandes'),
                     stats.whenOrNull(
-                      data: (s) => _KpiGrid([
+                      data: (s) => _kpiGrid([
                         KpiCard(
                           emoji:  '📊',
                           valeur: '${s.totalCommandes}',
@@ -336,9 +340,9 @@ class AdminDashboardScreen extends ConsumerWidget {
                         child: SizedBox.shrink()),
 
                     // ── KPIs Paiements & Stock ───────────────
-                    _SectionTitle('💳 Paiements & Stock'),
+                    _sectionTitle('💳 Paiements & Stock'),
                     stats.whenOrNull(
-                      data: (s) => _KpiGrid([
+                      data: (s) => _kpiGrid([
                         KpiCard(
                           emoji:  '🔍',
                           valeur: '${s.paiementsAVerifier}',
@@ -375,9 +379,9 @@ class AdminDashboardScreen extends ConsumerWidget {
                         child: SizedBox.shrink()),
 
                     // ── KPIs Collectes ───────────────────────
-                    _SectionTitle('🚛 Collectes'),
+                    _sectionTitle('🚛 Collectes'),
                     stats.whenOrNull(
-                      data: (s) => _KpiGrid([
+                      data: (s) => _kpiGrid([
                         KpiCard(
                           emoji:  '📅',
                           valeur: '${s.collectesPlanifiees}',
@@ -461,7 +465,7 @@ class _RevStat extends StatelessWidget {
   );
 }
 
-Widget _SectionTitle(String titre) => SliverToBoxAdapter(
+Widget _sectionTitle(String titre) => SliverToBoxAdapter(
   child: Padding(
     padding: const EdgeInsets.fromLTRB(16, 20, 16, 8),
     child: Text(titre,
@@ -474,7 +478,7 @@ Widget _SectionTitle(String titre) => SliverToBoxAdapter(
   ),
 );
 
-Widget _KpiGrid(List<KpiCard> cards) => SliverPadding(
+Widget _kpiGrid(List<KpiCard> cards) => SliverPadding(
   padding: const EdgeInsets.symmetric(horizontal: 12),
   sliver: SliverGrid(
     delegate: SliverChildListDelegate(cards),

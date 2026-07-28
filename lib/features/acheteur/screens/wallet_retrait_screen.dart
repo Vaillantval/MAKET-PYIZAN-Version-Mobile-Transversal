@@ -182,28 +182,29 @@ class _WalletRetraitScreenState
 
                   _Section(
                     titre: '📱 Canal de réception',
-                    child: Column(
-                      children: [
-                        for (final c in [
-                          ('moncash', 'MonCash'),
-                          ('natcash', 'NatCash'),
-                        ])
-                          RadioListTile<String>(
-                            value:      c.$1,
-                            groupValue: _canal,
-                            title: Row(
-                              children: [
-                                LogoPaiement(c.$1),
-                                const SizedBox(width: 10),
-                                Text(c.$2),
-                              ],
+                    child: RadioGroup<String>(
+                      groupValue: _canal,
+                      onChanged: (v) => setState(() => _canal = v!),
+                      child: Column(
+                        children: [
+                          for (final c in [
+                            ('moncash', 'MonCash'),
+                            ('natcash', 'NatCash'),
+                          ])
+                            RadioListTile<String>(
+                              value: c.$1,
+                              title: Row(
+                                children: [
+                                  LogoPaiement(c.$1),
+                                  const SizedBox(width: 10),
+                                  Text(c.$2),
+                                ],
+                              ),
+                              activeColor: AppColors.vertVif,
+                              contentPadding: EdgeInsets.zero,
                             ),
-                            activeColor: AppColors.vertVif,
-                            onChanged: (v) =>
-                                setState(() => _canal = v!),
-                            contentPadding: EdgeInsets.zero,
-                          ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
                   const SizedBox(height: 12),

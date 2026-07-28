@@ -285,24 +285,30 @@ class _OnglLigne extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 8),
-        for (final m in [
-          ('moncash', 'MonCash'),
-          ('natcash', 'NatCash'),
-        ])
-          RadioListTile<String>(
-            value:      m.$1,
-            groupValue: methode,
-            title: Row(
-              children: [
-                LogoPaiement(m.$1),
-                const SizedBox(width: 10),
-                Text(m.$2),
-              ],
-            ),
-            activeColor: AppColors.vertVif,
-            onChanged:  onMethodeChanged,
-            contentPadding: EdgeInsets.zero,
+        RadioGroup<String>(
+          groupValue: methode,
+          onChanged: onMethodeChanged,
+          child: Column(
+            children: [
+              for (final m in [
+                ('moncash', 'MonCash'),
+                ('natcash', 'NatCash'),
+              ])
+                RadioListTile<String>(
+                  value: m.$1,
+                  title: Row(
+                    children: [
+                      LogoPaiement(m.$1),
+                      const SizedBox(width: 10),
+                      Text(m.$2),
+                    ],
+                  ),
+                  activeColor: AppColors.vertVif,
+                  contentPadding: EdgeInsets.zero,
+                ),
+            ],
           ),
+        ),
         const SizedBox(height: 28),
         ElevatedButton(
           onPressed: loading ? null : onRecharger,

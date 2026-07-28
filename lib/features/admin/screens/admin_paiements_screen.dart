@@ -41,7 +41,7 @@ class AdminPaiementsScreen extends ConsumerWidget {
                   borderRadius: BorderRadius.circular(14),
                   boxShadow: [
                     BoxShadow(
-                      color:     Colors.black.withOpacity(0.06),
+                      color:     Colors.black.withValues(alpha: 0.06),
                       blurRadius: 8,
                     ),
                   ],
@@ -52,7 +52,7 @@ class AdminPaiementsScreen extends ConsumerWidget {
                     Container(
                       padding: const EdgeInsets.all(14),
                       decoration: BoxDecoration(
-                        color: AppColors.orange.withOpacity(0.08),
+                        color: AppColors.orange.withValues(alpha: 0.08),
                         borderRadius: const BorderRadius.vertical(
                           top: Radius.circular(14),
                         ),
