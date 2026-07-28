@@ -217,8 +217,8 @@ class DashboardProducteurScreen extends ConsumerWidget {
                             ),
                           ]),
                           gridDelegate:
-                              const SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount:   2,
+                              const SliverGridDelegateWithMaxCrossAxisExtent(
+                            maxCrossAxisExtent: 180,
                             childAspectRatio: 1.3,
                             mainAxisSpacing:  10,
                             crossAxisSpacing: 10,
@@ -278,8 +278,8 @@ class DashboardProducteurScreen extends ConsumerWidget {
                             ),
                           ]),
                           gridDelegate:
-                              const SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount:   2,
+                              const SliverGridDelegateWithMaxCrossAxisExtent(
+                            maxCrossAxisExtent: 180,
                             childAspectRatio: 1.3,
                             mainAxisSpacing:  10,
                             crossAxisSpacing: 10,

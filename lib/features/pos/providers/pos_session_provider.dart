@@ -4,6 +4,7 @@ import '../../../core/api/api_endpoints.dart';
 import '../../../core/offline/connectivity_service.dart';
 import '../../../core/offline/offline_manager.dart';
 import '../../../core/storage/pos_local_storage.dart';
+import '../../../core/utils/api_error.dart';
 import '../../../models/pos_session.dart';
 import 'pos_device_provider.dart';
 import 'pos_vente_provider.dart';
@@ -62,8 +63,8 @@ class PosSessionNotifier extends StateNotifier<AsyncValue<PosSession?>> {
         return null;
       }
       return data['error']?.toString() ?? "Erreur lors de l'ouverture de la session";
-    } catch (_) {
-      return 'Erreur réseau — impossible de contacter le serveur.';
+    } catch (e) {
+      return messageErreurApi(e, 'Erreur réseau — impossible de contacter le serveur.');
     }
   }
 
@@ -111,8 +112,8 @@ class PosSessionNotifier extends StateNotifier<AsyncValue<PosSession?>> {
         return d; // repli : ancien contrat plat
       }
       return {'error': data['error']?.toString() ?? 'Erreur lors de la fermeture de la session'};
-    } catch (_) {
-      return {'error': 'Erreur réseau — impossible de contacter le serveur.'};
+    } catch (e) {
+      return {'error': messageErreurApi(e, 'Erreur réseau — impossible de contacter le serveur.')};
     }
   }
 }

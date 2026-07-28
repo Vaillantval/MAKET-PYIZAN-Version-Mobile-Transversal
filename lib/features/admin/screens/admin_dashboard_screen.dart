@@ -482,8 +482,8 @@ Widget _kpiGrid(List<KpiCard> cards) => SliverPadding(
   padding: const EdgeInsets.symmetric(horizontal: 12),
   sliver: SliverGrid(
     delegate: SliverChildListDelegate(cards),
-    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-      crossAxisCount:   2,
+    gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+      maxCrossAxisExtent: 180,
       childAspectRatio: 1.2,
       mainAxisSpacing:  10,
       crossAxisSpacing: 10,

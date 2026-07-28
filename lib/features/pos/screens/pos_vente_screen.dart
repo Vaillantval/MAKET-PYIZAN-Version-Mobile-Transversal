@@ -97,9 +97,9 @@ class _PosVenteScreenState extends ConsumerState<PosVenteScreen> {
                       )
                     : GridView.builder(
                         padding: const EdgeInsets.fromLTRB(12, 0, 12, 100),
-                        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 2,
-                          childAspectRatio: 1.55,
+                        gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                          maxCrossAxisExtent: 200,
+                          mainAxisExtent: 196,
                           crossAxisSpacing: 10,
                           mainAxisSpacing: 10,
                         ),

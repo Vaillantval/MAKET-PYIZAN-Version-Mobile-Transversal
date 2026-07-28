@@ -4,6 +4,7 @@ import '../core/api/api_endpoints.dart';
 import '../core/storage/secure_storage.dart';
 import '../core/offline/cache_manager.dart';
 import '../core/notifications/fcm_service.dart';
+import '../core/utils/api_error.dart';
 import '../models/user.dart';
 
 // État d'authentification
@@ -145,7 +146,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
     } catch (e) {
       state = state.copyWith(
         isLoading: false,
-        error:     'Vérifiez votre connexion internet.',
+        error:     messageErreurApi(e, 'Vérifiez votre connexion internet.'),
       );
       return false;
     }
@@ -209,7 +210,10 @@ class AuthNotifier extends StateNotifier<AuthState> {
       );
       return false;
     } catch (e) {
-      state = state.copyWith(isLoading: false, error: e.toString());
+      state = state.copyWith(
+        isLoading: false,
+        error:     messageErreurApi(e, 'Vérifiez votre connexion internet.'),
+      );
       return false;
     }
   }
