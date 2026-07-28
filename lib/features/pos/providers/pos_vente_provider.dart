@@ -8,11 +8,13 @@ import '../../../core/offline/connectivity_service.dart';
 import '../../../core/offline/offline_manager.dart';
 import '../../../core/offline/sync_queue.dart';
 import '../../../core/storage/pos_local_storage.dart';
+import '../../../core/utils/api_error.dart';
 import '../../../models/pos_item.dart';
 import '../../../models/pos_sale.dart';
 import 'pos_catalogue_provider.dart';
 import 'pos_exceptions.dart';
 import 'pos_session_provider.dart';
+import 'pos_terminal_status_provider.dart';
 
 final posHistoriqueProvider =
     StateNotifierProvider<PosHistoriqueNotifier, AsyncValue<List<PosSale>>>((ref) {
@@ -273,7 +275,17 @@ class PosHistoriqueNotifier extends StateNotifier<AsyncValue<List<PosSale>>> {
         );
       } on PosVenteException {
         rethrow;
-      } catch (_) {
+      } catch (e) {
+        final code = codePosErreur(e);
+        if (code == 'TERMINAL_EN_ATTENTE' || code == 'TERMINAL_REVOQUE') {
+          _ref.read(posTerminalStatusProvider.notifier).definir(code == 'TERMINAL_EN_ATTENTE'
+              ? PosTerminalStatut.enAttente
+              : PosTerminalStatut.revoque);
+          throw PosVenteException(
+            code!,
+            messagePosErreur(e) ?? 'Terminal non autorisé — contactez votre administrateur.',
+          );
+        }
         throw const PosVenteException(
           'OFFLINE',
           'La connexion a été interrompue pendant le paiement — la vente '
@@ -298,6 +310,12 @@ class PosHistoriqueNotifier extends StateNotifier<AsyncValue<List<PosSale>>> {
         if (_isNetworkError(e)) {
           await _mettreEnQueue(idempotencyKey, payloadVente);
         } else {
+          final code = codePosErreur(e);
+          if (code == 'TERMINAL_EN_ATTENTE' || code == 'TERMINAL_REVOQUE') {
+            _ref.read(posTerminalStatusProvider.notifier).definir(code == 'TERMINAL_EN_ATTENTE'
+                ? PosTerminalStatut.enAttente
+                : PosTerminalStatut.revoque);
+          }
           sale = sale.copyWith(statut: 'rejetee', syncStatus: 'rejetee');
         }
       }

@@ -105,6 +105,7 @@ class AppEndpoints {
   static const String posCatalogue      = '/api/pos/catalogue/';
   static const String posRapports       = '/api/pos/rapports/';
   static const String posVerifierCodeClient = '/api/pos/client/verifier-code/';
+  static const String posTerminalStatut = '/api/pos/terminal/statut/';
 
   // Système
   static const String healthCheck    = '/health/';

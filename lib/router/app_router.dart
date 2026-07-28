@@ -37,6 +37,8 @@ import '../features/pos/screens/pos_historique_screen.dart';
 import '../features/pos/screens/pos_paiement_screen.dart';
 import '../features/pos/screens/pos_profil_screen.dart';
 import '../features/pos/widgets/pos_session_banner.dart';
+import '../features/pos/widgets/pos_terminal_banner.dart';
+import '../features/pos/providers/pos_terminal_status_provider.dart';
 import '../features/admin/screens/admin_dashboard_screen.dart';
 import '../features/admin/screens/admin_producteurs_screen.dart';
 import '../features/admin/screens/admin_commandes_screen.dart';
@@ -115,6 +117,11 @@ final routerProvider = Provider<GoRouter>((ref) {
           return '/pos/appairage';
         }
       }
+
+      // POS : un terminal non (ou plus) autorisé (TERMINAL_EN_ATTENTE /
+      // TERMINAL_REVOQUE) n'est volontairement PAS bloquant ici — voir
+      // PosTerminalBanner et l'onglet Profil pour le statut affiché à
+      // l'opérateur, qui reste libre de naviguer.
 
       return null;
     },
@@ -299,18 +306,34 @@ class CollecteurShell extends ConsumerWidget {
   }
 }
 
-class PosShell extends ConsumerWidget {
+class PosShell extends ConsumerStatefulWidget {
   final Widget child;
   const PosShell({required this.child, super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<PosShell> createState() => _PosShellState();
+}
+
+class _PosShellState extends ConsumerState<PosShell> {
+  @override
+  void initState() {
+    super.initState();
+    // Vérification non-bloquante au démarrage/reprise de l'app — un appel
+    // POS réel (catalogue, session…) alimente déjà ce statut en direct sur
+    // un 403, mais l'opérateur peut aussi naviguer directement sur Session/
+    // Historique/Profil sans jamais déclencher un tel appel.
+    Future.microtask(() => ref.read(posTerminalStatusProvider.notifier).verifier());
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       body: Column(
         children: [
           const OfflineBanner(),
+          const PosTerminalBanner(),
           const PosSessionBanner(),
-          Expanded(child: child),
+          Expanded(child: widget.child),
         ],
       ),
       bottomNavigationBar: _buildBottomNav(context, [

@@ -7,6 +7,7 @@ import '../../../core/storage/pos_local_storage.dart';
 import '../../../core/utils/api_error.dart';
 import '../../../models/pos_session.dart';
 import 'pos_device_provider.dart';
+import 'pos_terminal_status_provider.dart';
 import 'pos_vente_provider.dart';
 
 final posSessionProvider =
@@ -57,6 +58,7 @@ class PosSessionNotifier extends StateNotifier<AsyncValue<PosSession?>> {
       });
       final data = res.data as Map<String, dynamic>;
       if (data['success'] == true) {
+        _ref.read(posTerminalStatusProvider.notifier).definir(PosTerminalStatut.actif);
         final session = PosSession.fromJson(data['data'] as Map<String, dynamic>);
         await _posStorage.saveSession(session.toJson());
         state = AsyncValue.data(session);
@@ -64,7 +66,20 @@ class PosSessionNotifier extends StateNotifier<AsyncValue<PosSession?>> {
       }
       return data['error']?.toString() ?? "Erreur lors de l'ouverture de la session";
     } catch (e) {
+      _majStatutTerminal(e);
       return messageErreurApi(e, 'Erreur réseau — impossible de contacter le serveur.');
+    }
+  }
+
+  /// Met à jour [posTerminalStatusProvider] si l'exception correspond à un
+  /// code de permission POS (403 {code, message}) — alimente le badge de
+  /// statut (PosTerminalBanner, onglet Profil), sans bloquer l'opérateur.
+  void _majStatutTerminal(Object e) {
+    final code = codePosErreur(e);
+    if (code == 'TERMINAL_EN_ATTENTE') {
+      _ref.read(posTerminalStatusProvider.notifier).definir(PosTerminalStatut.enAttente);
+    } else if (code == 'TERMINAL_REVOQUE') {
+      _ref.read(posTerminalStatusProvider.notifier).definir(PosTerminalStatut.revoque);
     }
   }
 
@@ -94,6 +109,7 @@ class PosSessionNotifier extends StateNotifier<AsyncValue<PosSession?>> {
       });
       final data = res.data as Map<String, dynamic>;
       if (data['success'] == true) {
+        _ref.read(posTerminalStatusProvider.notifier).definir(PosTerminalStatut.actif);
         await _posStorage.clearSession();
         state = const AsyncValue.data(null);
         // Contrat backend : data = {session: {...}, recap: {nb_ventes,
@@ -113,6 +129,7 @@ class PosSessionNotifier extends StateNotifier<AsyncValue<PosSession?>> {
       }
       return {'error': data['error']?.toString() ?? 'Erreur lors de la fermeture de la session'};
     } catch (e) {
+      _majStatutTerminal(e);
       return {'error': messageErreurApi(e, 'Erreur réseau — impossible de contacter le serveur.')};
     }
   }

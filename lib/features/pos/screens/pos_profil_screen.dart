@@ -8,6 +8,7 @@ import '../../../core/storage/local_storage.dart';
 import '../../../providers/auth_provider.dart';
 import '../providers/pos_device_provider.dart';
 import '../providers/pos_session_provider.dart';
+import '../providers/pos_terminal_status_provider.dart';
 
 class PosProfilScreen extends ConsumerStatefulWidget {
   const PosProfilScreen({super.key});
@@ -31,6 +32,7 @@ class _PosProfilScreenState extends ConsumerState<PosProfilScreen> {
     final deviceUid = ref.watch(posDeviceUidProvider);
     final sessionOuverte = ref.watch(posSessionProvider.notifier).isOuverte;
     final imprimanteState = ref.watch(posPrinterProvider);
+    final terminalInfo = ref.watch(posTerminalStatusProvider);
 
     return Scaffold(
       backgroundColor: AppColors.grisClair,
@@ -71,6 +73,8 @@ class _PosProfilScreenState extends ConsumerState<PosProfilScreen> {
               ],
             ),
           ),
+          const SizedBox(height: 16),
+          _TerminalStatutCard(info: terminalInfo),
           const SizedBox(height: 16),
           Container(
             decoration: BoxDecoration(
@@ -127,6 +131,97 @@ class _PosProfilScreenState extends ConsumerState<PosProfilScreen> {
               onTap: () => ref.read(authProvider.notifier).logout(),
             ),
           ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Badge coloré (vert/orange/rouge/gris) + détail du statut d'autorisation
+/// du terminal, avec bouton "Vérifier maintenant" (roue de secours si le
+/// push de validation n'arrive pas — device sans Google Play Services,
+/// token FCM expiré…).
+class _TerminalStatutCard extends ConsumerStatefulWidget {
+  final PosTerminalInfo info;
+  const _TerminalStatutCard({required this.info});
+
+  @override
+  ConsumerState<_TerminalStatutCard> createState() => _TerminalStatutCardState();
+}
+
+class _TerminalStatutCardState extends ConsumerState<_TerminalStatutCard> {
+  bool _verification = false;
+
+  Future<void> _verifier() async {
+    setState(() => _verification = true);
+    await ref.read(posTerminalStatusProvider.notifier).verifier();
+    if (mounted) setState(() => _verification = false);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final (couleur, icone, libelle) = switch (widget.info.statut) {
+      PosTerminalStatut.actif      => (AppColors.vertVif, Icons.check_circle, 'Actif'),
+      PosTerminalStatut.enAttente  => (AppColors.orange, Icons.hourglass_top_rounded, 'En attente de validation'),
+      PosTerminalStatut.rejetee    => (AppColors.rouge, Icons.block_rounded, 'Rejeté'),
+      PosTerminalStatut.revoque    => (AppColors.rouge, Icons.block_rounded, 'Révoqué'),
+      PosTerminalStatut.inconnu    => (AppColors.grisTexte, Icons.help_outline_rounded, 'Inconnu'),
+    };
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(icone, color: couleur, size: 20),
+              const SizedBox(width: 8),
+              const Text('Statut du terminal',
+                  style: TextStyle(fontWeight: FontWeight.w700, fontSize: 14)),
+              const Spacer(),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: couleur.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Text(
+                  libelle,
+                  style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: couleur),
+                ),
+              ),
+            ],
+          ),
+          if (widget.info.tentatives != null) ...[
+            const SizedBox(height: 8),
+            Text(
+              'Tentative(s) : ${widget.info.tentatives}',
+              style: const TextStyle(fontSize: 12, color: AppColors.grisTexte),
+            ),
+          ],
+          if (widget.info.statut != PosTerminalStatut.actif) ...[
+            const SizedBox(height: 12),
+            OutlinedButton.icon(
+              onPressed: _verification ? null : _verifier,
+              icon: _verification
+                  ? const SizedBox(
+                      width: 16, height: 16,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Icon(Icons.refresh, size: 18),
+              label: const Text('Vérifier maintenant'),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: AppColors.vertFonce,
+                side: const BorderSide(color: AppColors.vertFonce),
+                minimumSize: const Size(double.infinity, 40),
+              ),
+            ),
+          ],
         ],
       ),
     );

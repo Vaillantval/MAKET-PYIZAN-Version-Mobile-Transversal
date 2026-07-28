@@ -2,6 +2,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../features/pos/providers/pos_terminal_status_provider.dart';
 import '../../providers/auth_provider.dart';
 import '../utils/role_utils.dart';
 
@@ -19,6 +20,17 @@ class NotificationHandler {
       final role = ProviderScope.containerOf(context, listen: false)
           .read(authProvider).user?.role;
       context.go('${walletBasePath(role)}/wallet');
+      return;
+    }
+
+    // Terminal POS validé par un admin — pousser un rafraîchissement
+    // immédiat du statut (badge, onglet Profil) plutôt que d'attendre le
+    // prochain appel POS pour le découvrir.
+    if (data['screen'] == 'pos_terminal_valide') {
+      context.go('/pos/vente');
+      ProviderScope.containerOf(context, listen: false)
+          .read(posTerminalStatusProvider.notifier)
+          .verifier();
       return;
     }
 

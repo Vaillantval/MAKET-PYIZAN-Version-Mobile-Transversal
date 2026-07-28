@@ -5,6 +5,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'core/theme/app_theme.dart';
 import 'core/notifications/notification_handler.dart';
 import 'core/notifications/notification_provider.dart';
+import 'features/pos/providers/pos_terminal_status_provider.dart';
 import 'router/app_router.dart';
 
 class MaketPeyizanApp extends ConsumerStatefulWidget {
@@ -28,6 +29,12 @@ class _MaketPeyizanAppState
     // Notification reçue en foreground → incrémenter compteur
     FirebaseMessaging.onMessage.listen((message) {
       ref.read(notificationProvider.notifier);
+      // Terminal POS validé pendant que l'app est déjà ouverte : pas de
+      // tap à intercepter ici (onMessageOpenedApp ne se déclenche que sur
+      // tap depuis l'arrière-plan), donc rafraîchir directement le badge.
+      if (message.data['screen'] == 'pos_terminal_valide') {
+        ref.read(posTerminalStatusProvider.notifier).verifier();
+      }
     });
 
     // Tap notification depuis background → naviguer

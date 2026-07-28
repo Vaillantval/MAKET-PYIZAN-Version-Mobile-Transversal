@@ -3,19 +3,22 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/api/api_client.dart';
 import '../../../core/api/api_endpoints.dart';
 import '../../../core/offline/cache_manager.dart';
+import '../../../core/utils/api_error.dart';
 import '../../../core/utils/string_utils.dart';
 import '../../../models/pos_produit_catalogue.dart';
+import 'pos_terminal_status_provider.dart';
 
 final posCatalogueProvider =
     StateNotifierProvider<PosCatalogueNotifier, AsyncValue<List<PosProduitCatalogue>>>((ref) {
-  return PosCatalogueNotifier(ref.read(apiClientProvider), ref.read(cacheManagerProvider));
+  return PosCatalogueNotifier(ref.read(apiClientProvider), ref.read(cacheManagerProvider), ref);
 });
 
 class PosCatalogueNotifier extends StateNotifier<AsyncValue<List<PosProduitCatalogue>>> {
   final ApiClient    _api;
   final CacheManager _cache;
+  final Ref          _ref;
 
-  PosCatalogueNotifier(this._api, this._cache) : super(const AsyncValue.loading()) {
+  PosCatalogueNotifier(this._api, this._cache, this._ref) : super(const AsyncValue.loading()) {
     charger();
   }
 
@@ -43,16 +46,26 @@ class PosCatalogueNotifier extends StateNotifier<AsyncValue<List<PosProduitCatal
         ),
       );
 
-      if (res.statusCode == 304) return; // cache toujours à jour
+      if (res.statusCode == 304) {
+        _ref.read(posTerminalStatusProvider.notifier).definir(PosTerminalStatut.actif);
+        return; // cache toujours à jour
+      }
 
       final data = res.data as Map<String, dynamic>;
       if (data['success'] == true) {
+        _ref.read(posTerminalStatusProvider.notifier).definir(PosTerminalStatut.actif);
         final list = data['data'] as List;
         final newEtag = res.headers.value('etag');
         await _cache.savePosCatalogue(list, etag: newEtag);
         state = AsyncValue.data(_parse(list));
       }
     } catch (e) {
+      final code = codePosErreur(e);
+      if (code == 'TERMINAL_EN_ATTENTE') {
+        _ref.read(posTerminalStatusProvider.notifier).definir(PosTerminalStatut.enAttente);
+      } else if (code == 'TERMINAL_REVOQUE') {
+        _ref.read(posTerminalStatusProvider.notifier).definir(PosTerminalStatut.revoque);
+      }
       if (cached == null) {
         state = AsyncValue.error(e, StackTrace.current);
       }
