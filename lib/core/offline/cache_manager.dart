@@ -91,5 +91,26 @@ class CacheManager {
     await _storage.remove('${key}_ts');
   }
 
-  Future<void> clearAll() async => _storage.clear();
+  // Efface uniquement les clés de CACHE gérées par cette classe — jamais
+  // via _storage.clear() (SharedPreferences.clear() efface TOUT le
+  // stockage partagé, y compris des clés sans rapport comme le
+  // device_uid POS ou le flag d'onboarding : appelé depuis
+  // AuthNotifier.logout(), ça désenregistrait le terminal POS à CHAQUE
+  // déconnexion, obligeant à le refaire valider par un admin à chaque
+  // session opérateur).
+  Future<void> clearAll() async {
+    for (final key in [
+      AppConstants.keyCatalogCache,
+      AppConstants.keyPosCatalogCache,
+      AppConstants.keyGeoCache,
+      AppConstants.keyUserData,
+      'dashboard_stats', // producteur/providers/dashboard_provider.dart
+      'admin_stats',     // admin/providers/admin_stats_provider.dart
+      'categories',      // acheteur/providers/catalogue_provider.dart
+    ]) {
+      await _storage.remove(key);
+      await _storage.remove('${key}_ts');
+    }
+    await _storage.remove('${AppConstants.keyPosCatalogCache}_etag');
+  }
 }

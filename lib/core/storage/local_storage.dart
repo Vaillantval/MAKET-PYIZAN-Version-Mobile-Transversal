@@ -57,5 +57,4 @@ class LocalStorage {
   }
 
   Future<void> remove(String key) async => _prefs.remove(key);
-  Future<void> clear() async => _prefs.clear();
 }
