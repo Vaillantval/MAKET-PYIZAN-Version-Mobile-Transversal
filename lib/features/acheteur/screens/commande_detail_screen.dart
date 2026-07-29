@@ -183,7 +183,17 @@ class CommandeDetailScreen extends ConsumerWidget {
                                           ),
                                         ),
                                         Text(
-                                          'x${item['quantite'] ?? 0}',
+                                          // quantite_choisie/unite_choisie
+                                          // reflètent ce que l'acheteur a
+                                          // réellement sélectionné (ex: "1
+                                          // sac 50 kg") ; quantite/unite_vente
+                                          // sont désormais toujours exprimés
+                                          // dans l'unité de base du produit
+                                          // (ex: "50 kg") — pas ce qu'il faut
+                                          // afficher au client. Repli sur
+                                          // l'ancien champ si absent.
+                                          'x${item['quantite_choisie'] ?? item['quantite'] ?? 0}'
+                                          '${item['unite_choisie'] != null ? ' ${item['unite_choisie']}' : ''}',
                                           style: const TextStyle(
                                             fontSize: 12,
                                             color: AppColors

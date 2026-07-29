@@ -24,6 +24,7 @@ mixin _$PosSale {
   String get idempotencyKey => throw _privateConstructorUsedError;
   @JsonKey(name: 'numero_vente')
   String? get numeroVente => throw _privateConstructorUsedError;
+  @JsonKey(toJson: _itemsToJson)
   List<PosItem> get items => throw _privateConstructorUsedError;
   @JsonKey(name: 'montant_total', fromJson: jsonToDouble)
   double get montantTotal => throw _privateConstructorUsedError;
@@ -59,7 +60,7 @@ abstract class $PosSaleCopyWith<$Res> {
   $Res call(
       {@JsonKey(name: 'idempotency_key') String idempotencyKey,
       @JsonKey(name: 'numero_vente') String? numeroVente,
-      List<PosItem> items,
+      @JsonKey(toJson: _itemsToJson) List<PosItem> items,
       @JsonKey(name: 'montant_total', fromJson: jsonToDouble)
       double montantTotal,
       @JsonKey(name: 'methode_paiement') String methodePaiement,
@@ -158,7 +159,7 @@ abstract class _$$PosSaleImplCopyWith<$Res> implements $PosSaleCopyWith<$Res> {
   $Res call(
       {@JsonKey(name: 'idempotency_key') String idempotencyKey,
       @JsonKey(name: 'numero_vente') String? numeroVente,
-      List<PosItem> items,
+      @JsonKey(toJson: _itemsToJson) List<PosItem> items,
       @JsonKey(name: 'montant_total', fromJson: jsonToDouble)
       double montantTotal,
       @JsonKey(name: 'methode_paiement') String methodePaiement,
@@ -251,7 +252,7 @@ class _$PosSaleImpl implements _PosSale {
   const _$PosSaleImpl(
       {@JsonKey(name: 'idempotency_key') required this.idempotencyKey,
       @JsonKey(name: 'numero_vente') this.numeroVente,
-      final List<PosItem> items = const [],
+      @JsonKey(toJson: _itemsToJson) final List<PosItem> items = const [],
       @JsonKey(name: 'montant_total', fromJson: jsonToDouble)
       required this.montantTotal,
       @JsonKey(name: 'methode_paiement') this.methodePaiement = 'cash',
@@ -275,7 +276,7 @@ class _$PosSaleImpl implements _PosSale {
   final String? numeroVente;
   final List<PosItem> _items;
   @override
-  @JsonKey()
+  @JsonKey(toJson: _itemsToJson)
   List<PosItem> get items {
     if (_items is EqualUnmodifiableListView) return _items;
     // ignore: implicit_dynamic_type
@@ -377,7 +378,7 @@ abstract class _PosSale implements PosSale {
   const factory _PosSale(
       {@JsonKey(name: 'idempotency_key') required final String idempotencyKey,
       @JsonKey(name: 'numero_vente') final String? numeroVente,
-      final List<PosItem> items,
+      @JsonKey(toJson: _itemsToJson) final List<PosItem> items,
       @JsonKey(name: 'montant_total', fromJson: jsonToDouble)
       required final double montantTotal,
       @JsonKey(name: 'methode_paiement') final String methodePaiement,
@@ -398,6 +399,7 @@ abstract class _PosSale implements PosSale {
   @JsonKey(name: 'numero_vente')
   String? get numeroVente;
   @override
+  @JsonKey(toJson: _itemsToJson)
   List<PosItem> get items;
   @override
   @JsonKey(name: 'montant_total', fromJson: jsonToDouble)

@@ -268,12 +268,25 @@ class _AjoutPanierDialog extends ConsumerStatefulWidget {
 
 class _AjoutPanierDialogState extends ConsumerState<_AjoutPanierDialog> {
   int _quantite = 1;
-  bool _prixGros = false;
+  PosPrixUnite? _unite;
+
+  @override
+  void initState() {
+    super.initState();
+    final prix = widget.produit.prix;
+    if (prix.isNotEmpty) {
+      _unite = prix.firstWhere((u) => u.estUniteBase, orElse: () => prix.first);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final p = widget.produit;
-    final prixUnitaire = (_prixGros && p.prixGros != null) ? p.prixGros! : p.prixDetail;
+    // Prix suggéré du catalogue pour l'unité choisie — prixDetail reste
+    // la source de vérité pour l'unité de base (au cas où elle
+    // divergerait de son entrée dans prix[]).
+    final uniteChoisieNonBase = _unite != null && !_unite!.estUniteBase;
+    final prixUnitaire = uniteChoisieNonBase ? _unite!.prix : p.prixDetail;
     final lot = p.lots.isNotEmpty ? p.lots.first : null;
 
     return AlertDialog(
@@ -281,24 +294,21 @@ class _AjoutPanierDialogState extends ConsumerState<_AjoutPanierDialog> {
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          if (p.prixGros != null)
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                ChoiceChip(
-                  label: const Text('Détail'),
-                  selected: !_prixGros,
-                  onSelected: (_) => setState(() => _prixGros = false),
-                ),
-                const SizedBox(width: 8),
-                ChoiceChip(
-                  label: const Text('Gros'),
-                  selected: _prixGros,
-                  onSelected: (_) => setState(() => _prixGros = true),
-                ),
-              ],
+          // Le sélecteur ne s'affiche que si un admin a défini des
+          // prix_supplementaires — la majorité des produits n'ont que
+          // leur unité de base, l'écran reste identique pour eux.
+          if (p.prix.length > 1) ...[
+            Wrap(
+              spacing: 8,
+              alignment: WrapAlignment.center,
+              children: p.prix.map((u) => ChoiceChip(
+                label: Text(u.uniteNom),
+                selected: _unite?.uniteId == u.uniteId,
+                onSelected: (_) => setState(() => _unite = u),
+              )).toList(),
             ),
-          const SizedBox(height: 12),
+            const SizedBox(height: 12),
+          ],
           HtgLabel(prixUnitaire),
           const SizedBox(height: 16),
           Row(
@@ -338,6 +348,10 @@ class _AjoutPanierDialogState extends ConsumerState<_AjoutPanierDialog> {
               produitId: p.id,
               nomProduit: p.nom,
               lotId: lot?.id,
+              uniteId: uniteChoisieNonBase ? _unite!.uniteId : null,
+              uniteCode: uniteChoisieNonBase ? _unite!.uniteCode : null,
+              uniteNom: uniteChoisieNonBase ? _unite!.uniteNom : null,
+              facteurConversion: uniteChoisieNonBase ? _unite!.facteurConversion : 1,
               quantite: _quantite.toDouble(),
               prixUnitaire: prixUnitaire,
             );
@@ -394,7 +408,9 @@ class _PanierSheet extends ConsumerWidget {
                       itemBuilder: (_, i) {
                         final item = items[i];
                         return ListTile(
-                          title: Text(item.nomProduit),
+                          title: Text(item.uniteNom != null
+                              ? '${item.nomProduit} — ${item.uniteNom}'
+                              : item.nomProduit),
                           subtitle: Text('${FormatUtils.htg(item.prixUnitaire)} x ${item.quantite.toStringAsFixed(0)}'),
                           trailing: Row(
                             mainAxisSize: MainAxisSize.min,

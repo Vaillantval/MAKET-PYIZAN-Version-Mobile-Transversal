@@ -25,7 +25,24 @@ mixin _$PosItem {
   @JsonKey(name: 'nom_produit')
   String get nomProduit => throw _privateConstructorUsedError;
   @JsonKey(name: 'lot_id')
-  int? get lotId => throw _privateConstructorUsedError;
+  int? get lotId =>
+      throw _privateConstructorUsedError; // Optionnel : défaut = unité de base du produit côté serveur si
+// absent (comportement inchangé). Dès renseigné, quantite et
+// prixUnitaire s'entendent dans CETTE unité (ex: 2 sacs, pas 100 kg).
+  @JsonKey(name: 'unite_id')
+  int? get uniteId =>
+      throw _privateConstructorUsedError; // Affichage/calcul LOCAL uniquement (panier, reçu, décrément du
+// stock en cache) — jamais envoyés au serveur, qui les redétermine
+// lui-même depuis unite_id.
+  @JsonKey(name: 'unite_code')
+  String? get uniteCode => throw _privateConstructorUsedError;
+  @JsonKey(name: 'unite_nom')
+  String? get uniteNom =>
+      throw _privateConstructorUsedError; // Combien d'unités de base (le stock est toujours suivi dans
+// l'unité de base) représente 1 unité vendue. 1 par défaut (unité
+// de base elle-même).
+  @JsonKey(name: 'facteur_conversion', fromJson: jsonToDouble)
+  double get facteurConversion => throw _privateConstructorUsedError;
   @JsonKey(fromJson: jsonToDouble)
   double get quantite => throw _privateConstructorUsedError;
   @JsonKey(name: 'prix_unitaire', fromJson: jsonToDouble)
@@ -51,6 +68,11 @@ abstract class $PosItemCopyWith<$Res> {
       {@JsonKey(name: 'produit_id') int produitId,
       @JsonKey(name: 'nom_produit') String nomProduit,
       @JsonKey(name: 'lot_id') int? lotId,
+      @JsonKey(name: 'unite_id') int? uniteId,
+      @JsonKey(name: 'unite_code') String? uniteCode,
+      @JsonKey(name: 'unite_nom') String? uniteNom,
+      @JsonKey(name: 'facteur_conversion', fromJson: jsonToDouble)
+      double facteurConversion,
       @JsonKey(fromJson: jsonToDouble) double quantite,
       @JsonKey(name: 'prix_unitaire', fromJson: jsonToDouble)
       double prixUnitaire,
@@ -75,6 +97,10 @@ class _$PosItemCopyWithImpl<$Res, $Val extends PosItem>
     Object? produitId = null,
     Object? nomProduit = null,
     Object? lotId = freezed,
+    Object? uniteId = freezed,
+    Object? uniteCode = freezed,
+    Object? uniteNom = freezed,
+    Object? facteurConversion = null,
     Object? quantite = null,
     Object? prixUnitaire = null,
     Object? sousTotal = null,
@@ -92,6 +118,22 @@ class _$PosItemCopyWithImpl<$Res, $Val extends PosItem>
           ? _value.lotId
           : lotId // ignore: cast_nullable_to_non_nullable
               as int?,
+      uniteId: freezed == uniteId
+          ? _value.uniteId
+          : uniteId // ignore: cast_nullable_to_non_nullable
+              as int?,
+      uniteCode: freezed == uniteCode
+          ? _value.uniteCode
+          : uniteCode // ignore: cast_nullable_to_non_nullable
+              as String?,
+      uniteNom: freezed == uniteNom
+          ? _value.uniteNom
+          : uniteNom // ignore: cast_nullable_to_non_nullable
+              as String?,
+      facteurConversion: null == facteurConversion
+          ? _value.facteurConversion
+          : facteurConversion // ignore: cast_nullable_to_non_nullable
+              as double,
       quantite: null == quantite
           ? _value.quantite
           : quantite // ignore: cast_nullable_to_non_nullable
@@ -119,6 +161,11 @@ abstract class _$$PosItemImplCopyWith<$Res> implements $PosItemCopyWith<$Res> {
       {@JsonKey(name: 'produit_id') int produitId,
       @JsonKey(name: 'nom_produit') String nomProduit,
       @JsonKey(name: 'lot_id') int? lotId,
+      @JsonKey(name: 'unite_id') int? uniteId,
+      @JsonKey(name: 'unite_code') String? uniteCode,
+      @JsonKey(name: 'unite_nom') String? uniteNom,
+      @JsonKey(name: 'facteur_conversion', fromJson: jsonToDouble)
+      double facteurConversion,
       @JsonKey(fromJson: jsonToDouble) double quantite,
       @JsonKey(name: 'prix_unitaire', fromJson: jsonToDouble)
       double prixUnitaire,
@@ -141,6 +188,10 @@ class __$$PosItemImplCopyWithImpl<$Res>
     Object? produitId = null,
     Object? nomProduit = null,
     Object? lotId = freezed,
+    Object? uniteId = freezed,
+    Object? uniteCode = freezed,
+    Object? uniteNom = freezed,
+    Object? facteurConversion = null,
     Object? quantite = null,
     Object? prixUnitaire = null,
     Object? sousTotal = null,
@@ -158,6 +209,22 @@ class __$$PosItemImplCopyWithImpl<$Res>
           ? _value.lotId
           : lotId // ignore: cast_nullable_to_non_nullable
               as int?,
+      uniteId: freezed == uniteId
+          ? _value.uniteId
+          : uniteId // ignore: cast_nullable_to_non_nullable
+              as int?,
+      uniteCode: freezed == uniteCode
+          ? _value.uniteCode
+          : uniteCode // ignore: cast_nullable_to_non_nullable
+              as String?,
+      uniteNom: freezed == uniteNom
+          ? _value.uniteNom
+          : uniteNom // ignore: cast_nullable_to_non_nullable
+              as String?,
+      facteurConversion: null == facteurConversion
+          ? _value.facteurConversion
+          : facteurConversion // ignore: cast_nullable_to_non_nullable
+              as double,
       quantite: null == quantite
           ? _value.quantite
           : quantite // ignore: cast_nullable_to_non_nullable
@@ -181,6 +248,11 @@ class _$PosItemImpl implements _PosItem {
       {@JsonKey(name: 'produit_id') required this.produitId,
       @JsonKey(name: 'nom_produit') this.nomProduit = '',
       @JsonKey(name: 'lot_id') this.lotId,
+      @JsonKey(name: 'unite_id') this.uniteId,
+      @JsonKey(name: 'unite_code') this.uniteCode,
+      @JsonKey(name: 'unite_nom') this.uniteNom,
+      @JsonKey(name: 'facteur_conversion', fromJson: jsonToDouble)
+      this.facteurConversion = 1,
       @JsonKey(fromJson: jsonToDouble) required this.quantite,
       @JsonKey(name: 'prix_unitaire', fromJson: jsonToDouble)
       required this.prixUnitaire,
@@ -198,6 +270,27 @@ class _$PosItemImpl implements _PosItem {
   @override
   @JsonKey(name: 'lot_id')
   final int? lotId;
+// Optionnel : défaut = unité de base du produit côté serveur si
+// absent (comportement inchangé). Dès renseigné, quantite et
+// prixUnitaire s'entendent dans CETTE unité (ex: 2 sacs, pas 100 kg).
+  @override
+  @JsonKey(name: 'unite_id')
+  final int? uniteId;
+// Affichage/calcul LOCAL uniquement (panier, reçu, décrément du
+// stock en cache) — jamais envoyés au serveur, qui les redétermine
+// lui-même depuis unite_id.
+  @override
+  @JsonKey(name: 'unite_code')
+  final String? uniteCode;
+  @override
+  @JsonKey(name: 'unite_nom')
+  final String? uniteNom;
+// Combien d'unités de base (le stock est toujours suivi dans
+// l'unité de base) représente 1 unité vendue. 1 par défaut (unité
+// de base elle-même).
+  @override
+  @JsonKey(name: 'facteur_conversion', fromJson: jsonToDouble)
+  final double facteurConversion;
   @override
   @JsonKey(fromJson: jsonToDouble)
   final double quantite;
@@ -210,7 +303,7 @@ class _$PosItemImpl implements _PosItem {
 
   @override
   String toString() {
-    return 'PosItem(produitId: $produitId, nomProduit: $nomProduit, lotId: $lotId, quantite: $quantite, prixUnitaire: $prixUnitaire, sousTotal: $sousTotal)';
+    return 'PosItem(produitId: $produitId, nomProduit: $nomProduit, lotId: $lotId, uniteId: $uniteId, uniteCode: $uniteCode, uniteNom: $uniteNom, facteurConversion: $facteurConversion, quantite: $quantite, prixUnitaire: $prixUnitaire, sousTotal: $sousTotal)';
   }
 
   @override
@@ -223,6 +316,13 @@ class _$PosItemImpl implements _PosItem {
             (identical(other.nomProduit, nomProduit) ||
                 other.nomProduit == nomProduit) &&
             (identical(other.lotId, lotId) || other.lotId == lotId) &&
+            (identical(other.uniteId, uniteId) || other.uniteId == uniteId) &&
+            (identical(other.uniteCode, uniteCode) ||
+                other.uniteCode == uniteCode) &&
+            (identical(other.uniteNom, uniteNom) ||
+                other.uniteNom == uniteNom) &&
+            (identical(other.facteurConversion, facteurConversion) ||
+                other.facteurConversion == facteurConversion) &&
             (identical(other.quantite, quantite) ||
                 other.quantite == quantite) &&
             (identical(other.prixUnitaire, prixUnitaire) ||
@@ -233,8 +333,18 @@ class _$PosItemImpl implements _PosItem {
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, produitId, nomProduit, lotId,
-      quantite, prixUnitaire, sousTotal);
+  int get hashCode => Object.hash(
+      runtimeType,
+      produitId,
+      nomProduit,
+      lotId,
+      uniteId,
+      uniteCode,
+      uniteNom,
+      facteurConversion,
+      quantite,
+      prixUnitaire,
+      sousTotal);
 
   /// Create a copy of PosItem
   /// with the given fields replaced by the non-null parameter values.
@@ -257,6 +367,11 @@ abstract class _PosItem implements PosItem {
       {@JsonKey(name: 'produit_id') required final int produitId,
       @JsonKey(name: 'nom_produit') final String nomProduit,
       @JsonKey(name: 'lot_id') final int? lotId,
+      @JsonKey(name: 'unite_id') final int? uniteId,
+      @JsonKey(name: 'unite_code') final String? uniteCode,
+      @JsonKey(name: 'unite_nom') final String? uniteNom,
+      @JsonKey(name: 'facteur_conversion', fromJson: jsonToDouble)
+      final double facteurConversion,
       @JsonKey(fromJson: jsonToDouble) required final double quantite,
       @JsonKey(name: 'prix_unitaire', fromJson: jsonToDouble)
       required final double prixUnitaire,
@@ -273,7 +388,28 @@ abstract class _PosItem implements PosItem {
   String get nomProduit;
   @override
   @JsonKey(name: 'lot_id')
-  int? get lotId;
+  int?
+      get lotId; // Optionnel : défaut = unité de base du produit côté serveur si
+// absent (comportement inchangé). Dès renseigné, quantite et
+// prixUnitaire s'entendent dans CETTE unité (ex: 2 sacs, pas 100 kg).
+  @override
+  @JsonKey(name: 'unite_id')
+  int?
+      get uniteId; // Affichage/calcul LOCAL uniquement (panier, reçu, décrément du
+// stock en cache) — jamais envoyés au serveur, qui les redétermine
+// lui-même depuis unite_id.
+  @override
+  @JsonKey(name: 'unite_code')
+  String? get uniteCode;
+  @override
+  @JsonKey(name: 'unite_nom')
+  String?
+      get uniteNom; // Combien d'unités de base (le stock est toujours suivi dans
+// l'unité de base) représente 1 unité vendue. 1 par défaut (unité
+// de base elle-même).
+  @override
+  @JsonKey(name: 'facteur_conversion', fromJson: jsonToDouble)
+  double get facteurConversion;
   @override
   @JsonKey(fromJson: jsonToDouble)
   double get quantite;

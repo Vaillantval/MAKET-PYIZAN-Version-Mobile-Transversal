@@ -16,11 +16,18 @@ class PosPanierNotifier extends StateNotifier<List<PosItem>> {
     required int produitId,
     required String nomProduit,
     int? lotId,
+    int? uniteId,
+    String? uniteCode,
+    String? uniteNom,
+    double facteurConversion = 1,
     required double quantite,
     required double prixUnitaire,
   }) {
+    // Même produit mais unité différente ("2 kg" vs "1 sac 50 kg") =
+    // deux lignes distinctes, jamais fusionnées entre elles — cohérent
+    // avec le panier acheteur (voir LignePanier).
     final index = state.indexWhere(
-      (i) => i.produitId == produitId && i.lotId == lotId,
+      (i) => i.produitId == produitId && i.lotId == lotId && i.uniteId == uniteId,
     );
     if (index != -1) {
       modifierQuantite(index, state[index].quantite + quantite);
@@ -32,6 +39,10 @@ class PosPanierNotifier extends StateNotifier<List<PosItem>> {
         produitId: produitId,
         nomProduit: nomProduit,
         lotId: lotId,
+        uniteId: uniteId,
+        uniteCode: uniteCode,
+        uniteNom: uniteNom,
+        facteurConversion: facteurConversion,
         quantite: quantite,
         prixUnitaire: prixUnitaire,
         sousTotal: quantite * prixUnitaire,

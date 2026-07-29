@@ -325,10 +325,15 @@ class PosHistoriqueNotifier extends StateNotifier<AsyncValue<List<PosSale>>> {
 
     await _local.saveSale(sale.toJson());
 
-    // Décrémenter le stock EN CACHE (cohérence visuelle entre deux syncs)
+    // Décrémenter le stock EN CACHE (cohérence visuelle entre deux syncs).
+    // Le stock est toujours suivi en unité de base — convertir la
+    // quantité vendue (ex: 2 sacs) via facteurConversion (ex: 50) pour
+    // décrémenter du bon montant (ex: 100 kg), pas juste "2".
     final catalogueNotifier = _ref.read(posCatalogueProvider.notifier);
     for (final item in items) {
-      await catalogueNotifier.decrementerStock(item.produitId, item.lotId, item.quantite);
+      await catalogueNotifier.decrementerStock(
+        item.produitId, item.lotId, item.quantite * item.facteurConversion,
+      );
     }
 
     await charger();

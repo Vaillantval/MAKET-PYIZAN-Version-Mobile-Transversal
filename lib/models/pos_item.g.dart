@@ -11,6 +11,12 @@ _$PosItemImpl _$$PosItemImplFromJson(Map<String, dynamic> json) =>
       produitId: (json['produit_id'] as num).toInt(),
       nomProduit: json['nom_produit'] as String? ?? '',
       lotId: (json['lot_id'] as num?)?.toInt(),
+      uniteId: (json['unite_id'] as num?)?.toInt(),
+      uniteCode: json['unite_code'] as String?,
+      uniteNom: json['unite_nom'] as String?,
+      facteurConversion: json['facteur_conversion'] == null
+          ? 1
+          : jsonToDouble(json['facteur_conversion']),
       quantite: jsonToDouble(json['quantite']),
       prixUnitaire: jsonToDouble(json['prix_unitaire']),
       sousTotal:
@@ -22,6 +28,10 @@ Map<String, dynamic> _$$PosItemImplToJson(_$PosItemImpl instance) =>
       'produit_id': instance.produitId,
       'nom_produit': instance.nomProduit,
       'lot_id': instance.lotId,
+      'unite_id': instance.uniteId,
+      'unite_code': instance.uniteCode,
+      'unite_nom': instance.uniteNom,
+      'facteur_conversion': instance.facteurConversion,
       'quantite': instance.quantite,
       'prix_unitaire': instance.prixUnitaire,
       'sous_total': instance.sousTotal,

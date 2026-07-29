@@ -166,7 +166,10 @@ class PosPrinterNotifier extends StateNotifier<PosPrinterState> {
 
     // ── Articles ─────────────────────────────────────────────────
     for (final item in vente.items) {
-      final nom = _tronquer(item.nomProduit, 16);
+      final nomComplet = item.uniteNom != null
+          ? '${item.nomProduit} (${item.uniteNom})'
+          : item.nomProduit;
+      final nom = _tronquer(nomComplet, 16);
       final qteFois = '${_formatQte(item.quantite)} x ${FormatUtils.htg(item.prixUnitaire)}';
       await _ligneColonnes([
         _Col(nom, 6),

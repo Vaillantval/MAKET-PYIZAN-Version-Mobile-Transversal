@@ -14,7 +14,6 @@ _$ProduitImpl _$$ProduitImplFromJson(Map<String, dynamic> json) =>
       variete: json['variete'] as String? ?? '',
       description: json['description'] as String? ?? '',
       prixUnitaire: json['prix_unitaire'] as String,
-      prixGros: json['prix_gros'] as String?,
       uniteVente: json['unite_vente'] as String,
       uniteVenteLabel: json['unite_vente_label'] as String,
       quantiteMinCommande:
@@ -37,7 +36,6 @@ Map<String, dynamic> _$$ProduitImplToJson(_$ProduitImpl instance) =>
       'variete': instance.variete,
       'description': instance.description,
       'prix_unitaire': instance.prixUnitaire,
-      'prix_gros': instance.prixGros,
       'unite_vente': instance.uniteVente,
       'unite_vente_label': instance.uniteVenteLabel,
       'quantite_min_commande': instance.quantiteMinCommande,

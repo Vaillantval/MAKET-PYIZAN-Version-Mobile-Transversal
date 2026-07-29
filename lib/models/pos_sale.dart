@@ -6,12 +6,24 @@ import 'pos_item.dart';
 part 'pos_sale.freezed.dart';
 part 'pos_sale.g.dart';
 
+// Sans toJson explicite par élément, le toJson() généré imbrique les
+// objets PosItem bruts (pas leur Map JSON) dans 'items' — jsonEncode()
+// le tolère en silence pour les requêtes HTTP (Dio) mais Hive le rejette
+// avec "Cannot write, unknown type: _$PosItemImpl" (pas de TypeAdapter
+// enregistré — le stockage local de saveSale() attend des Map pures).
+// @JsonSerializable(explicitToJson: true) au niveau classe ne suffit
+// pas ici : freezed génère le (dé)sérialiseur réellement utilisé
+// (_$$PosSaleImplToJson) séparément et ne le propage pas — d'où un
+// convertisseur explicite par champ, seul moyen fiable.
+List<Map<String, dynamic>> _itemsToJson(List<PosItem> items) =>
+    items.map((e) => e.toJson()).toList();
+
 @freezed
 class PosSale with _$PosSale {
   const factory PosSale({
     @JsonKey(name: 'idempotency_key') required String idempotencyKey,
     @JsonKey(name: 'numero_vente')    String? numeroVente,
-    @Default([]) List<PosItem> items,
+    @JsonKey(toJson: _itemsToJson) @Default([]) List<PosItem> items,
     @JsonKey(name: 'montant_total', fromJson: jsonToDouble)   required double montantTotal,
     @JsonKey(name: 'methode_paiement') @Default('cash') String methodePaiement,
     @JsonKey(name: 'montant_wallet', fromJson: jsonToDouble)  @Default(0) double montantWallet,

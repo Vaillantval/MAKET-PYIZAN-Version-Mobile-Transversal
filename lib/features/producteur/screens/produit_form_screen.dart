@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../../core/constants/app_colors.dart';
 import '../providers/mes_produits_provider.dart';
+import '../providers/unites_mesure_provider.dart';
 
 class ProduitFormScreen extends ConsumerStatefulWidget {
   final String? slug; // null = nouveau, slug = modifier
@@ -25,22 +26,10 @@ class _ProduitFormScreenState extends ConsumerState<ProduitFormScreen> {
   final _seuilCtrl = TextEditingController();
   final _origCtrl  = TextEditingController();
 
-  String  _uniteVente  = 'kg';
+  int?    _uniteVenteId;
   int?    _categorieId;
   File?   _imageFile;
   bool    _isLoading   = false;
-
-  static const _unites = [
-    ('kg',     'Kilogramme (kg)'),
-    ('tonne',  'Tonne'),
-    ('sac_50', 'Sac 50 kg'),
-    ('sac_25', 'Sac 25 kg'),
-    ('botte',  'Botte'),
-    ('piece',  'Pièce'),
-    ('litre',  'Litre'),
-    ('carton', 'Carton'),
-    ('douz',   'Douzaine'),
-  ];
 
   @override
   void dispose() {
@@ -68,6 +57,15 @@ class _ProduitFormScreenState extends ConsumerState<ProduitFormScreen> {
 
   Future<void> _sauvegarder() async {
     if (!_formKey.currentState!.validate()) return;
+    if (_uniteVenteId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Sélectionnez une unité de vente.'),
+          backgroundColor: AppColors.rouge,
+        ),
+      );
+      return;
+    }
     setState(() => _isLoading = true);
 
     final body = <String, dynamic>{
@@ -77,7 +75,7 @@ class _ProduitFormScreenState extends ConsumerState<ProduitFormScreen> {
       'prix_unitaire':    _prixCtrl.text.trim(),
       'stock_disponible': int.tryParse(_stockCtrl.text) ?? 0,
       'seuil_alerte':     int.tryParse(_seuilCtrl.text) ?? 10,
-      'unite_vente':      _uniteVente,
+      'unite_vente':      _uniteVenteId,
       'origine':          _origCtrl.text.trim(),
       if (_categorieId != null) 'categorie': _categorieId,
     };
@@ -225,18 +223,38 @@ class _ProduitFormScreenState extends ConsumerState<ProduitFormScreen> {
                 ),
                 const SizedBox(width: 12),
                 Expanded(
-                  child: DropdownButtonFormField<String>(
-                    initialValue: _uniteVente,
-                    items:    _unites.map((u) => DropdownMenuItem(
-                      value: u.$1,
-                      child: Text(u.$2,
-                        overflow: TextOverflow.ellipsis),
-                    )).toList(),
-                    onChanged: (v) =>
-                        setState(() => _uniteVente = v!),
-                    decoration: const InputDecoration(
-                      labelText: 'Unité *',
-                    ),
+                  child: Consumer(
+                    builder: (context, ref, _) {
+                      final unites = ref.watch(unitesMesureProvider);
+                      return unites.when(
+                        loading: () => const Center(
+                          child: Padding(
+                            padding: EdgeInsets.symmetric(vertical: 12),
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          ),
+                        ),
+                        error: (_, __) => const Text(
+                          'Erreur de chargement des unités',
+                          style: TextStyle(fontSize: 12, color: AppColors.rouge),
+                        ),
+                        data: (liste) {
+                          _uniteVenteId ??= liste.isNotEmpty ? liste.first.id : null;
+                          return DropdownButtonFormField<int>(
+                            initialValue: _uniteVenteId,
+                            items: liste.map((u) => DropdownMenuItem(
+                              value: u.id,
+                              child: Text(u.nom, overflow: TextOverflow.ellipsis),
+                            )).toList(),
+                            onChanged: (v) =>
+                                setState(() => _uniteVenteId = v),
+                            decoration: const InputDecoration(
+                              labelText: 'Unité *',
+                            ),
+                            validator: (v) => v == null ? 'Requis' : null,
+                          );
+                        },
+                      );
+                    },
                   ),
                 ),
               ]),

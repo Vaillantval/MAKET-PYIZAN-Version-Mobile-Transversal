@@ -162,7 +162,12 @@ class _ArticleTile extends StatelessWidget {
                 ),
               ),
               Text(
-                'x${detail['quantite']}  ${detail['unite_vente'] ?? ''}',
+                // Voir commentaire équivalent côté acheteur : quantite/
+                // unite_vente sont désormais toujours dans l'unité de
+                // base du produit — quantite_choisie/unite_choisie
+                // reflètent ce que l'acheteur a réellement sélectionné.
+                'x${detail['quantite_choisie'] ?? detail['quantite']}  '
+                '${detail['unite_choisie'] ?? detail['unite_vente'] ?? ''}',
                 style: const TextStyle(
                   fontSize: 12, color: AppColors.grisTexte),
               ),

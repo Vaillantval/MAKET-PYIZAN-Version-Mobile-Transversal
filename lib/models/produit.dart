@@ -13,7 +13,6 @@ class Produit with _$Produit {
     @Default('') String variete,
     @Default('') String description,
     @JsonKey(name: 'prix_unitaire')     required String prixUnitaire,
-    @JsonKey(name: 'prix_gros')         String? prixGros,
     @JsonKey(name: 'unite_vente')       required String uniteVente,
     @JsonKey(name: 'unite_vente_label') required String uniteVenteLabel,
     @JsonKey(name: 'quantite_min_commande') @Default(1) int quantiteMinCommande,

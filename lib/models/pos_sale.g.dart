@@ -30,7 +30,7 @@ Map<String, dynamic> _$$PosSaleImplToJson(_$PosSaleImpl instance) =>
     <String, dynamic>{
       'idempotency_key': instance.idempotencyKey,
       'numero_vente': instance.numeroVente,
-      'items': instance.items,
+      'items': _itemsToJson(instance.items),
       'montant_total': instance.montantTotal,
       'methode_paiement': instance.methodePaiement,
       'montant_wallet': instance.montantWallet,

@@ -36,6 +36,7 @@ class AppEndpoints {
   static String produitDetail(String slug) => '/api/products/public/$slug/';
   static const String mesProduits   = '/api/products/mes-produits/';
   static String monProduit(String slug) => '/api/products/mes-produits/$slug/';
+  static const String unitesMesure  = '/api/products/unites-mesure/';
 
   // Panier
   static const String panier        = '/api/orders/panier/';
