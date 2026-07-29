@@ -140,7 +140,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
       state = state.copyWith(
         isLoading: false,
-        error:     data['error']?.toString() ?? 'Erreur de connexion',
+        error:     extraireMessageErreur(data['error'], 'Erreur de connexion'),
       );
       return false;
     } catch (e) {
@@ -161,6 +161,16 @@ class AuthNotifier extends StateNotifier<AuthState> {
     required String lastName,
     String telephone = '',
     String? codeParrainage,
+    // Profil producteur (géo obligatoire côté backend pour ce rôle).
+    String? departement,
+    String? commune,
+    String? localite,
+    double? superficieHa,
+    String? numIdentification,
+    String? description,
+    // Profil acheteur (tous optionnels côté backend).
+    String? typeAcheteur,
+    String? nomOrganisation,
   }) async {
     state = state.copyWith(isLoading: true, error: null);
     try {
@@ -177,6 +187,21 @@ class AuthNotifier extends StateNotifier<AuthState> {
           'telephone':  telephone,
           if (codeParrainage != null && codeParrainage.isNotEmpty)
             'code_parrainage': codeParrainage,
+          if (departement != null && departement.isNotEmpty)
+            'departement': departement,
+          if (commune != null && commune.isNotEmpty)
+            'commune': commune,
+          if (localite != null && localite.isNotEmpty)
+            'localite': localite,
+          if (superficieHa != null) 'superficie_ha': superficieHa,
+          if (numIdentification != null && numIdentification.isNotEmpty)
+            'num_identification': numIdentification,
+          if (description != null && description.isNotEmpty)
+            'description': description,
+          if (typeAcheteur != null && typeAcheteur.isNotEmpty)
+            'type_acheteur': typeAcheteur,
+          if (nomOrganisation != null && nomOrganisation.isNotEmpty)
+            'nom_organisation': nomOrganisation,
         },
       );
       final data = response.data as Map<String, dynamic>;
@@ -206,7 +231,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
       state = state.copyWith(
         isLoading: false,
-        error:     data['error']?.toString(),
+        error:     extraireMessageErreur(data['error'], 'Erreur d\'inscription'),
       );
       return false;
     } catch (e) {

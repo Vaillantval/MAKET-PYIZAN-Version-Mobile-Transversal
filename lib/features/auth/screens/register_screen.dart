@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../providers/auth_provider.dart';
+import '../../../shared/widgets/geo_selector.dart';
 
 class RegisterScreen extends ConsumerStatefulWidget {
   const RegisterScreen({super.key});
@@ -20,8 +21,28 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   final _lastNameCtrl  = TextEditingController();
   final _telCtrl       = TextEditingController();
   final _parrainageCtrl = TextEditingController();
-  String _role         = 'acheteur';
-  bool   _obscure      = true;
+  // Producteur
+  final _superficieCtrl = TextEditingController();
+  final _numIdCtrl       = TextEditingController();
+  final _descCtrl        = TextEditingController();
+  // Acheteur
+  final _nomOrgCtrl = TextEditingController();
+
+  String  _role         = 'acheteur';
+  bool    _obscure      = true;
+  String? _geoDept;
+  String? _geoCommune;
+  String? _geoSection;
+  String? _typeAcheteur;
+
+  static const _typesAcheteur = [
+    ('particulier', 'Particulier'),
+    ('grossiste',   'Grossiste'),
+    ('detaillant',  'Détaillant'),
+    ('cooperative', 'Coopérative'),
+    ('institution', 'Institution'),
+    ('restaurant',  'Restaurant'),
+  ];
 
   @override
   void dispose() {
@@ -32,11 +53,29 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     _lastNameCtrl.dispose();
     _telCtrl.dispose();
     _parrainageCtrl.dispose();
+    _superficieCtrl.dispose();
+    _numIdCtrl.dispose();
+    _descCtrl.dispose();
+    _nomOrgCtrl.dispose();
     super.dispose();
   }
 
   Future<void> _register() async {
     if (!_formKey.currentState!.validate()) return;
+
+    // Le backend refuse de toute façon un producteur sans géo, mais on
+    // évite l'aller-retour réseau en le signalant tout de suite.
+    if (_role == 'producteur' &&
+        ((_geoDept ?? '').isEmpty || (_geoCommune ?? '').isEmpty)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Département et commune sont requis pour un compte producteur.'),
+          backgroundColor: AppColors.rouge,
+        ),
+      );
+      return;
+    }
+
     final success = await ref.read(authProvider.notifier).register(
       username:   _usernameCtrl.text.trim(),
       email:      _emailCtrl.text.trim(),
@@ -47,6 +86,20 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       telephone:  _telCtrl.text.trim(),
       codeParrainage: _parrainageCtrl.text.trim().isEmpty
           ? null : _parrainageCtrl.text.trim(),
+      departement: _role == 'producteur' ? _geoDept
+          : (_geoDept != null && _geoDept!.isNotEmpty ? _geoDept : null),
+      commune:     _role == 'producteur' ? _geoCommune : null,
+      localite:    _role == 'producteur' ? _geoSection : null,
+      superficieHa: _role == 'producteur'
+          ? double.tryParse(_superficieCtrl.text.trim())
+          : null,
+      numIdentification: _role == 'producteur' && _numIdCtrl.text.trim().isNotEmpty
+          ? _numIdCtrl.text.trim() : null,
+      description: _role == 'producteur' && _descCtrl.text.trim().isNotEmpty
+          ? _descCtrl.text.trim() : null,
+      typeAcheteur: _role == 'acheteur' ? _typeAcheteur : null,
+      nomOrganisation: _role == 'acheteur' && _nomOrgCtrl.text.trim().isNotEmpty
+          ? _nomOrgCtrl.text.trim() : null,
     );
     if (!success && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -58,6 +111,101 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
         ),
       );
     }
+  }
+
+  /// Champs de profil spécifiques au rôle choisi — géo + infos
+  /// d'exploitation pour un producteur, géo (département seul) + type
+  /// pour un acheteur. Réutilise GeoSelector (déjà câblé sur l'écran
+  /// Adresses) plutôt que d'en recréer un.
+  Widget _buildChampsRole() {
+    if (_role == 'producteur') {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Localisation de l\'exploitation *',
+            style: TextStyle(fontWeight: FontWeight.w700, fontSize: 14),
+          ),
+          const SizedBox(height: 8),
+          GeoSelector(
+            // Clé distincte du GeoSelector acheteur ci-dessous : sans ça,
+            // Flutter réutilise le même État en changeant de rôle (même
+            // type de widget, même position dans l'arbre) et la sélection
+            // du département fuite d'un mode vers l'autre.
+            key: const ValueKey('geo-producteur'),
+            onChanged: (dept, commune, section) => setState(() {
+              _geoDept    = dept;
+              _geoCommune = commune;
+              _geoSection = section;
+            }),
+          ),
+          const SizedBox(height: 16),
+          TextFormField(
+            controller:   _superficieCtrl,
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+            decoration: const InputDecoration(
+              labelText:  'Superficie exploitée (ha, optionnel)',
+              prefixIcon: Icon(Icons.landscape_outlined),
+            ),
+          ),
+          const SizedBox(height: 16),
+          TextFormField(
+            controller: _numIdCtrl,
+            decoration: const InputDecoration(
+              labelText:  'N° d\'identification (optionnel)',
+              prefixIcon: Icon(Icons.badge_outlined),
+            ),
+          ),
+          const SizedBox(height: 16),
+          TextFormField(
+            controller: _descCtrl,
+            maxLines:   3,
+            decoration: const InputDecoration(
+              labelText:  'Description de l\'exploitation (optionnel)',
+              prefixIcon: Icon(Icons.description_outlined),
+            ),
+          ),
+        ],
+      );
+    }
+
+    // Acheteur
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Localisation (optionnel)',
+          style: TextStyle(fontWeight: FontWeight.w700, fontSize: 14),
+        ),
+        const SizedBox(height: 8),
+        GeoSelector(
+          key: const ValueKey('geo-acheteur'),
+          showCommuneEtSection: false,
+          onChanged: (dept, commune, section) => setState(() => _geoDept = dept),
+        ),
+        const SizedBox(height: 16),
+        DropdownButtonFormField<String>(
+          initialValue: _typeAcheteur,
+          items: _typesAcheteur.map((t) => DropdownMenuItem(
+            value: t.$1,
+            child: Text(t.$2),
+          )).toList(),
+          onChanged: (v) => setState(() => _typeAcheteur = v),
+          decoration: const InputDecoration(
+            labelText:  'Type d\'acheteur (optionnel)',
+            prefixIcon: Icon(Icons.storefront_outlined),
+          ),
+        ),
+        const SizedBox(height: 16),
+        TextFormField(
+          controller: _nomOrgCtrl,
+          decoration: const InputDecoration(
+            labelText:  'Nom de l\'organisation (optionnel)',
+            prefixIcon: Icon(Icons.apartment_outlined),
+          ),
+        ),
+      ],
+    );
   }
 
   @override
@@ -121,6 +269,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                     ),
                   ),
 
+                const SizedBox(height: 20),
+                _buildChampsRole(),
                 const SizedBox(height: 24),
 
                 // Champs

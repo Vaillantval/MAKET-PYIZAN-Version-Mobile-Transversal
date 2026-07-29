@@ -1,20 +1,28 @@
 import 'package:dio/dio.dart';
 
-/// Extrait le message d'erreur métier renvoyé par le backend (data['error'],
-/// string ou objet {"champ": ["message"]} des erreurs de validation DRF)
-/// depuis une DioException, au lieu d'assumer que toute exception vient
-/// d'un problème réseau.
+/// Extrait un message affichable depuis un champ 'error' de réponse
+/// backend : soit une string, soit un objet {"champ": ["message"]} des
+/// erreurs de validation DRF (renvoie le premier message trouvé).
+String extraireMessageErreur(dynamic erreur, String messageParDefaut) {
+  if (erreur is String && erreur.isNotEmpty) return erreur;
+  if (erreur is Map) {
+    final premier = erreur.values.firstWhere(
+      (v) => v is List && v.isNotEmpty,
+      orElse: () => null,
+    );
+    if (premier is List) return premier.first.toString();
+  }
+  return messageParDefaut;
+}
+
+/// Même chose, mais depuis une DioException (ex: 400 avec {success:false,
+/// error:...}) au lieu d'assumer que toute exception vient d'un problème
+/// réseau.
 String messageErreurApi(Object e, String messageParDefaut) {
   if (e is DioException && e.response?.data is Map) {
-    final erreur = (e.response!.data as Map)['error'];
-    if (erreur is String && erreur.isNotEmpty) return erreur;
-    if (erreur is Map) {
-      final premier = erreur.values.firstWhere(
-        (v) => v is List && v.isNotEmpty,
-        orElse: () => null,
-      );
-      if (premier is List) return premier.first.toString();
-    }
+    return extraireMessageErreur(
+      (e.response!.data as Map)['error'], messageParDefaut,
+    );
   }
   return messageParDefaut;
 }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'core/firebase_init.dart';
 import 'core/theme/app_theme.dart';
 import 'core/notifications/notification_handler.dart';
 import 'core/notifications/notification_provider.dart';
@@ -25,7 +26,14 @@ class _MaketPeyizanAppState
     _setupNotifications();
   }
 
-  void _setupNotifications() {
+  Future<void> _setupNotifications() async {
+    // main.dart ne bloque plus runApp() sur Firebase.initializeApp() (voir
+    // FirebaseInit) — l'attendre ici, avant tout usage de
+    // FirebaseMessaging, évite un crash si l'init n'est pas encore
+    // terminée à ce stade.
+    final ready = await FirebaseInit.ready;
+    if (!ready || !mounted) return;
+
     // Notification reçue en foreground → incrémenter compteur
     FirebaseMessaging.onMessage.listen((message) {
       ref.read(notificationProvider.notifier);

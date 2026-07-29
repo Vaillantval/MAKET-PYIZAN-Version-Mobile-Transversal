@@ -12,12 +12,16 @@ class GeoSelector extends ConsumerStatefulWidget {
   final String? initialDept;
   final String? initialCommune;
   final String? initialSection;
+  // Acheteur : seul le département est collecté à l'inscription (commune/
+  // section restent réservées à l'adresse de livraison, écran séparé).
+  final bool showCommuneEtSection;
 
   const GeoSelector({
     required this.onChanged,
     this.initialDept,
     this.initialCommune,
     this.initialSection,
+    this.showCommuneEtSection = true,
     super.key,
   });
 
@@ -159,42 +163,44 @@ class _GeoSelectorState extends ConsumerState<GeoSelector> {
             _notifyChanged();
           },
         ),
-        const SizedBox(height: 12),
+        if (widget.showCommuneEtSection) ...[
+          const SizedBox(height: 12),
 
-        // Commune
-        _buildDropdown(
-          label:    'Commune',
-          value:    _selectedCommune,
-          enabled:  _communes.isNotEmpty,
-          items:    _communes.map((c) => DropdownMenuItem(
-            value: c['nom'] as String,
-            child: Text(c['nom'] as String),
-          )).toList(),
-          onChanged: (v) {
-            setState(() {
-              _selectedCommune = v;
-              _selectedSection = null;
-              _sections        = [];
-            });
-            if (v != null) _chargerSections(v);
-            _notifyChanged();
-          },
-        ),
-        const SizedBox(height: 12),
+          // Commune
+          _buildDropdown(
+            label:    'Commune',
+            value:    _selectedCommune,
+            enabled:  _communes.isNotEmpty,
+            items:    _communes.map((c) => DropdownMenuItem(
+              value: c['nom'] as String,
+              child: Text(c['nom'] as String),
+            )).toList(),
+            onChanged: (v) {
+              setState(() {
+                _selectedCommune = v;
+                _selectedSection = null;
+                _sections        = [];
+              });
+              if (v != null) _chargerSections(v);
+              _notifyChanged();
+            },
+          ),
+          const SizedBox(height: 12),
 
-        // Section communale (optionnel)
-        _buildDropdown(
-          label:    'Section communale (optionnel)',
-          value:    _selectedSection,
-          enabled:  _sections.isNotEmpty,
-          items:    _sections.map((s) => DropdownMenuItem(
-            value: s, child: Text(s),
-          )).toList(),
-          onChanged: (v) {
-            setState(() => _selectedSection = v);
-            _notifyChanged();
-          },
-        ),
+          // Section communale (optionnel)
+          _buildDropdown(
+            label:    'Section communale (optionnel)',
+            value:    _selectedSection,
+            enabled:  _sections.isNotEmpty,
+            items:    _sections.map((s) => DropdownMenuItem(
+              value: s, child: Text(s),
+            )).toList(),
+            onChanged: (v) {
+              setState(() => _selectedSection = v);
+              _notifyChanged();
+            },
+          ),
+        ],
       ],
     );
   }

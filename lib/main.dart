@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:firebase_core/firebase_core.dart';
+import 'core/firebase_init.dart';
 import 'core/offline/connectivity_service.dart';
 import 'core/storage/local_storage.dart';
 import 'core/storage/secure_storage.dart';
@@ -22,9 +22,10 @@ void main() async {
   // SharedPreferences
   final prefs = await SharedPreferences.getInstance();
 
-  // Firebase — ne doit jamais bloquer le démarrage de l'app (ex: config
-  // Android manquante). Sans ça, une exception ici empêche runApp() et
-  // l'app reste bloquée indéfiniment sur le splash natif.
+  // Firebase — volontairement PAS attendu ici : l'attendre retardait le
+  // premier affichage de l'app à chaque démarrage à froid (voir
+  // FirebaseInit). app.dart attend FirebaseInit.ready avant d'utiliser
+  // FirebaseMessaging, donc ne rien attendre ici ne casse rien.
   //
   // onBackgroundMessage() n'est volontairement PAS enregistré : le
   // handler associé est un no-op (Firebase affiche déjà la notification
@@ -33,11 +34,7 @@ void main() async {
   // lancement — coûteux, et bloquant le thread principal au point de
   // geler toute l'app sur du matériel bas de gamme (ex: terminaux
   // caisse Sunmi/MediaTek).
-  try {
-    await Firebase.initializeApp();
-  } catch (e) {
-    debugPrint('Firebase indisponible, notifications push désactivées : $e');
-  }
+  FirebaseInit.start();
 
   // Connectivité — ne doit pas bloquer le démarrage : sur certains réseaux
   // (DNS lent/indisponible), la vérification initiale peut prendre un
