@@ -1,6 +1,8 @@
+import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/api/api_client.dart';
 import '../../../core/api/api_endpoints.dart';
+import '../../../core/utils/api_error.dart';
 import 'pos_exceptions.dart';
 
 final posWalletProvider = Provider<PosWalletService>((ref) {
@@ -55,7 +57,18 @@ class PosWalletService {
       );
     } on PosVenteException {
       rethrow;
-    } catch (_) {
+    } catch (e) {
+      // Code refusé : le backend répond 400 {success:false, error} — Dio
+      // le lève en exception, ce n'est pas un problème de connexion.
+      if (e is DioException && e.response?.statusCode == 400) {
+        throw PosVenteException('CODE_INVALIDE', messageErreurApi(e,
+            'Code invalide ou expiré — demandez au client de régénérer un nouveau code.'));
+      }
+      final codeTerminal = codePosErreur(e);
+      if (codeTerminal != null) {
+        throw PosVenteException(codeTerminal, messagePosErreur(e) ??
+            'Terminal non autorisé — contactez votre administrateur.');
+      }
       throw const PosVenteException(
         'RESEAU',
         'Impossible de vérifier le code — vérifiez la connexion.',

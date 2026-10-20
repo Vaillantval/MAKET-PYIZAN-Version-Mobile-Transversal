@@ -55,27 +55,30 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                   width:  100,
                   height: 100,
                   decoration: BoxDecoration(
-                    color: AppColors.jaune,
-                    borderRadius: BorderRadius.circular(50),
+                    color: AppColors.blanc,
+                    borderRadius: BorderRadius.circular(30),
                     image: const DecorationImage(
-                      image: AssetImage('assets/images/maketpeyizan.jpeg'),
+                      image: AssetImage('assets/images/maketlakay.jpeg'),
                       fit: BoxFit.cover,
                     ),
                   ),
                 ),
                 const SizedBox(height: 24),
-                const Text(
-                  'Makèt Peyizan',
+                const Text.rich(
+                  TextSpan(children: [
+                    TextSpan(text: 'Maket'),
+                    TextSpan(text: 'Lakay', style: TextStyle(color: AppColors.jaune)),
+                  ]),
                   style: TextStyle(
-                    fontFamily: 'PlayfairDisplay',
-                    fontSize:   32,
-                    fontWeight: FontWeight.w900,
+                    fontSize:   34,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: -0.8,
                     color:      AppColors.blanc,
                   ),
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Sòti nan jaden rive lakay',
+                  'Sòti nan jaden, rive lakay ou',
                   style: TextStyle(
                     fontSize: 14,
                     color:    AppColors.blanc.withValues(alpha: 0.7),

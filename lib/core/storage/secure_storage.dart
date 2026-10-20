@@ -47,6 +47,23 @@ class SecureStorage {
 
   Future<int?> getUserId() async => _prefs.getInt(AppConstants.keyUserId);
 
+  // Entreprise active (espace entreprise) : id + rôle du compte dans celle-ci
+  Future<void> saveEntrepriseActive(int id, String role) async {
+    await _prefs.setInt(AppConstants.keyEntrepriseActive, id);
+    await _prefs.setString(AppConstants.keyEntrepriseActiveRole, role);
+  }
+
+  int? getEntrepriseActiveId() =>
+      _prefs.getInt(AppConstants.keyEntrepriseActive);
+
+  String? getEntrepriseActiveRole() =>
+      _prefs.getString(AppConstants.keyEntrepriseActiveRole);
+
+  Future<void> clearEntrepriseActive() async {
+    await _prefs.remove(AppConstants.keyEntrepriseActive);
+    await _prefs.remove(AppConstants.keyEntrepriseActiveRole);
+  }
+
   Future<bool> isLoggedIn() async {
     final token = await getAccessToken();
     return token != null && token.isNotEmpty;
@@ -63,5 +80,6 @@ class SecureStorage {
     await _prefs.remove(AppConstants.keyRefreshToken);
     await _prefs.remove(AppConstants.keyUserRole);
     await _prefs.remove(AppConstants.keyUserId);
+    await clearEntrepriseActive();
   }
 }

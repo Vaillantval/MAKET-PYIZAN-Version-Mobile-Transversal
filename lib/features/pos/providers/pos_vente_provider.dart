@@ -225,14 +225,18 @@ class PosHistoriqueNotifier extends StateNotifier<AsyncValue<List<PosSale>>> {
     String? referenceTransaction,
   }) async {
     final idempotencyKey = const Uuid().v4();
-    final vendueLe = DateTime.now().toIso8601String();
+    // Horodatage UTC explicite : le backend rattache une vente synchronisée
+    // à la session qui couvrait vendue_le — une heure « naïve » serait lue
+    // à l'heure d'Haïti, faussée sur un terminal réglé sur un autre fuseau.
+    final vendueLe = DateTime.now().toUtc().toIso8601String();
 
     final payloadVente = <String, dynamic>{
       'idempotency_key':  idempotencyKey,
       'items':            items.map((i) => i.toPayload()).toList(),
       'methode_paiement': methodePaiement,
       'vendue_le':        vendueLe,
-      if (montantWallet > 0) 'montant_wallet': montantWallet,
+      if (montantWallet > 0)
+        'montant_wallet': double.parse(montantWallet.toStringAsFixed(2)),
       if (codePaiement != null && codePaiement.isNotEmpty)
         'code_paiement': codePaiement,
       if (referenceTransaction != null && referenceTransaction.isNotEmpty)
@@ -260,11 +264,11 @@ class PosHistoriqueNotifier extends StateNotifier<AsyncValue<List<PosSale>>> {
         );
       }
       try {
-        final res  = await _api.post(AppEndpoints.posVente, data: payloadVente);
+        final res  = await _posterVenteWallet(payloadVente);
         final data = res.data as Map<String, dynamic>;
         if (data['success'] != true) {
           final erreur = data['error']?.toString();
-          final code   = _classifierErreurWallet(erreur);
+          final code   = _classifierErreurWallet(data['code']?.toString(), erreur);
           throw PosVenteException(code, _messageErreurWallet(code, erreur));
         }
         final v = _extraireVente(data);
@@ -276,20 +280,23 @@ class PosHistoriqueNotifier extends StateNotifier<AsyncValue<List<PosSale>>> {
       } on PosVenteException {
         rethrow;
       } catch (e) {
-        final code = codePosErreur(e);
-        if (code == 'TERMINAL_EN_ATTENTE' || code == 'TERMINAL_REVOQUE') {
-          _ref.read(posTerminalStatusProvider.notifier).definir(code == 'TERMINAL_EN_ATTENTE'
-              ? PosTerminalStatut.enAttente
-              : PosTerminalStatut.revoque);
-          throw PosVenteException(
-            code!,
-            messagePosErreur(e) ?? 'Terminal non autorisé — contactez votre administrateur.',
-          );
+        final codeTerminal = _signalerTerminalNonAutorise(e);
+        if (codeTerminal != null) {
+          throw PosVenteException(codeTerminal, messagePosErreur(e) ??
+              'Terminal non autorisé — contactez votre administrateur.');
+        }
+        // Refus métier (HTTP 400 : solde insuffisant, code invalide ou
+        // expiré, session fermée…) — Dio le lève en exception.
+        final refus = _refusMetier(e);
+        if (refus != null) {
+          final code = _classifierErreurWallet(refus.code, refus.message);
+          throw PosVenteException(code, _messageErreurWallet(code, refus.message));
         }
         throw const PosVenteException(
           'OFFLINE',
-          'La connexion a été interrompue pendant le paiement — la vente '
-          'n\'a pas été enregistrée.',
+          'La connexion a été interrompue pendant le paiement : la vente n\'a '
+          'peut-être pas été enregistrée. Vérifiez l\'historique avant de '
+          'réessayer (un code déjà utilisé sera refusé, sans double débit).',
         );
       }
     } else if (ConnectivityService().isOnline) {
@@ -304,20 +311,27 @@ class PosHistoriqueNotifier extends StateNotifier<AsyncValue<List<PosSale>>> {
             syncStatus:  'synchronisee',
           );
         } else {
-          sale = sale.copyWith(statut: 'rejetee', syncStatus: 'rejetee');
+          throw PosVenteException('REJETEE', extraireMessageErreur(
+              data['error'], 'Vente refusée par le serveur.'));
         }
+      } on PosVenteException {
+        rethrow;
       } catch (e) {
-        if (_isNetworkError(e)) {
-          await _mettreEnQueue(idempotencyKey, payloadVente);
-        } else {
-          final code = codePosErreur(e);
-          if (code == 'TERMINAL_EN_ATTENTE' || code == 'TERMINAL_REVOQUE') {
-            _ref.read(posTerminalStatusProvider.notifier).definir(code == 'TERMINAL_EN_ATTENTE'
-                ? PosTerminalStatut.enAttente
-                : PosTerminalStatut.revoque);
-          }
-          sale = sale.copyWith(statut: 'rejetee', syncStatus: 'rejetee');
+        // Refus définitif (400 métier, 403 terminal) : la vente n'existe
+        // pas côté serveur — ne pas l'enregistrer comme faite, ne pas
+        // vider le panier ni décrémenter le stock local.
+        final codeTerminal = _signalerTerminalNonAutorise(e);
+        if (codeTerminal != null) {
+          throw PosVenteException(codeTerminal, messagePosErreur(e) ??
+              'Terminal non autorisé — contactez votre administrateur.');
         }
+        final refus = _refusMetier(e);
+        if (refus != null) {
+          throw PosVenteException('REJETEE', refus.message);
+        }
+        // Réseau ou erreur serveur (5xx) : la vente a pu passer ou non —
+        // la file la resoumet avec la même idempotency_key (sans doublon).
+        await _mettreEnQueue(idempotencyKey, payloadVente);
       }
     } else {
       await _mettreEnQueue(idempotencyKey, payloadVente);
@@ -349,7 +363,52 @@ class PosHistoriqueNotifier extends StateNotifier<AsyncValue<List<PosSale>>> {
     return v is Map<String, dynamic> ? v : d;
   }
 
-  String _classifierErreurWallet(String? erreur) {
+  /// POST /api/pos/vente/ pour un paiement wallet, avec UNE nouvelle
+  /// tentative (même idempotency_key) si la réponse se perd en route : le
+  /// backend renvoie alors la vente existante sans re-débiter le client.
+  Future<Response> _posterVenteWallet(Map<String, dynamic> payload) async {
+    try {
+      return await _api.post(AppEndpoints.posVente, data: payload);
+    } catch (e) {
+      if (!_isNetworkError(e) && !_isErreurServeur(e)) rethrow;
+      return _api.post(AppEndpoints.posVente, data: payload);
+    }
+  }
+
+  /// 403 TERMINAL_* : met à jour le badge de statut du terminal et
+  /// renvoie le code (null sinon).
+  String? _signalerTerminalNonAutorise(Object e) {
+    final code = codePosErreur(e);
+    if (code == 'TERMINAL_EN_ATTENTE' || code == 'TERMINAL_REVOQUE') {
+      _ref.read(posTerminalStatusProvider.notifier).definir(code == 'TERMINAL_EN_ATTENTE'
+          ? PosTerminalStatut.enAttente
+          : PosTerminalStatut.revoque);
+      return code;
+    }
+    return null;
+  }
+
+  /// Refus métier du backend (HTTP 4xx avec {success:false, error, code?}
+  /// ou {code, message} pour les permissions POS).
+  ({String? code, String message})? _refusMetier(Object e) {
+    if (e is! DioException) return null;
+    final status = e.response?.statusCode ?? 0;
+    if (status < 400 || status >= 500) return null;
+    final data = e.response?.data;
+    if (data is! Map) {
+      return (code: null, message: 'Vente refusée par le serveur ($status).');
+    }
+    return (
+      code: data['code']?.toString(),
+      message: extraireMessageErreur(
+        data['error'] ?? data['message'] ?? data['detail'] ?? data,
+        'Vente refusée par le serveur.',
+      ),
+    );
+  }
+
+  String _classifierErreurWallet(String? codeServeur, String? erreur) {
+    if (codeServeur == 'SOLDE_INSUFFISANT') return 'SOLDE_INSUFFISANT';
     final e = (erreur ?? '').toUpperCase();
     if (e.contains('CODE')) return 'CODE_INVALIDE';
     if (e.contains('SOLDE') || e.contains('INSUFFISANT')) return 'SOLDE_INSUFFISANT';
@@ -378,6 +437,9 @@ class PosHistoriqueNotifier extends StateNotifier<AsyncValue<List<PosSale>>> {
       localId:  idempotencyKey,
     ));
   }
+
+  bool _isErreurServeur(dynamic e) =>
+      e is DioException && (e.response?.statusCode ?? 0) >= 500;
 
   bool _isNetworkError(dynamic e) =>
       e is DioException &&

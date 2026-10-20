@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Vert Makèt Peyizan (fond de l'icône officielle) -->
-    <color name="ic_launcher_background">#1B4A2F</color>
+    <!-- Fond blanc de l'icône MaketLakay -->
+    <color name="ic_launcher_background">#FFFFFF</color>
     <!-- Teinte appliquée à l'icône de notification (silhouette blanche) -->
-    <color name="notification_color">#1B4A2F</color>
+    <color name="notification_color">#0B4A24</color>
 </resources>

@@ -6,6 +6,7 @@ import '../core/offline/cache_manager.dart';
 import '../core/notifications/fcm_service.dart';
 import '../core/utils/api_error.dart';
 import '../models/user.dart';
+import 'entreprise_provider.dart';
 
 // État d'authentification
 enum AuthStatus { unknown, authenticated, unauthenticated }
@@ -93,6 +94,8 @@ class AuthNotifier extends StateNotifier<AuthState> {
         await _storage.saveUserRole(user.role);
         await _storage.saveUserId(user.id);
         await _cache.saveUser(data['data'] as Map<String, dynamic>);
+        await _ref.read(entrepriseActiveIdProvider.notifier)
+            .synchroniser(user.entreprises);
         state = state.copyWith(
           status: AuthStatus.authenticated,
           user:   user,
@@ -124,6 +127,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
         await _storage.saveUserRole(user.role);
         await _storage.saveUserId(user.id);
         await _cache.saveUser(d['user'] as Map<String, dynamic>);
+        await _ref.read(entrepriseActiveIdProvider.notifier).quitter();
 
         state = state.copyWith(
           status:    AuthStatus.authenticated,
@@ -156,19 +160,15 @@ class AuthNotifier extends StateNotifier<AuthState> {
     required String username,
     required String email,
     required String password,
-    required String role,
     required String firstName,
     required String lastName,
     String telephone = '',
     String? codeParrainage,
-    // Profil producteur (géo obligatoire côté backend pour ce rôle).
-    String? departement,
-    String? commune,
-    String? localite,
-    double? superficieHa,
-    String? numIdentification,
-    String? description,
+    // Entreprise à créer avec le compte (cf. EntrepriseFormController) :
+    // vendre passe par une entreprise, plus par le rôle « producteur ».
+    Map<String, dynamic>? entreprise,
     // Profil acheteur (tous optionnels côté backend).
+    String? departement,
     String? typeAcheteur,
     String? nomOrganisation,
   }) async {
@@ -181,7 +181,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
           'email':      email,
           'password':   password,
           'password2':  password, // requis par le backend
-          'role':       role,
+          'role':       'acheteur',
           'first_name': firstName,
           'last_name':  lastName,
           'telephone':  telephone,
@@ -189,15 +189,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
             'code_parrainage': codeParrainage,
           if (departement != null && departement.isNotEmpty)
             'departement': departement,
-          if (commune != null && commune.isNotEmpty)
-            'commune': commune,
-          if (localite != null && localite.isNotEmpty)
-            'localite': localite,
-          if (superficieHa != null) 'superficie_ha': superficieHa,
-          if (numIdentification != null && numIdentification.isNotEmpty)
-            'num_identification': numIdentification,
-          if (description != null && description.isNotEmpty)
-            'description': description,
+          if (entreprise != null) 'entreprise': entreprise,
           if (typeAcheteur != null && typeAcheteur.isNotEmpty)
             'type_acheteur': typeAcheteur,
           if (nomOrganisation != null && nomOrganisation.isNotEmpty)
@@ -215,6 +207,15 @@ class AuthNotifier extends StateNotifier<AuthState> {
         await _storage.saveUserRole(user.role);
         await _storage.saveUserId(user.id);
         await _cache.saveUser(d['user'] as Map<String, dynamic>);
+        // Entreprise créée avec le compte : ouvrir directement son espace
+        // (écran « en attente de validation ») — fait avant le passage à
+        // `authenticated`, qui redirige aussitôt vers l'accueil.
+        final active = _ref.read(entrepriseActiveIdProvider.notifier);
+        if (entreprise != null && user.entreprises.isNotEmpty) {
+          await active.activer(user.entreprises.first);
+        } else {
+          await active.quitter();
+        }
 
         state = state.copyWith(
           status:    AuthStatus.authenticated,
@@ -255,10 +256,11 @@ class AuthNotifier extends StateNotifier<AuthState> {
     } catch (_) {}
     await _storage.clearAll();
     await _cache.clearAll();
+    await _ref.read(entrepriseActiveIdProvider.notifier).quitter();
     state = const AuthState(status: AuthStatus.unauthenticated);
   }
 
-  bool get isProducteurEnAttente =>
-      state.user?.role == 'producteur' &&
-      state.user?.profilProducteurStatut == 'en_attente';
+  /// Recharger le profil (ex: après création d'une entreprise ou pour
+  /// vérifier si une entreprise a été validée).
+  Future<void> rafraichirProfil() => checkAuth();
 }

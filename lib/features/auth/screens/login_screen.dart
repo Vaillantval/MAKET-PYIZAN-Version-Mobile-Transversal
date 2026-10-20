@@ -57,47 +57,62 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const SizedBox(height: 40),
+                const SizedBox(height: 32),
 
                 // Logo + Titre
                 Center(
                   child: Column(
                     children: [
                       Container(
-                        width:  80,
-                        height: 80,
+                        width:  96,
+                        height: 96,
                         decoration: BoxDecoration(
-                          color:        AppColors.vertFonce,
-                          borderRadius: BorderRadius.circular(40),
+                          color:        AppColors.blanc,
+                          borderRadius: BorderRadius.circular(28),
+                          border: Border.all(color: AppColors.grisBord),
                           image: const DecorationImage(
-                            image: AssetImage('assets/images/maketpeyizan.jpeg'),
+                            image: AssetImage('assets/images/maketlakay.jpeg'),
                             fit: BoxFit.cover,
                           ),
                         ),
                       ),
                       const SizedBox(height: 16),
-                      const Text(
-                        'Makèt Peyizan',
+                      const Text.rich(
+                        TextSpan(children: [
+                          TextSpan(text: 'Maket',
+                              style: TextStyle(color: AppColors.vertFonce)),
+                          TextSpan(text: 'Lakay',
+                              style: TextStyle(color: AppColors.jaune)),
+                        ]),
                         style: TextStyle(
-                          fontFamily:  'PlayfairDisplay',
-                          fontSize:    28,
-                          fontWeight:  FontWeight.w900,
-                          color:       AppColors.vertFonce,
+                          fontSize:    30,
+                          fontWeight:  FontWeight.w800,
+                          letterSpacing: -0.8,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      const Text(
+                        'Sòti nan jaden, rive lakay ou',
+                        style: TextStyle(
+                          fontSize: 13,
+                          color:    AppColors.grisTexte,
+                          fontStyle: FontStyle.italic,
                         ),
                       ),
                     ],
                   ),
                 ),
 
-                const SizedBox(height: 40),
+                const SizedBox(height: 36),
 
                 // Titre section
                 const Text(
                   'Connexion',
                   style: TextStyle(
-                    fontSize:   22,
-                    fontWeight: FontWeight.w700,
+                    fontSize:   24,
+                    fontWeight: FontWeight.w800,
                     color:      AppColors.noir,
+                    letterSpacing: -0.4,
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -141,7 +156,17 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   validator: (v) => v?.isEmpty == true
                       ? 'Mot de passe requis' : null,
                 ),
-                const SizedBox(height: 28),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: TextButton(
+                    onPressed: () => context.push('/mot-de-passe-oublie'),
+                    child: const Text(
+                      'Mot de passe oublié ?',
+                      style: TextStyle(color: AppColors.grisTexte),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
 
                 // Bouton connexion
                 ElevatedButton(

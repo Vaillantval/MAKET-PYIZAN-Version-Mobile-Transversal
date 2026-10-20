@@ -9,6 +9,7 @@ import '../../../models/wallet_recharge.dart';
 import '../../../models/wallet_retrait.dart';
 import '../../../models/bon_cadeau.dart';
 import '../../../models/wallet_code_paiement.dart';
+import '../../../providers/entreprise_provider.dart';
 
 /// Extrait la liste d'une réponse paginée
 /// ({"results": [...], "count": ..., "next": ..., "previous": ...})
@@ -59,6 +60,7 @@ Future<_PageResult<T>> _chargerPage<T>(
 
 final walletProvider =
     StateNotifierProvider<WalletNotifier, AsyncValue<Wallet>>((ref) {
+  ref.watch(entrepriseActiveIdProvider); // portefeuille perso ↔ entreprise
   return WalletNotifier(ref.read(apiClientProvider));
 });
 
@@ -67,6 +69,7 @@ final walletProvider =
 final walletTransactionsProvider =
     StateNotifierProvider<WalletTransactionsNotifier,
         AsyncValue<List<WalletTransaction>>>((ref) {
+  ref.watch(entrepriseActiveIdProvider); // portefeuille perso ↔ entreprise
   return WalletTransactionsNotifier(ref.read(apiClientProvider));
 });
 
@@ -79,6 +82,7 @@ final walletRechargesProvider =
 final walletRetraitsProvider =
     StateNotifierProvider<WalletRetraitsNotifier,
         AsyncValue<List<WalletRetrait>>>((ref) {
+  ref.watch(entrepriseActiveIdProvider); // portefeuille perso ↔ entreprise
   return WalletRetraitsNotifier(ref.read(apiClientProvider));
 });
 

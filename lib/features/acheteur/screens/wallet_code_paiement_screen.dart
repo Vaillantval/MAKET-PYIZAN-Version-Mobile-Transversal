@@ -142,7 +142,7 @@ class _ContenuCode extends StatelessWidget {
           padding: const EdgeInsets.symmetric(vertical: 32),
           decoration: BoxDecoration(
             gradient: const LinearGradient(
-              colors: [AppColors.vertFonce, Color(0xFF1E8449)],
+              colors: [AppColors.vertFonce, AppColors.vertDegrade],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),

@@ -10,7 +10,7 @@ import '../../../core/storage/local_storage.dart';
 import '../../../core/utils/format_utils.dart';
 import '../../../core/utils/role_utils.dart';
 import '../../../models/wallet.dart';
-import '../../../providers/auth_provider.dart';
+import '../../../providers/entreprise_provider.dart';
 import '../providers/wallet_provider.dart';
 
 class WalletScreen extends ConsumerStatefulWidget {
@@ -77,13 +77,20 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
     final isOnline      = ref.watch(isOnlineProvider);
     final walletState   = ref.watch(walletProvider);
     final transState    = ref.watch(walletTransactionsProvider);
-    final base          = walletBasePath(ref.watch(authProvider).user?.role);
+    final base          = walletBasePath(context);
+    // Portefeuille d'entreprise : seuls le solde, l'historique et les
+    // retraits s'y rapportent (recharges, bons, paiement au comptoir et
+    // cashback restent sur le portefeuille personnel côté backend).
+    final enEntreprise  = estEspaceEntreprise(context);
+    final entreprise    = enEntreprise ? ref.watch(entrepriseActiveProvider) : null;
     final wallet         = walletState.valueOrNull;
 
     return Scaffold(
       backgroundColor: AppColors.grisClair,
       appBar: AppBar(
-        title: const Text('Mon Portefeuille'),
+        title: Text(entreprise != null
+            ? 'Portefeuille — ${entreprise.nom}'
+            : 'Mon Portefeuille'),
         actions: [
           if (isOnline)
             IconButton(
@@ -116,7 +123,15 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
                     child: Padding(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 16, vertical: 12),
-                      child: Column(
+                      child: enEntreprise
+                          ? _ActionButton(
+                              icon:  Icons.account_balance_wallet_outlined,
+                              label: 'Retirer',
+                              color: AppColors.orange,
+                              onTap: () =>
+                                  context.push('$base/wallet/retrait'),
+                            )
+                          : Column(
                         children: [
                           Row(
                             children: [
@@ -171,7 +186,7 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
                   ),
 
                   // ── Cashback ──────────────────────────────────
-                  if (wallet?.cashback?.actif == true)
+                  if (!enEntreprise && wallet?.cashback?.actif == true)
                     SliverToBoxAdapter(
                       child: _CarteCashback(cashback: wallet!.cashback!),
                     ),
@@ -265,7 +280,7 @@ class _CarteWallet extends StatelessWidget {
       margin: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
-          colors: [AppColors.vertFonce, Color(0xFF1E8449)],
+          colors: [AppColors.vertFonce, AppColors.vertDegrade],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
@@ -331,7 +346,7 @@ class _CarteWallet extends StatelessWidget {
                 Icon(Icons.verified, color: Colors.white, size: 14),
                 SizedBox(width: 4),
                 Text(
-                  'Makèt Peyizan Wallet',
+                  'MaketLakay Wallet',
                   style: TextStyle(color: Colors.white, fontSize: 12),
                 ),
               ],
@@ -383,13 +398,13 @@ class _CarteParrainage extends StatelessWidget {
   final WalletParrainage parrainage;
   const _CarteParrainage({required this.parrainage});
 
-  String get _lien => 'https://maketpeyizan.ht/inscription/?parrain=${parrainage.code}';
+  String get _lien => 'https://maketlakay.ht/inscription/?parrain=${parrainage.code}';
 
   void _partager() {
     Share.share(
-      'Rejoins Makèt Peyizan avec mon code de parrainage ${parrainage.code} '
+      'Rejoins MaketLakay avec mon code de parrainage ${parrainage.code} '
       'et profite d\'un bonus sur ton portefeuille : $_lien',
-      subject: 'Invitation Makèt Peyizan',
+      subject: 'Invitation MaketLakay',
     );
   }
 

@@ -1,4 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'entreprise.dart';
 
 part 'user.freezed.dart';
 part 'user.g.dart';
@@ -18,6 +19,8 @@ class User with _$User {
     @JsonKey(name: 'is_superuser') @Default(false) bool isSuperuser,
     @JsonKey(name: 'is_staff')     @Default(false) bool isStaff,
     @JsonKey(name: 'profil_producteur_statut') String? profilProducteurStatut,
+    // Entreprises dont le compte est membre (vendre passe par elles)
+    @Default([]) List<EntrepriseMembre> entreprises,
   }) = _User;
 
   factory User.fromJson(Map<String, dynamic> json) => _$UserFromJson(json);

@@ -288,6 +288,9 @@ class ProduitDetailScreen extends ConsumerWidget {
                                 children: produitsSimilaires
                                     .map((p) => Container(
                                           width: 160,
+                                          // Hauteur bornée : la carte répartit
+                                          // l'espace entre image et texte
+                                          height: 240,
                                           margin: const EdgeInsets
                                               .only(right: 12),
                                           child: ProduitCard(

@@ -101,6 +101,15 @@ class _PosPaiementScreenState extends ConsumerState<PosPaiementScreen> {
         if (_codeSaisi.length == 6) await _verifierCode(silencieux: true);
       } else if (e.code == 'OFFLINE') {
         _proposerBasculeCash(e.message);
+      } else if (methodePaiement != 'wallet' && montantWallet <= 0) {
+        // Vente sans wallet refusée par le serveur (session fermée,
+        // terminal non autorisé, produit/unité invalide…) : le panier est
+        // conservé, rien n'a été enregistré.
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text('Vente non enregistrée : ${e.message}'),
+          backgroundColor: AppColors.rouge,
+          duration: const Duration(seconds: 6),
+        ));
       } else {
         setState(() => _erreurWallet = e.message);
       }
@@ -359,7 +368,7 @@ class _MethodeTile extends StatelessWidget {
         color: selected ? AppColors.vertMenthe : Colors.white,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: selected ? AppColors.vertVif : const Color(0xFFE0E0E0),
+          color: selected ? AppColors.vertVif : AppColors.grisBord,
           width: selected ? 2 : 1,
         ),
       ),

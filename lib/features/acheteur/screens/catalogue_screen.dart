@@ -235,7 +235,7 @@ class _FilterChip extends StatelessWidget {
         color: selected ? AppColors.vertFonce : Colors.white,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: selected ? AppColors.vertFonce : const Color(0xFFDDDDDD),
+          color: selected ? AppColors.vertFonce : AppColors.grisBord,
         ),
       ),
       child: Text(

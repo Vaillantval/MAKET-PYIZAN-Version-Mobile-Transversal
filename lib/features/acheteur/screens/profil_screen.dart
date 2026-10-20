@@ -6,6 +6,8 @@ import '../../../core/constants/app_colors.dart';
 import '../../../providers/auth_provider.dart';
 import '../../../core/utils/format_utils.dart';
 import '../providers/wallet_provider.dart';
+import '../../entreprise/widgets/espace_entreprise.dart';
+import '../../../shared/widgets/changer_mot_de_passe_sheet.dart';
 
 class ProfilScreen extends ConsumerWidget {
   const ProfilScreen({super.key});
@@ -34,7 +36,8 @@ class ProfilScreen extends ConsumerWidget {
           children: [
             // Photo de profil
             Container(
-              padding: const EdgeInsets.all(16),
+              width: double.infinity,
+              padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(12),
@@ -42,7 +45,7 @@ class ProfilScreen extends ConsumerWidget {
               child: Column(
                 children: [
                   CircleAvatar(
-                    radius: 60,
+                    radius: 44,
                     backgroundColor: AppColors.vertMenthe,
                     backgroundImage: user?.photo != null
                         ? CachedNetworkImageProvider(
@@ -51,7 +54,7 @@ class ProfilScreen extends ConsumerWidget {
                         : null,
                     child: user?.photo == null
                         ? const Icon(Icons.person,
-                            size: 60,
+                            size: 44,
                             color: AppColors.vertFonce)
                         : null,
                   ),
@@ -105,23 +108,22 @@ class ProfilScreen extends ConsumerWidget {
                     label: 'Téléphone',
                     value: user?.telephone ?? '-',
                   ),
-                  const SizedBox(height: 12),
-                  _InfoRow(
-                    label: 'Rôle',
-                    value: user?.role ?? '-',
-                  ),
                 ],
               ),
             ),
 
             const SizedBox(height: 20),
 
+            // Entreprises : accès à l'espace vendeur
+            const MesEntreprisesCard(),
+
+            const SizedBox(height: 20),
+
             // Actions
-            Container(
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(12),
-              ),
+            Material(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12),
+              clipBehavior: Clip.antiAlias,
               child: Column(
                 children: [
                   ListTile(
@@ -151,14 +153,7 @@ class ProfilScreen extends ConsumerWidget {
                       color: AppColors.vertVif),
                     title: const Text('Changer le mot de passe'),
                     trailing: const Icon(Icons.arrow_forward_ios),
-                    onTap: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text(
-                              'Fonctionnalité en développement'),
-                        ),
-                      );
-                    },
+                    onTap: () => afficherChangementMotDePasse(context),
                   ),
                   const Divider(height: 1),
                   ListTile(
@@ -201,7 +196,7 @@ class ProfilScreen extends ConsumerWidget {
             onPressed: () {
               Navigator.pop(context);
               ref.read(authProvider.notifier).logout();
-              context.go('/auth/login');
+              context.go('/login');
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.rouge,

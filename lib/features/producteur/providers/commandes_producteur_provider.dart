@@ -2,13 +2,15 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/api/api_client.dart';
 import '../../../core/api/api_endpoints.dart';
 import '../../../models/commande.dart';
+import '../../../providers/entreprise_provider.dart';
 
 // Liste des commandes reçues
 final commandesProducteurProvider = StateNotifierProvider
     .family<CommandesProducteurNotifier, AsyncValue<List<Commande>>, String>(
-  (ref, statut) => CommandesProducteurNotifier(
-    ref.read(apiClientProvider), statut,
-  ),
+  (ref, statut) {
+    ref.watch(entrepriseActiveIdProvider);
+    return CommandesProducteurNotifier(ref.read(apiClientProvider), statut);
+  },
 );
 
 class CommandesProducteurNotifier
@@ -63,6 +65,7 @@ class CommandesProducteurNotifier
 // Détail d'une commande
 final commandeProducteurDetailProvider =
     FutureProvider.family<Commande?, String>((ref, numero) async {
+  ref.watch(entrepriseActiveIdProvider);
   final api = ref.read(apiClientProvider);
   try {
     final res  = await api.get(AppEndpoints.producteurCommande(numero));

@@ -5,12 +5,16 @@ import 'package:dio/dio.dart';
 /// erreurs de validation DRF (renvoie le premier message trouvé).
 String extraireMessageErreur(dynamic erreur, String messageParDefaut) {
   if (erreur is String && erreur.isNotEmpty) return erreur;
+  if (erreur is List && erreur.isNotEmpty) {
+    return extraireMessageErreur(erreur.first, messageParDefaut);
+  }
   if (erreur is Map) {
-    final premier = erreur.values.firstWhere(
-      (v) => v is List && v.isNotEmpty,
-      orElse: () => null,
-    );
-    if (premier is List) return premier.first.toString();
+    // Erreurs imbriquées (ex: {"entreprise": {"nom": ["..."]}} à
+    // l'inscription) : descendre jusqu'au premier message.
+    for (final v in erreur.values) {
+      final m = extraireMessageErreur(v, '');
+      if (m.isNotEmpty) return m;
+    }
   }
   return messageParDefaut;
 }
@@ -20,8 +24,12 @@ String extraireMessageErreur(dynamic erreur, String messageParDefaut) {
 /// réseau.
 String messageErreurApi(Object e, String messageParDefaut) {
   if (e is DioException && e.response?.data is Map) {
+    final data = e.response!.data as Map;
+    // Enveloppe {success, error} des vues, sinon format DRF brut :
+    // {"detail": "..."} (403/404 levés par entreprise_active) ou
+    // {"champ": ["..."]} (ValidationError, ex: « Choisissez une entreprise »).
     return extraireMessageErreur(
-      (e.response!.data as Map)['error'], messageParDefaut,
+      data['error'] ?? data['detail'] ?? data, messageParDefaut,
     );
   }
   return messageParDefaut;

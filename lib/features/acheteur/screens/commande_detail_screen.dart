@@ -62,15 +62,15 @@ class CommandeDetailScreen extends ConsumerWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Row(
-                        mainAxisAlignment:
-                            MainAxisAlignment.spaceBetween,
                         children: [
-                          Column(
+                          Expanded(child: Column(
                             crossAxisAlignment:
                                 CrossAxisAlignment.start,
                             children: [
                               Text(
                                 'Commande #${commande.numeroCommande}',
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
                                 style: const TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.w800,
@@ -88,7 +88,8 @@ class CommandeDetailScreen extends ConsumerWidget {
                                 ),
                               ),
                             ],
-                          ),
+                          )),
+                          const SizedBox(width: 8),
                           CommandeStatutBadge(commande.statut),
                         ],
                       ),

@@ -37,7 +37,9 @@ mixin _$User {
   @JsonKey(name: 'is_staff')
   bool get isStaff => throw _privateConstructorUsedError;
   @JsonKey(name: 'profil_producteur_statut')
-  String? get profilProducteurStatut => throw _privateConstructorUsedError;
+  String? get profilProducteurStatut =>
+      throw _privateConstructorUsedError; // Entreprises dont le compte est membre (vendre passe par elles)
+  List<EntrepriseMembre> get entreprises => throw _privateConstructorUsedError;
 
   /// Serializes this User to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -65,8 +67,8 @@ abstract class $UserCopyWith<$Res> {
       @JsonKey(name: 'is_verified') bool isVerified,
       @JsonKey(name: 'is_superuser') bool isSuperuser,
       @JsonKey(name: 'is_staff') bool isStaff,
-      @JsonKey(name: 'profil_producteur_statut')
-      String? profilProducteurStatut});
+      @JsonKey(name: 'profil_producteur_statut') String? profilProducteurStatut,
+      List<EntrepriseMembre> entreprises});
 }
 
 /// @nodoc
@@ -96,6 +98,7 @@ class _$UserCopyWithImpl<$Res, $Val extends User>
     Object? isSuperuser = null,
     Object? isStaff = null,
     Object? profilProducteurStatut = freezed,
+    Object? entreprises = null,
   }) {
     return _then(_value.copyWith(
       id: null == id
@@ -146,6 +149,10 @@ class _$UserCopyWithImpl<$Res, $Val extends User>
           ? _value.profilProducteurStatut
           : profilProducteurStatut // ignore: cast_nullable_to_non_nullable
               as String?,
+      entreprises: null == entreprises
+          ? _value.entreprises
+          : entreprises // ignore: cast_nullable_to_non_nullable
+              as List<EntrepriseMembre>,
     ) as $Val);
   }
 }
@@ -169,8 +176,8 @@ abstract class _$$UserImplCopyWith<$Res> implements $UserCopyWith<$Res> {
       @JsonKey(name: 'is_verified') bool isVerified,
       @JsonKey(name: 'is_superuser') bool isSuperuser,
       @JsonKey(name: 'is_staff') bool isStaff,
-      @JsonKey(name: 'profil_producteur_statut')
-      String? profilProducteurStatut});
+      @JsonKey(name: 'profil_producteur_statut') String? profilProducteurStatut,
+      List<EntrepriseMembre> entreprises});
 }
 
 /// @nodoc
@@ -197,6 +204,7 @@ class __$$UserImplCopyWithImpl<$Res>
     Object? isSuperuser = null,
     Object? isStaff = null,
     Object? profilProducteurStatut = freezed,
+    Object? entreprises = null,
   }) {
     return _then(_$UserImpl(
       id: null == id
@@ -247,6 +255,10 @@ class __$$UserImplCopyWithImpl<$Res>
           ? _value.profilProducteurStatut
           : profilProducteurStatut // ignore: cast_nullable_to_non_nullable
               as String?,
+      entreprises: null == entreprises
+          ? _value._entreprises
+          : entreprises // ignore: cast_nullable_to_non_nullable
+              as List<EntrepriseMembre>,
     ));
   }
 }
@@ -266,7 +278,9 @@ class _$UserImpl implements _User {
       @JsonKey(name: 'is_verified') this.isVerified = false,
       @JsonKey(name: 'is_superuser') this.isSuperuser = false,
       @JsonKey(name: 'is_staff') this.isStaff = false,
-      @JsonKey(name: 'profil_producteur_statut') this.profilProducteurStatut});
+      @JsonKey(name: 'profil_producteur_statut') this.profilProducteurStatut,
+      final List<EntrepriseMembre> entreprises = const []})
+      : _entreprises = entreprises;
 
   factory _$UserImpl.fromJson(Map<String, dynamic> json) =>
       _$$UserImplFromJson(json);
@@ -302,10 +316,20 @@ class _$UserImpl implements _User {
   @override
   @JsonKey(name: 'profil_producteur_statut')
   final String? profilProducteurStatut;
+// Entreprises dont le compte est membre (vendre passe par elles)
+  final List<EntrepriseMembre> _entreprises;
+// Entreprises dont le compte est membre (vendre passe par elles)
+  @override
+  @JsonKey()
+  List<EntrepriseMembre> get entreprises {
+    if (_entreprises is EqualUnmodifiableListView) return _entreprises;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_entreprises);
+  }
 
   @override
   String toString() {
-    return 'User(id: $id, username: $username, email: $email, firstName: $firstName, lastName: $lastName, role: $role, telephone: $telephone, photo: $photo, isVerified: $isVerified, isSuperuser: $isSuperuser, isStaff: $isStaff, profilProducteurStatut: $profilProducteurStatut)';
+    return 'User(id: $id, username: $username, email: $email, firstName: $firstName, lastName: $lastName, role: $role, telephone: $telephone, photo: $photo, isVerified: $isVerified, isSuperuser: $isSuperuser, isStaff: $isStaff, profilProducteurStatut: $profilProducteurStatut, entreprises: $entreprises)';
   }
 
   @override
@@ -331,7 +355,9 @@ class _$UserImpl implements _User {
                 other.isSuperuser == isSuperuser) &&
             (identical(other.isStaff, isStaff) || other.isStaff == isStaff) &&
             (identical(other.profilProducteurStatut, profilProducteurStatut) ||
-                other.profilProducteurStatut == profilProducteurStatut));
+                other.profilProducteurStatut == profilProducteurStatut) &&
+            const DeepCollectionEquality()
+                .equals(other._entreprises, _entreprises));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -349,7 +375,8 @@ class _$UserImpl implements _User {
       isVerified,
       isSuperuser,
       isStaff,
-      profilProducteurStatut);
+      profilProducteurStatut,
+      const DeepCollectionEquality().hash(_entreprises));
 
   /// Create a copy of User
   /// with the given fields replaced by the non-null parameter values.
@@ -381,7 +408,8 @@ abstract class _User implements User {
       @JsonKey(name: 'is_superuser') final bool isSuperuser,
       @JsonKey(name: 'is_staff') final bool isStaff,
       @JsonKey(name: 'profil_producteur_statut')
-      final String? profilProducteurStatut}) = _$UserImpl;
+      final String? profilProducteurStatut,
+      final List<EntrepriseMembre> entreprises}) = _$UserImpl;
 
   factory _User.fromJson(Map<String, dynamic> json) = _$UserImpl.fromJson;
 
@@ -414,7 +442,10 @@ abstract class _User implements User {
   bool get isStaff;
   @override
   @JsonKey(name: 'profil_producteur_statut')
-  String? get profilProducteurStatut;
+  String?
+      get profilProducteurStatut; // Entreprises dont le compte est membre (vendre passe par elles)
+  @override
+  List<EntrepriseMembre> get entreprises;
 
   /// Create a copy of User
   /// with the given fields replaced by the non-null parameter values.

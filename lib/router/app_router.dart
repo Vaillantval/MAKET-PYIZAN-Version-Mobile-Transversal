@@ -1,14 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../core/constants/app_colors.dart';
 import '../providers/auth_provider.dart';
+import '../providers/entreprise_provider.dart';
 import '../core/constants/app_constants.dart';
 import '../core/storage/local_storage.dart';
+import '../models/entreprise.dart';
 import '../core/offline/offline_banner.dart';
 import '../features/auth/screens/splash_screen.dart';
 import '../features/auth/screens/login_screen.dart';
 import '../features/auth/screens/register_screen.dart';
+import '../features/auth/screens/mot_de_passe_oublie_screen.dart';
 import '../features/auth/screens/pending_validation_screen.dart';
+import '../features/acheteur/providers/panier_provider.dart';
 import '../features/acheteur/screens/accueil_screen.dart';
 import '../features/acheteur/screens/catalogue_screen.dart';
 import '../features/acheteur/screens/produit_detail_screen.dart';
@@ -30,6 +35,9 @@ import '../features/producteur/screens/mes_produits_screen.dart';
 import '../features/producteur/screens/collectes_screen.dart' show CollectesProducteurScreen;
 import '../features/producteur/screens/profil_producteur_screen.dart';
 import '../features/collecteur/screens/collectes_terrain_screen.dart';
+import '../features/entreprise/screens/creer_entreprise_screen.dart';
+import '../features/entreprise/screens/entreprise_infos_screen.dart';
+import '../features/entreprise/screens/membres_screen.dart';
 import '../features/pos/screens/pos_appairage_screen.dart';
 import '../features/pos/screens/pos_vente_screen.dart';
 import '../features/pos/screens/pos_session_screen.dart';
@@ -58,6 +66,8 @@ import '../features/admin/screens/admin_collectes_screen.dart';
 class _AuthRefreshNotifier extends ChangeNotifier {
   _AuthRefreshNotifier(this._ref) {
     _ref.listen<AuthState>(authProvider, (_, __) => notifyListeners());
+    // Entrer / sortir de l'espace entreprise, ou changer d'entreprise
+    _ref.listen<int?>(entrepriseActiveIdProvider, (_, __) => notifyListeners());
   }
   final Ref _ref;
 }
@@ -76,7 +86,7 @@ final routerProvider = Provider<GoRouter>((ref) {
       // '/splash' est volontairement exclu : c'est un écran de transit qui
       // doit toujours être quitté dès que le statut d'auth est résolu (sinon
       // l'app reste bloquée dessus indéfiniment une fois non-authentifié).
-      final isAuth  = ['/login', '/register'].contains(path);
+      final isAuth  = ['/login', '/register', '/mot-de-passe-oublie'].contains(path);
 
       if (status == AuthStatus.unknown) {
         return path == '/splash' ? null : '/splash';
@@ -88,23 +98,39 @@ final routerProvider = Provider<GoRouter>((ref) {
       }
 
       final role = authState.user?.role ?? 'acheteur';
+      // Espace entreprise : vendre ne dépend plus du rôle du compte mais de
+      // son appartenance à une entreprise, choisie depuis l'espace acheteur.
+      final entreprise = ref.read(entrepriseActiveProvider);
 
       // Connecté
       if (isAuth || path == '/splash') {
-        // Rediriger selon le rôle
-        return _homeRouteForRole(role);
+        // Rediriger selon le rôle (ou rouvrir l'entreprise active)
+        return _homeRoute(role, entreprise);
       }
 
       // Garde-fou : /pos/* réservé au rôle pos_operator
       if (path.startsWith('/pos/') && role != 'pos_operator') {
-        return _homeRouteForRole(role);
+        return _homeRoute(role, entreprise);
       }
 
-      // Producteur en attente → écran dédié
-      final notifier = ref.read(authProvider.notifier);
-      if (notifier.isProducteurEnAttente &&
-          path != '/producteur/en-attente') {
-        return '/producteur/en-attente';
+      // Garde-fou : /producteur/* exige une entreprise active dont le
+      // compte est (toujours) membre
+      if (path.startsWith('/producteur')) {
+        if (entreprise == null) return '/acheteur/accueil';
+
+        // Entreprise pas (encore) validée → écran dédié
+        if (!entreprise.estActive) {
+          return path == '/producteur/en-attente'
+              ? null
+              : '/producteur/en-attente';
+        }
+        if (path == '/producteur/en-attente') return '/producteur/dashboard';
+
+        // Portefeuille d'entreprise : propriétaires seulement
+        if (path.startsWith('/producteur/wallet') &&
+            !entreprise.estProprietaire) {
+          return '/producteur/profil';
+        }
       }
 
       // POS : premier lancement → forcer l'écran d'enregistrement du
@@ -137,6 +163,10 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path:    '/register',
         builder: (_, __) => const RegisterScreen(),
+      ),
+      GoRoute(
+        path:    '/mot-de-passe-oublie',
+        builder: (_, __) => const MotDePasseOublieScreen(),
       ),
       GoRoute(
         path:    '/producteur/en-attente',
@@ -179,6 +209,8 @@ final routerProvider = Provider<GoRouter>((ref) {
           GoRoute(path: '/acheteur/wallet/retrait',  builder: (_, __) => const WalletRetraitScreen()),
           GoRoute(path: '/acheteur/wallet/bons',     builder: (_, __) => const BonsCadeauxScreen()),
           GoRoute(path: '/acheteur/wallet/code-paiement', builder: (_, __) => const WalletCodePaiementScreen()),
+          // ── Entreprises ──────────────────────────────────
+          GoRoute(path: '/acheteur/entreprise/creer', builder: (_, __) => const CreerEntrepriseScreen()),
         ],
       ),
 
@@ -191,12 +223,14 @@ final routerProvider = Provider<GoRouter>((ref) {
           GoRoute(path: '/producteur/catalogue', builder: (_, __) => const MesProduitsScreen()),
           GoRoute(path: '/producteur/collectes', builder: (_, __) => const CollectesProducteurScreen()),
           GoRoute(path: '/producteur/profil',    builder: (_, __) => const ProfilProducteurScreen()),
-          // ── Wallet (mêmes écrans que côté acheteur) ────────
+          GoRoute(path: '/producteur/entreprise', builder: (_, __) => const EntrepriseInfosScreen()),
+          GoRoute(path: '/producteur/membres',   builder: (_, __) => const MembresScreen()),
+          // ── Wallet de l'entreprise (mêmes écrans que côté acheteur) ──
+          // Recharges, bons et paiement au comptoir restent personnels :
+          // seuls le solde, l'historique et les retraits portent sur
+          // l'entreprise (en-tête X-Entreprise, cf. ApiClient).
           GoRoute(path: '/producteur/wallet',          builder: (_, __) => const WalletScreen()),
-          GoRoute(path: '/producteur/wallet/recharge', builder: (_, __) => const WalletRechargeScreen()),
           GoRoute(path: '/producteur/wallet/retrait',  builder: (_, __) => const WalletRetraitScreen()),
-          GoRoute(path: '/producteur/wallet/bons',     builder: (_, __) => const BonsCadeauxScreen()),
-          GoRoute(path: '/producteur/wallet/code-paiement', builder: (_, __) => const WalletCodePaiementScreen()),
         ],
       ),
 
@@ -239,14 +273,14 @@ final routerProvider = Provider<GoRouter>((ref) {
   );
 });
 
-String _homeRouteForRole(String role) {
+String _homeRoute(String role, EntrepriseMembre? entreprise) {
   switch (role) {
-    case 'producteur':  return '/producteur/dashboard';
     case 'collecteur':  return '/collecteur/collectes';
     case 'pos_operator': return '/pos/vente';
     case 'superadmin':
     case 'admin':       return '/admin/dashboard';
-    default:            return '/acheteur/accueil';
+    default:
+      return entreprise != null ? '/producteur/dashboard' : '/acheteur/accueil';
   }
 }
 
@@ -258,14 +292,16 @@ class AcheteurShell extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    ref.watch(panierProvider); // badge du panier à jour
+    final nbPanier = ref.read(panierProvider.notifier).nbArticles;
     return Scaffold(
       body: child,
       bottomNavigationBar: _buildBottomNav(context, [
-        const _NavItem(icon: Icons.home_outlined,      label: 'Accueil',   route: '/acheteur/accueil'),
-        const _NavItem(icon: Icons.store_outlined,     label: 'Catalogue', route: '/acheteur/catalogue'),
-        const _NavItem(icon: Icons.shopping_cart_outlined, label: 'Panier',route: '/acheteur/panier'),
-        const _NavItem(icon: Icons.receipt_outlined,   label: 'Commandes', route: '/acheteur/commandes'),
-        const _NavItem(icon: Icons.person_outline,     label: 'Profil',    route: '/acheteur/profil'),
+        const _NavItem(icon: Icons.home_outlined, iconActif: Icons.home,      label: 'Accueil',   route: '/acheteur/accueil'),
+        const _NavItem(icon: Icons.store_outlined, iconActif: Icons.store,     label: 'Catalogue', route: '/acheteur/catalogue'),
+        _NavItem(icon: Icons.shopping_cart_outlined, iconActif: Icons.shopping_cart, label: 'Panier',route: '/acheteur/panier', badge: nbPanier),
+        const _NavItem(icon: Icons.receipt_outlined, iconActif: Icons.receipt,   label: 'Commandes', route: '/acheteur/commandes'),
+        const _NavItem(icon: Icons.person_outline, iconActif: Icons.person,     label: 'Profil',    route: '/acheteur/profil'),
       ]),
     );
   }
@@ -280,11 +316,11 @@ class ProducteurShell extends ConsumerWidget {
     return Scaffold(
       body: child,
       bottomNavigationBar: _buildBottomNav(context, [
-        const _NavItem(icon: Icons.dashboard_outlined,  label: 'Dashboard',  route: '/producteur/dashboard'),
-        const _NavItem(icon: Icons.receipt_outlined,    label: 'Commandes',  route: '/producteur/commandes'),
-        const _NavItem(icon: Icons.inventory_outlined,  label: 'Catalogue',  route: '/producteur/catalogue'),
-        const _NavItem(icon: Icons.local_shipping_outlined, label: 'Collectes', route: '/producteur/collectes'),
-        const _NavItem(icon: Icons.person_outline,      label: 'Profil',     route: '/producteur/profil'),
+        const _NavItem(icon: Icons.dashboard_outlined, iconActif: Icons.dashboard,  label: 'Dashboard',  route: '/producteur/dashboard'),
+        const _NavItem(icon: Icons.receipt_outlined, iconActif: Icons.receipt,    label: 'Commandes',  route: '/producteur/commandes'),
+        const _NavItem(icon: Icons.inventory_outlined, iconActif: Icons.inventory,  label: 'Catalogue',  route: '/producteur/catalogue'),
+        const _NavItem(icon: Icons.local_shipping_outlined, iconActif: Icons.local_shipping, label: 'Collectes', route: '/producteur/collectes'),
+        const _NavItem(icon: Icons.person_outline, iconActif: Icons.person,      label: 'Profil',     route: '/producteur/profil'),
       ]),
     );
   }
@@ -299,8 +335,8 @@ class CollecteurShell extends ConsumerWidget {
     return Scaffold(
       body: child,
       bottomNavigationBar: _buildBottomNav(context, [
-        const _NavItem(icon: Icons.local_shipping_outlined, label: 'Collectes', route: '/collecteur/collectes'),
-        const _NavItem(icon: Icons.person_outline,          label: 'Profil',    route: '/collecteur/profil'),
+        const _NavItem(icon: Icons.local_shipping_outlined, iconActif: Icons.local_shipping, label: 'Collectes', route: '/collecteur/collectes'),
+        const _NavItem(icon: Icons.person_outline, iconActif: Icons.person,          label: 'Profil',    route: '/collecteur/profil'),
       ]),
     );
   }
@@ -338,9 +374,9 @@ class _PosShellState extends ConsumerState<PosShell> {
       ),
       bottomNavigationBar: _buildBottomNav(context, [
         const _NavItem(icon: Icons.point_of_sale,     label: 'Vente',      route: '/pos/vente'),
-        const _NavItem(icon: Icons.lock_clock_outlined, label: 'Session',  route: '/pos/session'),
+        const _NavItem(icon: Icons.lock_clock_outlined, iconActif: Icons.lock_clock, label: 'Session',  route: '/pos/session'),
         const _NavItem(icon: Icons.history,            label: 'Historique', route: '/pos/historique'),
-        const _NavItem(icon: Icons.person_outline,     label: 'Profil',     route: '/pos/profil'),
+        const _NavItem(icon: Icons.person_outline, iconActif: Icons.person,     label: 'Profil',     route: '/pos/profil'),
       ]),
     );
   }
@@ -353,7 +389,7 @@ class AdminShell extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Makèt Peyizan Admin')),
+      appBar: AppBar(title: const Text('MaketLakay Admin')),
       drawer: _buildAdminDrawer(context),
       body: child,
     );
@@ -364,7 +400,7 @@ class AdminShell extends ConsumerWidget {
       child: ListView(
         children: [
           const DrawerHeader(
-            decoration: BoxDecoration(color: Color(0xFF1A6B2F)),
+            decoration: BoxDecoration(color: AppColors.vertFonce),
             child: Text('Admin', style: TextStyle(color: Colors.white, fontSize: 20)),
           ),
           for (final item in [
@@ -398,19 +434,42 @@ Widget _buildBottomNav(BuildContext context, List<_NavItem> items) {
     (i) => location.startsWith(i.route),
   ).clamp(0, items.length - 1);
 
-  return BottomNavigationBar(
-    currentIndex: currentIndex,
-    onTap: (i) => context.go(items[i].route),
-    items: items.map((i) => BottomNavigationBarItem(
-      icon:  Icon(i.icon),
-      label: i.label,
-    )).toList(),
+  return DecoratedBox(
+    decoration: const BoxDecoration(
+      border: Border(top: BorderSide(color: AppColors.grisBord)),
+    ),
+    child: NavigationBar(
+      selectedIndex: currentIndex,
+      onDestinationSelected: (i) => context.go(items[i].route),
+      destinations: items.map((i) => NavigationDestination(
+        icon:         _iconeNav(i.icon, i.badge),
+        selectedIcon: _iconeNav(i.iconActif ?? i.icon, i.badge),
+        label:        i.label,
+      )).toList(),
+    ),
   );
 }
 
+Widget _iconeNav(IconData icone, int badge) => badge > 0
+    ? Badge(
+        label: Text('$badge'),
+        backgroundColor: AppColors.jaune,
+        textColor: AppColors.noir,
+        child: Icon(icone),
+      )
+    : Icon(icone);
+
 class _NavItem {
-  final IconData icon;
-  final String   label;
-  final String   route;
-  const _NavItem({required this.icon, required this.label, required this.route});
+  final IconData  icon;
+  final IconData? iconActif;
+  final String    label;
+  final String    route;
+  final int       badge;
+  const _NavItem({
+    required this.icon,
+    required this.label,
+    required this.route,
+    this.iconActif,
+    this.badge = 0,
+  });
 }

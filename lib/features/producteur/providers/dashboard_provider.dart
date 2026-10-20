@@ -3,6 +3,7 @@ import '../../../core/api/api_client.dart';
 import '../../../core/api/api_endpoints.dart';
 import '../../../core/offline/cache_manager.dart';
 import '../../../core/offline/connectivity_service.dart';
+import '../../../providers/entreprise_provider.dart';
 
 class DashboardStats {
   final int     commandesEnAttente;
@@ -50,10 +51,12 @@ class DashboardStats {
 
 final dashboardProvider =
     StateNotifierProvider<DashboardNotifier, AsyncValue<DashboardStats>>((ref) {
+  final entrepriseId = ref.watch(entrepriseActiveIdProvider);
   return DashboardNotifier(
     ref.read(apiClientProvider),
     ref.read(cacheManagerProvider),
     ConnectivityService(),
+    entrepriseId,
   );
 });
 
@@ -62,10 +65,13 @@ class DashboardNotifier
   final ApiClient           _api;
   final CacheManager        _cache;
   final ConnectivityService _conn;
-  static const _cacheKey = 'dashboard_stats';
+  // Un cache par entreprise : ne jamais afficher hors ligne les chiffres
+  // d'une autre entreprise du compte.
+  final String              _cacheKey;
 
-  DashboardNotifier(this._api, this._cache, this._conn)
-      : super(const AsyncValue.loading()) {
+  DashboardNotifier(this._api, this._cache, this._conn, int? entrepriseId)
+      : _cacheKey = 'dashboard_stats_${entrepriseId ?? 'defaut'}',
+        super(const AsyncValue.loading()) {
     charger();
   }
 

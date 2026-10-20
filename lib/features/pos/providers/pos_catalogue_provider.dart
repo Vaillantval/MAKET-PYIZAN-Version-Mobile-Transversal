@@ -79,10 +79,10 @@ class PosCatalogueNotifier extends StateNotifier<AsyncValue<List<PosProduitCatal
   /// Décrémente le stock du produit EN CACHE, pour une cohérence visuelle
   /// immédiate entre deux synchronisations.
   ///
-  /// stock_disponible (scalaire) est la source de vérité de ce contrat
-  /// backend ; 'lots' est toujours renvoyé vide, donc ignoré ici (lotId
-  /// n'est conservé dans la signature que pour compatibilité avec l'appel
-  /// existant côté vente).
+  /// stock_disponible (somme des lots actifs) est la source de vérité ;
+  /// les lots ne sont pas ajustés ici : sans lot imposé, le backend puise
+  /// en FIFO, éventuellement sur plusieurs lots (lotId n'est conservé dans
+  /// la signature que pour compatibilité avec l'appel côté vente).
   Future<void> decrementerStock(int produitId, int? lotId, double quantite) async {
     final current = state.valueOrNull;
     if (current == null) return;

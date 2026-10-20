@@ -10,6 +10,7 @@ import '../../../core/offline/offline_banner.dart';
 import '../../../shared/widgets/loading_widget.dart';
 import '../../../core/utils/format_utils.dart';
 import '../providers/wallet_provider.dart';
+import '../../entreprise/widgets/espace_entreprise.dart';
 
 class AccueilScreen extends ConsumerWidget {
   const AccueilScreen({super.key});
@@ -35,7 +36,7 @@ class AccueilScreen extends ConsumerWidget {
                     child: Container(
                       decoration: const BoxDecoration(
                         gradient: LinearGradient(
-                          colors: [AppColors.vertFonce, Color(0xFF1E8449)],
+                          colors: [AppColors.vertFonce, AppColors.vertDegrade],
                           begin:  Alignment.topLeft,
                           end:    Alignment.bottomRight,
                         ),
@@ -45,79 +46,102 @@ class AccueilScreen extends ConsumerWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    'Bonjou ${user?.firstName ?? ''} 👋',
-                                    style: const TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 20,
-                                      fontFamily: 'PlayfairDisplay',
-                                      fontWeight: FontWeight.w700,
+                              // Flexible : sur petit écran le prénom se tronque
+                              // au lieu de pousser les raccourcis hors de l'écran
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'Bonjou ${user?.firstName ?? ''} 👋',
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 21,
+                                        fontWeight: FontWeight.w800,
+                                        letterSpacing: -0.3,
+                                      ),
                                     ),
-                                  ),
-                                  const Text(
-                                    'Kisa ou bezwen jodi a ?',
-                                    style: TextStyle(
-                                      color: Color(0xBBFFFFFF),
-                                      fontSize: 13,
+                                    const SizedBox(height: 6),
+                                    // Solde du portefeuille sous la salutation :
+                                    // la ligne du haut garde la place pour le prénom
+                                    GestureDetector(
+                                      onTap: () => context.push('/acheteur/wallet'),
+                                      child: Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 10, vertical: 6,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: const Color(0x33FFFFFF),
+                                          borderRadius: BorderRadius.circular(20),
+                                        ),
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            const Icon(
+                                              Icons.account_balance_wallet_outlined,
+                                              color: Colors.white,
+                                              size: 16,
+                                            ),
+                                            const SizedBox(width: 6),
+                                            walletState.when(
+                                              data: (w) => Text(
+                                                FormatUtils.htg(w.solde),
+                                                style: const TextStyle(
+                                                  color: Colors.white,
+                                                  fontSize: 11,
+                                                  fontWeight: FontWeight.w700,
+                                                ),
+                                              ),
+                                              loading: () => const SizedBox(
+                                                width: 12, height: 12,
+                                                child: CircularProgressIndicator(
+                                                  strokeWidth: 1.5,
+                                                  color: Colors.white,
+                                                ),
+                                              ),
+                                              error: (_, __) => const Text(
+                                                'Solde',
+                                                style: TextStyle(
+                                                  color: Colors.white,
+                                                  fontSize: 11,
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
                                     ),
-                                  ),
-                                ],
+                                  ],
+                                ),
                               ),
+                              const SizedBox(width: 8),
                               Row(
                                 children: [
-                                  // Badge Portefeuille
-                                  GestureDetector(
-                                    onTap: () => context.push('/acheteur/wallet'),
-                                    child: Container(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 10, vertical: 6,
-                                      ),
-                                      decoration: BoxDecoration(
-                                        color: const Color(0x33FFFFFF),
-                                        borderRadius: BorderRadius.circular(20),
-                                      ),
-                                      child: Row(
-                                        children: [
-                                          const Icon(
-                                            Icons.account_balance_wallet_outlined,
+                                  // Accès à l'espace entreprise (membres d'au
+                                  // moins une entreprise ; la création se fait
+                                  // depuis le Profil)
+                                  if ((ref.watch(authProvider).user?.entreprises ??
+                                          const [])
+                                      .isNotEmpty) ...[
+                                    Tooltip(
+                                      message: 'Espace entreprise',
+                                      child: GestureDetector(
+                                        onTap: () =>
+                                            ouvrirEspaceEntreprise(context, ref),
+                                        child: const CircleAvatar(
+                                          backgroundColor: Color(0x33FFFFFF),
+                                          child: Icon(
+                                            Icons.storefront_outlined,
                                             color: Colors.white,
-                                            size: 16,
                                           ),
-                                          const SizedBox(width: 6),
-                                          walletState.when(
-                                            data: (w) => Text(
-                                              FormatUtils.htg(w.solde),
-                                              style: const TextStyle(
-                                                color: Colors.white,
-                                                fontSize: 11,
-                                                fontWeight: FontWeight.w700,
-                                              ),
-                                            ),
-                                            loading: () => const SizedBox(
-                                              width: 12, height: 12,
-                                              child: CircularProgressIndicator(
-                                                strokeWidth: 1.5,
-                                                color: Colors.white,
-                                              ),
-                                            ),
-                                            error: (_, __) => const Text(
-                                              'Solde',
-                                              style: TextStyle(
-                                                color: Colors.white,
-                                                fontSize: 11,
-                                              ),
-                                            ),
-                                          ),
-                                        ],
+                                        ),
                                       ),
                                     ),
-                                  ),
-                                  const SizedBox(width: 10),
+                                    const SizedBox(width: 10),
+                                  ],
                                   // Badge panier
                                   GestureDetector(
                                     onTap: () => context.go('/acheteur/panier'),
@@ -175,18 +199,22 @@ class AccueilScreen extends ConsumerWidget {
                               ),
                               decoration: BoxDecoration(
                                 color:        Colors.white,
-                                borderRadius: BorderRadius.circular(12),
+                                borderRadius: BorderRadius.circular(14),
                               ),
                               child: const Row(
                                 children: [
                                   Icon(Icons.search,
-                                    color: AppColors.grisTexte),
+                                    color: AppColors.vertFonce),
                                   SizedBox(width: 10),
-                                  Text(
-                                    'Chercher haricot, maïs, légumes...',
-                                    style: TextStyle(
-                                      color:   AppColors.grisTexte,
-                                      fontSize: 14,
+                                  Expanded(
+                                    child: Text(
+                                      'Chercher haricot, maïs, légumes...',
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: TextStyle(
+                                        color:   AppColors.grisTexte,
+                                        fontSize: 14,
+                                      ),
                                     ),
                                   ),
                                 ],
@@ -371,7 +399,7 @@ class _CategorieChip extends StatelessWidget {
         color: selected ? AppColors.vertFonce : Colors.white,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: selected ? AppColors.vertFonce : const Color(0xFFDDDDDD),
+          color: selected ? AppColors.vertFonce : AppColors.grisBord,
         ),
       ),
       child: Text(

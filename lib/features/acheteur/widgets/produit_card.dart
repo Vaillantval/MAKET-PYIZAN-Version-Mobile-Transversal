@@ -6,6 +6,11 @@ import '../../../core/constants/app_colors.dart';
 import '../../../core/utils/image_utils.dart';
 import '../../../core/utils/format_utils.dart';
 
+/// Carte produit des grilles (accueil, catalogue, similaires).
+///
+/// L'image occupe l'espace laissé par le texte (Expanded) plutôt qu'une
+/// hauteur fixe : la carte tient dans n'importe quelle cellule de grille,
+/// quels que soient la largeur d'écran et la longueur du nom.
 class ProduitCard extends StatelessWidget {
   final Produit      produit;
   final VoidCallback onTap;
@@ -20,182 +25,145 @@ class ProduitCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final imageUrl = ImageUtils.imageUrl(produit.imagePrincipale);
+    final imageUrl  = ImageUtils.imageUrl(produit.imagePrincipale);
+    final enRupture = produit.stockReel <= 0;
 
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        decoration: BoxDecoration(
-          color:        Colors.white,
-          borderRadius: BorderRadius.circular(14),
-          boxShadow: [
-            BoxShadow(
-              color:       Colors.black.withValues(alpha: 0.07),
-              blurRadius:  8,
-              offset:      const Offset(0, 2),
-            ),
-          ],
-        ),
+    return Material(
+      color: AppColors.blanc,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: const BorderSide(color: AppColors.grisBord),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: onTap,
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // Image
-            Stack(
-              children: [
-                ClipRRect(
-                  borderRadius: const BorderRadius.vertical(
-                    top: Radius.circular(14),
-                  ),
-                  child: imageUrl.isNotEmpty
+            // ── Image + badges ─────────────────────────────────
+            Expanded(
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  imageUrl.isNotEmpty
                       ? CachedNetworkImage(
                           imageUrl: imageUrl,
-                          height:   140,
-                          width:    double.infinity,
                           fit:      BoxFit.cover,
+                          color:    enRupture ? Colors.white.withValues(alpha: 0.45) : null,
+                          colorBlendMode: enRupture ? BlendMode.lighten : null,
                           placeholder: (_, __) => Shimmer.fromColors(
-                            baseColor:      Colors.grey[300]!,
-                            highlightColor: Colors.grey[100]!,
-                            child: Container(
-                              height: 140,
-                              color:  Colors.white,
-                            ),
+                            baseColor:      AppColors.grisBord,
+                            highlightColor: AppColors.grisClair,
+                            child: Container(color: Colors.white),
                           ),
-                          errorWidget: (_, __, ___) => Container(
-                            height: 140,
-                            color:  AppColors.vertMenthe,
-                            child:  const Center(
-                              child: Text('🌿', style: TextStyle(fontSize: 40)),
-                            ),
-                          ),
+                          errorWidget: (_, __, ___) => const _ImageVide(),
                         )
-                      : Container(
-                          height: 140,
-                          color:  AppColors.vertMenthe,
-                          child:  const Center(
-                            child: Text('🌿', style: TextStyle(fontSize: 40)),
-                          ),
-                        ),
-                ),
-                // Badge featured
-                if (produit.isFeatured)
-                  Positioned(
-                    top: 8, left: 8,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8, vertical: 3,
-                      ),
-                      decoration: BoxDecoration(
-                        color:        AppColors.jaune,
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: const Text(
-                        '⭐ Vedette',
-                        style: TextStyle(
-                          fontSize: 10, fontWeight: FontWeight.w700,
-                          color: AppColors.noir,
-                        ),
-                      ),
+                      : const _ImageVide(),
+                  if (produit.isFeatured)
+                    const Positioned(
+                      top: 8, left: 8,
+                      child: _Badge(texte: 'Vedette', icone: Icons.star_rounded,
+                          fond: AppColors.jaune, texteCouleur: AppColors.noir),
                     ),
-                  ),
-                // Badge stock faible
-                if (produit.stockReel <= 5 && produit.stockReel > 0)
-                  Positioned(
-                    top: 8, right: 8,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 6, vertical: 3,
-                      ),
-                      decoration: BoxDecoration(
-                        color:        AppColors.rouge,
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: Text(
-                        '⚡ ${produit.stockReel} restants',
-                        style: const TextStyle(
-                          fontSize: 10, fontWeight: FontWeight.w600,
-                          color: Colors.white,
-                        ),
-                      ),
+                  // Rupture : le catalogue liste aussi les produits épuisés
+                  // (après ceux en stock) — visibles mais non commandables
+                  if (enRupture)
+                    const Positioned(
+                      top: 8, right: 8,
+                      child: _Badge(texte: 'Rupture', fond: AppColors.noir,
+                          texteCouleur: AppColors.blanc),
+                    )
+                  else if (produit.stockReel <= 5)
+                    Positioned(
+                      top: 8, right: 8,
+                      child: _Badge(texte: '${produit.stockReel} restants',
+                          fond: AppColors.rouge, texteCouleur: AppColors.blanc),
                     ),
-                  ),
-              ],
+                ],
+              ),
             ),
 
-            // Contenu
+            // ── Contenu ────────────────────────────────────────
             Padding(
-              padding: const EdgeInsets.all(10),
+              padding: const EdgeInsets.fromLTRB(10, 8, 8, 10),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  // Catégorie
                   if (produit.categorie != null)
                     Text(
-                      produit.categorie!['nom']?.toString() ?? '',
+                      (produit.categorie!['nom']?.toString() ?? '').toUpperCase(),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
                         fontSize: 10, color: AppColors.vertVif,
-                        fontWeight: FontWeight.w600,
-                        letterSpacing: .3,
+                        fontWeight: FontWeight.w700, letterSpacing: .6,
                       ),
                     ),
                   const SizedBox(height: 2),
-
-                  // Nom
                   Text(
                     produit.nom,
-                    style: const TextStyle(
-                      fontSize: 13, fontWeight: FontWeight.w700,
-                      color: AppColors.vertFonce,
-                    ),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                  ),
-
-                  // Producteur
-                  if (produit.producteur != null)
-                    Text(
-                      '📍 ${produit.producteur!['commune'] ?? ''}',
-                      style: const TextStyle(
-                        fontSize: 11, color: AppColors.grisTexte,
-                      ),
+                    style: const TextStyle(
+                      fontSize: 13.5, fontWeight: FontWeight.w700,
+                      color: AppColors.noir, height: 1.2,
                     ),
-                  const SizedBox(height: 8),
-
-                  // Prix + bouton
+                  ),
+                  if (produit.producteur != null) ...[
+                    const SizedBox(height: 2),
+                    Row(
+                      children: [
+                        const Icon(Icons.place_outlined, size: 12, color: AppColors.grisTexte),
+                        const SizedBox(width: 2),
+                        Expanded(
+                          child: Text(
+                            '${produit.producteur!['commune'] ?? ''}',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(fontSize: 11, color: AppColors.grisTexte),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                  const SizedBox(height: 6),
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            FormatUtils.htg(produit.prixUnitaire),
-                            style: const TextStyle(
-                              fontSize: 15, fontWeight: FontWeight.w800,
-                              color: AppColors.vertFonce,
+                      Expanded(
+                        child: Text.rich(
+                          TextSpan(children: [
+                            TextSpan(
+                              text: FormatUtils.htg(produit.prixUnitaire),
+                              style: const TextStyle(
+                                fontSize: 15, fontWeight: FontWeight.w800,
+                                color: AppColors.vertFonce,
+                              ),
                             ),
-                          ),
-                          Text(
-                            '/ ${produit.uniteVenteLabel}',
-                            style: const TextStyle(
-                              fontSize: 10, color: AppColors.grisTexte,
+                            TextSpan(
+                              text: ' / ${produit.uniteVenteLabel}',
+                              style: const TextStyle(
+                                fontSize: 10.5, color: AppColors.grisTexte,
+                              ),
                             ),
-                          ),
-                        ],
+                          ]),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
                       ),
-                      if (onAjouter != null)
-                        GestureDetector(
-                          onTap: onAjouter,
-                          child: Container(
-                            padding: const EdgeInsets.all(8),
-                            decoration: BoxDecoration(
-                              color:        AppColors.vertVif,
-                              borderRadius: BorderRadius.circular(8),
+                      if (onAjouter != null && !enRupture)
+                        SizedBox(
+                          width: 34, height: 34,
+                          child: IconButton.filled(
+                            onPressed: onAjouter,
+                            padding: EdgeInsets.zero,
+                            tooltip: 'Ajouter au panier',
+                            style: IconButton.styleFrom(
+                              backgroundColor: AppColors.vertFonce,
+                              foregroundColor: AppColors.blanc,
                             ),
-                            child: const Icon(
-                              Icons.add,
-                              color: Colors.white,
-                              size: 18,
-                            ),
+                            icon: const Icon(Icons.add_rounded, size: 20),
                           ),
                         ),
                     ],
@@ -208,4 +176,44 @@ class ProduitCard extends StatelessWidget {
       ),
     );
   }
+}
+
+class _ImageVide extends StatelessWidget {
+  const _ImageVide();
+
+  @override
+  Widget build(BuildContext context) => Container(
+        color: AppColors.vertMenthe,
+        alignment: Alignment.center,
+        child: const Icon(Icons.eco_outlined, size: 40, color: AppColors.vertMoyen),
+      );
+}
+
+class _Badge extends StatelessWidget {
+  final String    texte;
+  final IconData? icone;
+  final Color     fond;
+  final Color     texteCouleur;
+  const _Badge({required this.texte, required this.fond,
+      required this.texteCouleur, this.icone});
+
+  @override
+  Widget build(BuildContext context) => Container(
+        padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+        decoration: BoxDecoration(
+          color: fond,
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (icone != null) ...[
+              Icon(icone, size: 12, color: texteCouleur),
+              const SizedBox(width: 2),
+            ],
+            Text(texte, style: TextStyle(
+              fontSize: 10, fontWeight: FontWeight.w700, color: texteCouleur)),
+          ],
+        ),
+      );
 }

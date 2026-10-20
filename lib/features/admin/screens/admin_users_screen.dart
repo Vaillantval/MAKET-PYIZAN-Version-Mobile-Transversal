@@ -20,9 +20,12 @@ class _AdminUsersScreenState
 
   final _roles = [
     ('',          'Tous'),
-    ('acheteur',  'Acheteurs'),
-    ('producteur','Producteurs'),
+    ('acheteur',  'Utilisateurs'),
+    // Vendre ne dépend plus du rôle : « membre » = membre d'au moins une
+    // entreprise (filtre backend dédié, l'ancien rôle producteur n'existe plus)
+    ('membre',    'Membres d\'entreprise'),
     ('collecteur','Collecteurs'),
+    ('pos_operator','Caissiers'),
     ('superadmin','Admins'),
   ];
 
@@ -152,7 +155,7 @@ class _AdminUsersScreenState
                                   ),
                                 ),
                                 Text(
-                                  u['role'] as String? ?? '',
+                                  _libelleRole(u),
                                   style: const TextStyle(
                                     fontSize: 11,
                                     color:    AppColors.vertVif,
@@ -181,4 +184,22 @@ class _AdminUsersScreenState
       ),
     );
   }
+}
+
+/// Libellé du compte : rôle + entreprises dont il est membre (/admin/users
+/// renvoie le même profil que /me, avec `entreprises`).
+String _libelleRole(Map<String, dynamic> u) {
+  const libelles = {
+    'acheteur':     'Utilisateur',
+    'collecteur':   'Agent de collecte',
+    'pos_operator': 'Opérateur de caisse',
+    'superadmin':   'Super-admin',
+  };
+  final role = u['is_superuser'] == true ? 'superadmin' : (u['role'] as String? ?? '');
+  final entreprises = (u['entreprises'] as List? ?? const [])
+      .map((e) => (e as Map)['nom']?.toString() ?? '')
+      .where((n) => n.isNotEmpty)
+      .toList();
+  final base = libelles[role] ?? role;
+  return entreprises.isEmpty ? base : '$base · ${entreprises.join(', ')}';
 }

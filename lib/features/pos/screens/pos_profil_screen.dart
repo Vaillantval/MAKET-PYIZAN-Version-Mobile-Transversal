@@ -76,11 +76,10 @@ class _PosProfilScreenState extends ConsumerState<PosProfilScreen> {
           const SizedBox(height: 16),
           _TerminalStatutCard(info: terminalInfo),
           const SizedBox(height: 16),
-          Container(
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(14),
-            ),
+          Material(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(14),
+            clipBehavior: Clip.antiAlias,
             child: ListTile(
               leading: const Icon(Icons.qr_code, color: AppColors.vertFonce),
               title: const Text('Identifiant du terminal'),
@@ -93,11 +92,10 @@ class _PosProfilScreenState extends ConsumerState<PosProfilScreen> {
             ),
           ),
           const SizedBox(height: 16),
-          Container(
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(14),
-            ),
+          Material(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(14),
+            clipBehavior: Clip.antiAlias,
             child: Column(
               children: [
                 SwitchListTile(
@@ -120,11 +118,10 @@ class _PosProfilScreenState extends ConsumerState<PosProfilScreen> {
             ),
           ),
           const SizedBox(height: 16),
-          Container(
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(14),
-            ),
+          Material(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(14),
+            clipBehavior: Clip.antiAlias,
             child: ListTile(
               leading: const Icon(Icons.logout, color: AppColors.rouge),
               title: const Text('Déconnexion'),

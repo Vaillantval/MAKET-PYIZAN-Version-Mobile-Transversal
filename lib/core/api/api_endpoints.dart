@@ -12,6 +12,17 @@ class AppEndpoints {
   static const String changePassword = '/api/auth/change-password/';
   static const String fcmToken       = '/api/auth/fcm-token/';
 
+  // Mot de passe oublié (code à 6 chiffres envoyé par email)
+  static const String passwordReset        = '/api/auth/password-reset/';
+  static const String passwordResetVerify  = '/api/auth/password-reset/verify/';
+  static const String passwordResetConfirm = '/api/auth/password-reset/confirm/';
+
+  // Entreprises (vendre passe par l'appartenance à une entreprise)
+  static const String entreprises = '/api/entreprises/';
+  static String entrepriseMembres(int id) => '/api/entreprises/$id/membres/';
+  static String entrepriseMembre(int id, int membreId) =>
+      '/api/entreprises/$id/membres/$membreId/';
+
   // Adresses
   static const String adresses       = '/api/auth/adresses/';
   static String adresseDetail(int id) => '/api/auth/adresses/$id/';

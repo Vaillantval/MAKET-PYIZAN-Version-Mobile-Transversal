@@ -223,7 +223,7 @@ class _GeoSelectorState extends ConsumerState<GeoSelector> {
       fillColor:   enabled ? Colors.white : AppColors.grisClair,
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: Color(0xFFDDDDDD)),
+        borderSide: const BorderSide(color: AppColors.grisBord),
       ),
     ),
     hint: Text(

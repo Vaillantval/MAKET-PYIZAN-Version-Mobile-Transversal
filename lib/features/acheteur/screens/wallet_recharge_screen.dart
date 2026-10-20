@@ -7,9 +7,7 @@ import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/offline/connectivity_service.dart';
 import '../../../core/storage/local_storage.dart';
-import '../../../core/utils/role_utils.dart';
 import '../../../models/wallet.dart';
-import '../../../providers/auth_provider.dart';
 import '../providers/wallet_provider.dart';
 import '../../../shared/widgets/logo_paiement.dart';
 import 'wallet_screen.dart' show EcranWalletHorsLigne;
@@ -118,7 +116,7 @@ class _WalletRechargeScreenState
                   isError: !success,
                 );
                 if (success) {
-                  context.go('${walletBasePath(ref.read(authProvider).user?.role)}/wallet');
+                  context.go('/acheteur/wallet');
                 }
               }
             },
@@ -170,7 +168,7 @@ class _WalletRechargeScreenState
       isError: !ok,
     );
     if (ok) {
-      context.go('${walletBasePath(ref.read(authProvider).user?.role)}/wallet');
+      context.go('/acheteur/wallet');
     }
   }
 

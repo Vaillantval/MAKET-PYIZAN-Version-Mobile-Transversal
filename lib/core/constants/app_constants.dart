@@ -2,7 +2,7 @@ class AppConstants {
   // API
   static const String baseUrl = String.fromEnvironment(
     'BASE_URL',
-    defaultValue: 'https://maketpeyizan.ht',
+    defaultValue: 'https://maketlakay.ht',
   );
   static const Duration connectTimeout  = Duration(seconds: 30);
   static const Duration receiveTimeout  = Duration(seconds: 30);
@@ -17,6 +17,10 @@ class AppConstants {
   static const String keyGeoCache      = 'geo_cache';
   static const String keySyncQueue     = 'sync_queue';
   static const String keyLastSync      = 'last_sync';
+
+  // Entreprise active (espace entreprise) — envoyée en en-tête X-Entreprise
+  static const String keyEntrepriseActive     = 'entreprise_active';
+  static const String keyEntrepriseActiveRole = 'entreprise_active_role';
 
   // POS
   static const String keyPosDeviceUid    = 'pos_device_uid'; // secure storage

@@ -9,16 +9,16 @@ import 'core/notifications/notification_provider.dart';
 import 'features/pos/providers/pos_terminal_status_provider.dart';
 import 'router/app_router.dart';
 
-class MaketPeyizanApp extends ConsumerStatefulWidget {
-  const MaketPeyizanApp({super.key});
+class MaketLakayApp extends ConsumerStatefulWidget {
+  const MaketLakayApp({super.key});
 
   @override
-  ConsumerState<MaketPeyizanApp> createState() =>
-      _MaketPeyizanAppState();
+  ConsumerState<MaketLakayApp> createState() =>
+      _MaketLakayAppState();
 }
 
-class _MaketPeyizanAppState
-    extends ConsumerState<MaketPeyizanApp> {
+class _MaketLakayAppState
+    extends ConsumerState<MaketLakayApp> {
 
   @override
   void initState() {
@@ -61,7 +61,7 @@ class _MaketPeyizanAppState
     final router = ref.watch(routerProvider);
 
     return MaterialApp.router(
-      title:           'Makèt Peyizan',
+      title:           'MaketLakay',
       theme:           AppTheme.lightTheme,
       routerConfig:    router,
       debugShowCheckedModeBanner: false,

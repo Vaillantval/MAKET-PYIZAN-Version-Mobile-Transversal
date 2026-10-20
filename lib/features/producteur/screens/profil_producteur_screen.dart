@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../providers/auth_provider.dart';
+import '../../../providers/entreprise_provider.dart';
+import '../../entreprise/widgets/espace_entreprise.dart';
 import '../providers/dashboard_provider.dart';
 
 class ProfilProducteurScreen extends ConsumerWidget {
@@ -10,8 +12,11 @@ class ProfilProducteurScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final user  = ref.watch(authProvider).user;
-    final stats = ref.watch(dashboardProvider);
+    final user        = ref.watch(authProvider).user;
+    final stats       = ref.watch(dashboardProvider);
+    final entreprise  = ref.watch(entrepriseActiveProvider);
+    final nbEntreprises = user?.entreprises.length ?? 0;
+    final proprio     = entreprise?.estProprietaire ?? false;
 
     return Scaffold(
       backgroundColor: AppColors.grisClair,
@@ -26,7 +31,7 @@ class ProfilProducteurScreen extends ConsumerWidget {
               background: Container(
                 decoration: const BoxDecoration(
                   gradient: LinearGradient(
-                    colors: [AppColors.vertFonce, Color(0xFF1E8449)],
+                    colors: [AppColors.vertFonce, AppColors.vertDegrade],
                   ),
                 ),
                 child: Column(
@@ -37,7 +42,9 @@ class ProfilProducteurScreen extends ConsumerWidget {
                       radius:          40,
                       backgroundColor: AppColors.jaune,
                       child: Text(
-                        (user?.firstName ?? '?')[0].toUpperCase(),
+                        (entreprise?.nom.isNotEmpty == true
+                                ? entreprise!.nom
+                                : '?')[0].toUpperCase(),
                         style: const TextStyle(
                           fontSize:   32,
                           fontWeight: FontWeight.w900,
@@ -47,9 +54,7 @@ class ProfilProducteurScreen extends ConsumerWidget {
                     ),
                     const SizedBox(height: 10),
                     Text(
-                      user?.firstName != null
-                          ? '${user!.firstName} ${user.lastName}'
-                          : '—',
+                      entreprise?.nom ?? '—',
                       style: const TextStyle(
                         color:      Colors.white,
                         fontSize:   20,
@@ -57,9 +62,12 @@ class ProfilProducteurScreen extends ConsumerWidget {
                         fontFamily: 'PlayfairDisplay',
                       ),
                     ),
-                    const Text(
-                      '🌾 Producteur',
-                      style: TextStyle(
+                    Text(
+                      [entreprise?.typeLabel, entreprise?.roleLabel,
+                       if (user != null) '${user.firstName} ${user.lastName}']
+                          .where((s) => s != null && s.trim().isNotEmpty)
+                          .join(' · '),
+                      style: const TextStyle(
                         color:   Color(0xBBFFFFFF),
                         fontSize: 13,
                       ),
@@ -107,10 +115,14 @@ class ProfilProducteurScreen extends ConsumerWidget {
               child: Column(
                 children: [
                   _MenuItem(
-                    icon:  Icons.person_outline,
-                    label: 'Mon profil boutique',
-                    onTap: () => context.go(
-                        '/producteur/profil/modifier'),
+                    icon:  Icons.storefront_outlined,
+                    label: 'Fiche de l\'entreprise',
+                    onTap: () => context.push('/producteur/entreprise'),
+                  ),
+                  _MenuItem(
+                    icon:  Icons.group_outlined,
+                    label: 'Membres',
+                    onTap: () => context.push('/producteur/membres'),
                   ),
                   _MenuItem(
                     icon:  Icons.store_outlined,
@@ -124,20 +136,33 @@ class ProfilProducteurScreen extends ConsumerWidget {
                     onTap: () =>
                         context.go('/producteur/commandes'),
                   ),
-                  _MenuItem(
-                    icon:  Icons.account_balance_wallet_outlined,
-                    label: 'Mon Portefeuille',
-                    onTap: () =>
-                        context.push('/producteur/wallet'),
-                  ),
-                  _MenuItem(
-                    icon:  Icons.lock_outline,
-                    label: 'Changer le mot de passe',
-                    onTap: () {
-                      // TODO: écran changer mot de passe
-                    },
-                  ),
+                  // Portefeuille de l'entreprise : propriétaires seulement
+                  if (proprio)
+                    _MenuItem(
+                      icon:  Icons.account_balance_wallet_outlined,
+                      label: 'Portefeuille de l\'entreprise',
+                      onTap: () =>
+                          context.push('/producteur/wallet'),
+                    ),
                   const SizedBox(height: 8),
+                  if (nbEntreprises > 1)
+                    _MenuItem(
+                      icon:  Icons.swap_horiz,
+                      label: 'Changer d\'entreprise',
+                      onTap: () async {
+                        final choix = await choisirEntreprise(
+                            context, user!.entreprises);
+                        if (choix != null && context.mounted) {
+                          await entrerDansEntreprise(context, ref, choix);
+                        }
+                      },
+                    ),
+                  _MenuItem(
+                    icon:  Icons.shopping_basket_outlined,
+                    label: 'Espace acheteur',
+                    color: AppColors.vertFonce,
+                    onTap: () => revenirEspaceAcheteur(context, ref),
+                  ),
                   _MenuItem(
                     icon:  Icons.logout,
                     label: 'Se déconnecter',
@@ -187,7 +212,7 @@ class _Divider extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Container(
     height: 40, width: 1,
-    color: const Color(0xFFEEEEEE),
+    color: AppColors.grisBord,
   );
 }
 
@@ -205,12 +230,12 @@ class _MenuItem extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) => Container(
-    margin: const EdgeInsets.only(bottom: 8),
-    decoration: BoxDecoration(
-      color:        Colors.white,
-      borderRadius: BorderRadius.circular(12),
-    ),
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.only(bottom: 8),
+    child: Material(
+    color:        Colors.white,
+    borderRadius: BorderRadius.circular(14),
+    clipBehavior: Clip.antiAlias,
     child: ListTile(
       leading:       Icon(icon, color: color),
       title:         Text(label,
@@ -225,8 +250,9 @@ class _MenuItem extends StatelessWidget {
       ),
       onTap:         onTap,
       shape:         RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(14),
       ),
+    ),
     ),
   );
 }

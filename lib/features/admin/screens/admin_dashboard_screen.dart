@@ -75,7 +75,7 @@ class AdminDashboardScreen extends ConsumerWidget {
                                       ),
                                     ),
                                     const Text(
-                                      'maketpeyizan.ht',
+                                      'maketlakay.ht',
                                       style: TextStyle(
                                         color:   Color(0x88FFFFFF),
                                         fontSize: 12,

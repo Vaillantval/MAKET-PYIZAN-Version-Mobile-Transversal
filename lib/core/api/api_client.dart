@@ -61,7 +61,38 @@ class ApiClient {
       }
     }
 
+    // Espace entreprise : désigner l'entreprise sur laquelle on agit
+    final entrepriseId = _storage.getEntrepriseActiveId();
+    if (entrepriseId != null &&
+        _cibleEntreprise(options.uri.path, _storage.getEntrepriseActiveRole())) {
+      options.headers['X-Entreprise'] = '$entrepriseId';
+    }
+
     handler.next(options);
+  }
+
+  // Endpoints qui agissent pour une entreprise (sans l'en-tête, le backend
+  // ne sait choisir que si le compte n'appartient qu'à une seule).
+  static const _prefixesEntreprise = [
+    '/api/auth/producteur/',
+    '/api/products/mes-produits/',
+    '/api/collectes/',
+  ];
+
+  // Avec X-Entreprise, ces endpoints basculent sur le portefeuille de
+  // l'entreprise — réservé à ses propriétaires (403 pour un gestionnaire).
+  // Les autres opérations wallet (recharge, paiement, bons…) restent
+  // toujours personnelles côté backend.
+  static const _walletEntreprise = [
+    '/api/wallet/',
+    '/api/wallet/transactions/',
+    '/api/wallet/retrait/',
+    '/api/wallet/retraits/',
+  ];
+
+  static bool _cibleEntreprise(String path, String? role) {
+    if (_prefixesEntreprise.any(path.startsWith)) return true;
+    return role == 'proprietaire' && _walletEntreprise.contains(path);
   }
 
   // Rafraîchir le token si 401

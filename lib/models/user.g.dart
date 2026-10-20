@@ -19,6 +19,10 @@ _$UserImpl _$$UserImplFromJson(Map<String, dynamic> json) => _$UserImpl(
       isSuperuser: json['is_superuser'] as bool? ?? false,
       isStaff: json['is_staff'] as bool? ?? false,
       profilProducteurStatut: json['profil_producteur_statut'] as String?,
+      entreprises: (json['entreprises'] as List<dynamic>?)
+              ?.map((e) => EntrepriseMembre.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          const [],
     );
 
 Map<String, dynamic> _$$UserImplToJson(_$UserImpl instance) =>
@@ -35,4 +39,5 @@ Map<String, dynamic> _$$UserImplToJson(_$UserImpl instance) =>
       'is_superuser': instance.isSuperuser,
       'is_staff': instance.isStaff,
       'profil_producteur_statut': instance.profilProducteurStatut,
+      'entreprises': instance.entreprises,
     };

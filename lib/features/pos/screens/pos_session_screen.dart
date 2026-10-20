@@ -42,9 +42,61 @@ class _PosSessionScreenState extends ConsumerState<PosSessionScreen> {
     if (erreur == null) {
       _fondsCtrl.clear();
       _showSnack('Session ouverte avec succès !');
+    } else if (erreur.contains('déjà ouverte')) {
+      // Session restée ouverte côté serveur mais inconnue de ce terminal
+      // (réinstallation, données effacées, autre terminal) : sans moyen de
+      // la clôturer ici, l'opérateur restait bloqué.
+      await _proposerFermetureSessionServeur(erreur);
     } else {
       _showSnack(erreur, isError: true);
     }
+  }
+
+  Future<void> _proposerFermetureSessionServeur(String message) async {
+    final comptageCtrl = TextEditingController();
+    final comptage = await showDialog<double>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Session déjà ouverte'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(message),
+            const SizedBox(height: 12),
+            const Text('Pour la clôturer, saisissez le montant compté dans la caisse :'),
+            TextField(
+              controller:   comptageCtrl,
+              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              decoration:   const InputDecoration(labelText: 'Comptage de clôture (HTG)'),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Annuler'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(ctx,
+                double.tryParse(comptageCtrl.text.trim().replaceAll(',', '.'))),
+            child: const Text('Clôturer cette session'),
+          ),
+        ],
+      ),
+    );
+    comptageCtrl.dispose();
+    if (comptage == null || comptage < 0 || !mounted) return;
+
+    setState(() => _loading = true);
+    final resultat = await ref.read(posSessionProvider.notifier).fermer(comptage);
+    setState(() => _loading = false);
+    if (!mounted) return;
+    if (resultat['error'] != null) {
+      _showSnack(resultat['error'].toString(), isError: true);
+      return;
+    }
+    _afficherRecap(resultat);
   }
 
   Future<void> _fermer() async {

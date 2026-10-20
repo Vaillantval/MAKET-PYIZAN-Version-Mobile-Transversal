@@ -145,7 +145,7 @@ class _ArticleTile extends StatelessWidget {
     decoration: BoxDecoration(
       color:        Colors.white,
       borderRadius: BorderRadius.circular(10),
-      border:       Border.all(color: const Color(0xFFEEEEEE)),
+      border:       Border.all(color: AppColors.grisBord),
     ),
     child: Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,

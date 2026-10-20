@@ -37,11 +37,13 @@ class PosItem with _$PosItem {
 /// (exclut les champs d'affichage local : nom_produit, sous_total,
 /// unite_code, unite_nom).
 extension PosItemPayload on PosItem {
+  // quantite : IntegerField côté backend (nombre d'unités vendues) ;
+  // prix_unitaire : DecimalField à 2 décimales max (sinon 400).
   Map<String, dynamic> toPayload() => {
     'produit_id': produitId,
     if (lotId != null) 'lot_id': lotId,
     if (uniteId != null) 'unite_id': uniteId,
-    'quantite': quantite,
-    'prix_unitaire': prixUnitaire,
+    'quantite': quantite.round(),
+    'prix_unitaire': double.parse(prixUnitaire.toStringAsFixed(2)),
   };
 }

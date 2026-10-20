@@ -54,7 +54,7 @@ class PosSessionNotifier extends StateNotifier<AsyncValue<PosSession?>> {
     try {
       final res = await _api.post(AppEndpoints.posSessionOuvrir, data: {
         'device_uid':      deviceUid,
-        'fonds_ouverture': fondsOuverture,
+        'fonds_ouverture': double.parse(fondsOuverture.toStringAsFixed(2)),
       });
       final data = res.data as Map<String, dynamic>;
       if (data['success'] == true) {
@@ -105,7 +105,7 @@ class PosSessionNotifier extends StateNotifier<AsyncValue<PosSession?>> {
 
     try {
       final res = await _api.post(AppEndpoints.posSessionFermer, data: {
-        'fonds_fermeture': fondsFermeture,
+        'fonds_fermeture': double.parse(fondsFermeture.toStringAsFixed(2)),
       });
       final data = res.data as Map<String, dynamic>;
       if (data['success'] == true) {

@@ -4,6 +4,8 @@ import 'package:go_router/go_router.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/utils/format_utils.dart';
 import '../../../providers/auth_provider.dart';
+import '../../../providers/entreprise_provider.dart';
+import '../../entreprise/widgets/espace_entreprise.dart';
 import '../providers/dashboard_provider.dart';
 import '../widgets/stat_card.dart';
 import '../../../shared/widgets/loading_widget.dart';
@@ -16,6 +18,7 @@ class DashboardProducteurScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final user      = ref.watch(authProvider).user;
     final dashState = ref.watch(dashboardProvider);
+    final entreprise = ref.watch(entrepriseActiveProvider);
 
     return Scaffold(
       backgroundColor: AppColors.grisClair,
@@ -38,7 +41,7 @@ class DashboardProducteurScreen extends ConsumerWidget {
                           gradient: LinearGradient(
                             colors: [
                               AppColors.vertFonce,
-                              Color(0xFF1E8449),
+                              AppColors.vertDegrade,
                             ],
                           ),
                         ),
@@ -48,43 +51,48 @@ class DashboardProducteurScreen extends ConsumerWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Row(
-                              mainAxisAlignment:
-                                  MainAxisAlignment.spaceBetween,
                               children: [
-                                Column(
-                                  crossAxisAlignment:
-                                      CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      'Bonjou ${user?.firstName ?? ''} 🌾',
-                                      style: const TextStyle(
-                                        color:      Colors.white,
-                                        fontSize:   20,
-                                        fontFamily: 'PlayfairDisplay',
-                                        fontWeight: FontWeight.w700,
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        'Bonjou ${user?.firstName ?? ''} 🌾',
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: const TextStyle(
+                                          color:      Colors.white,
+                                          fontSize:   21,
+                                          fontWeight: FontWeight.w800,
+                                          letterSpacing: -0.3,
+                                        ),
                                       ),
-                                    ),
-                                    const Text(
-                                      'Tableau de bord producteur',
-                                      style: TextStyle(
-                                        color:   Color(0xBBFFFFFF),
-                                        fontSize: 13,
+                                      // Entreprise sur laquelle on agit
+                                      Text(
+                                        entreprise?.nom ?? 'Espace entreprise',
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: const TextStyle(
+                                          color:   Color(0xBBFFFFFF),
+                                          fontSize: 13,
+                                        ),
                                       ),
-                                    ),
-                                  ],
-                                ),
-                                CircleAvatar(
-                                  backgroundColor:
-                                      Colors.white.withValues(alpha: 0.15),
-                                  child: Text(
-                                    (user?.firstName ?? '?')[0]
-                                        .toUpperCase(),
-                                    style: const TextStyle(
-                                      color:      Colors.white,
-                                      fontWeight: FontWeight.w800,
-                                      fontSize:   18,
-                                    ),
+                                    ],
                                   ),
+                                ),
+                                const SizedBox(width: 8),
+                                // Retour rapide à l'espace acheteur
+                                IconButton.filledTonal(
+                                  tooltip: 'Espace acheteur',
+                                  style: IconButton.styleFrom(
+                                    backgroundColor:
+                                        Colors.white.withValues(alpha: 0.15),
+                                    foregroundColor: Colors.white,
+                                  ),
+                                  onPressed: () =>
+                                      revenirEspaceAcheteur(context, ref),
+                                  icon: const Icon(Icons.shopping_basket_outlined),
                                 ),
                               ],
                             ),
@@ -101,10 +109,8 @@ class DashboardProducteurScreen extends ConsumerWidget {
                                       BorderRadius.circular(12),
                                 ),
                                 child: Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
                                   children: [
-                                    Column(
+                                    Expanded(child: Column(
                                       crossAxisAlignment:
                                           CrossAxisAlignment.start,
                                       children: [
@@ -115,18 +121,22 @@ class DashboardProducteurScreen extends ConsumerWidget {
                                             fontSize: 12,
                                           ),
                                         ),
-                                        Text(
-                                          FormatUtils.htg(
-                                              stats.revenusMois),
-                                          style: const TextStyle(
-                                            color:      AppColors.jaune,
-                                            fontSize:   24,
-                                            fontWeight: FontWeight.w900,
-                                            fontFamily: 'PlayfairDisplay',
+                                        FittedBox(
+                                          fit: BoxFit.scaleDown,
+                                          alignment: Alignment.centerLeft,
+                                          child: Text(
+                                            FormatUtils.htg(
+                                                stats.revenusMois),
+                                            style: const TextStyle(
+                                              color:      AppColors.jaune,
+                                              fontSize:   24,
+                                              fontWeight: FontWeight.w800,
+                                            ),
                                           ),
                                         ),
                                       ],
-                                    ),
+                                    )),
+                                    const SizedBox(width: 12),
                                     Column(
                                       crossAxisAlignment:
                                           CrossAxisAlignment.end,
@@ -141,6 +151,7 @@ class DashboardProducteurScreen extends ConsumerWidget {
                                         Text(
                                           FormatUtils.htg(
                                               stats.revenusTotal),
+                                          maxLines: 1,
                                           style: const TextStyle(
                                             color:      Colors.white,
                                             fontSize:   16,
@@ -219,7 +230,7 @@ class DashboardProducteurScreen extends ConsumerWidget {
                           gridDelegate:
                               const SliverGridDelegateWithMaxCrossAxisExtent(
                             maxCrossAxisExtent: 180,
-                            childAspectRatio: 1.3,
+                            childAspectRatio: 1.15,
                             mainAxisSpacing:  10,
                             crossAxisSpacing: 10,
                           ),
@@ -280,7 +291,7 @@ class DashboardProducteurScreen extends ConsumerWidget {
                           gridDelegate:
                               const SliverGridDelegateWithMaxCrossAxisExtent(
                             maxCrossAxisExtent: 180,
-                            childAspectRatio: 1.3,
+                            childAspectRatio: 1.15,
                             mainAxisSpacing:  10,
                             crossAxisSpacing: 10,
                           ),

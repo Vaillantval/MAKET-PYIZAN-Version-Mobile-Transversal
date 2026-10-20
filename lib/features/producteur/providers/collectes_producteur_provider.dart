@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/api/api_client.dart';
 import '../../../core/api/api_endpoints.dart';
+import '../../../providers/entreprise_provider.dart';
 
 class ParticipationCollecte {
   final int    id;
@@ -43,6 +44,7 @@ class ParticipationCollecte {
 final collectesProducteurProvider = StateNotifierProvider<
     CollectesProducteurNotifier,
     AsyncValue<List<ParticipationCollecte>>>((ref) {
+  ref.watch(entrepriseActiveIdProvider);
   return CollectesProducteurNotifier(ref.read(apiClientProvider));
 });
 
