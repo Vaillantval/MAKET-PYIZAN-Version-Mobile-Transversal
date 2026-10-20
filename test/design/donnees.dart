@@ -28,6 +28,7 @@ final utilisateurEnAttente = _user('acheteur', [
   {..._entreprise2, 'role': 'proprietaire', 'role_label': 'Propriétaire'},
 ]);
 final utilisateurCaissier  = _user('pos_operator', []);
+final utilisateurCollecteur = _user('collecteur', []);
 
 Map<String, dynamic> _produit(int id, String nom, String prix, String unite, int stock,
         {String categorie = 'Légumes', bool vedette = false, String commune = 'Kenscoff'}) => {

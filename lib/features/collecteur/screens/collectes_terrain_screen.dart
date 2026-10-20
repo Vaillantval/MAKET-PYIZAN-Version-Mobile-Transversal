@@ -1,174 +1,78 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/constants/app_colors.dart';
-import '../../../core/utils/format_utils.dart';
-import '../providers/collecteur_provider.dart';
-import '../../../shared/widgets/loading_widget.dart';
-import '../../../shared/widgets/empty_state.dart';
+import '../../../providers/auth_provider.dart';
 
+/// Espace agent de collecte.
+///
+/// Le backend MaketLakay assigne les collectes aux agents depuis le tableau
+/// de bord, mais n'expose pas encore d'API « mes collectes » pour eux :
+/// plutôt qu'un écran en erreur (403), on indique clairement où les suivre.
 class CollectesTerrainScreen extends ConsumerWidget {
   const CollectesTerrainScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final state = ref.watch(collecteurProvider);
+    final user = ref.watch(authProvider).user;
 
     return Scaffold(
       backgroundColor: AppColors.grisClair,
-      appBar: AppBar(title: const Text('Mes Collectes Terrain')),
-      body: state.when(
-        loading: () => const LoadingWidget(),
-        error:   (e, _) => Center(child: Text('Erreur : $e')),
-        data:    (collectes) {
-          if (collectes.isEmpty) {
-            return const EmptyState(
-              emoji:       '🚛',
-              titre:       'Aucune collecte assignée',
-              description:
-                  'Les collectes qui vous sont assignées apparaîtront ici.',
-            );
-          }
-
-          return ListView.builder(
-            padding:   const EdgeInsets.all(12),
-            itemCount: collectes.length,
-            itemBuilder: (_, i) {
-              final c       = collectes[i];
-              final collecte = c['collecte'] as Map<String, dynamic>? ?? {};
-
-              return Container(
-                margin:  const EdgeInsets.only(bottom: 12),
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color:        Colors.white,
-                  borderRadius: BorderRadius.circular(14),
-                  boxShadow: [
-                    BoxShadow(
-                      color:     Colors.black.withValues(alpha: 0.05),
-                      blurRadius: 8,
-                    ),
-                  ],
+      appBar: AppBar(title: const Text('Mes collectes')),
+      body: SafeArea(
+        child: Center(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(28),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 88, height: 88,
+                  decoration: BoxDecoration(
+                    color: AppColors.vertMenthe,
+                    borderRadius: BorderRadius.circular(26),
+                  ),
+                  child: const Icon(Icons.local_shipping_outlined,
+                      size: 44, color: AppColors.vertFonce),
                 ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(10),
-                          decoration: BoxDecoration(
-                            color:        AppColors.vertMenthe,
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: const Icon(
-                            Icons.local_shipping,
-                            color: AppColors.vertFonce,
-                            size:  28,
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment:
-                                CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                collecte['titre'] as String? ??
-                                    collecte['reference'] as String? ??
-                                    'Collecte',
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.w800,
-                                  fontSize:   16,
-                                  color:      AppColors.vertFonce,
-                                ),
-                              ),
-                              Text(
-                                collecte['zone'] as String? ?? '',
-                                style: const TextStyle(
-                                  fontSize: 13,
-                                  color:    AppColors.grisTexte,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        _StatutBadge(
-                          collecte['statut'] as String? ?? '',
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 14),
-                    const Divider(height: 1),
-                    const SizedBox(height: 12),
-
-                    // Infos collecte
-                    Row(children: [
-                      const Icon(Icons.calendar_today,
-                        size: 14, color: AppColors.grisTexte),
-                      const SizedBox(width: 6),
-                      Text(
-                        FormatUtils.date(
-                          collecte['date_prevue'] as String?
-                        ),
-                        style: const TextStyle(
-                          fontSize: 13,
-                          color:    AppColors.grisTexte,
-                        ),
-                      ),
-                    ]),
-
-                    const SizedBox(height: 14),
-                    Row(children: [
-                      const Icon(Icons.people_outline,
-                        size: 14, color: AppColors.vertVif),
-                      const SizedBox(width: 6),
-                      Text(
-                        '${collecte['nb_producteurs'] ?? 0} '
-                        'producteur(s) participant(s)',
-                        style: const TextStyle(
-                          fontSize: 13,
-                          color:    AppColors.grisTexte,
-                        ),
-                      ),
-                    ]),
-                  ],
+                const SizedBox(height: 24),
+                Text(
+                  'Bonjou ${user?.firstName ?? ''} !',
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    fontSize: 22, fontWeight: FontWeight.w800,
+                    color: AppColors.noir, letterSpacing: -0.3,
+                  ),
                 ),
-              );
-            },
-          );
-        },
-      ),
-    );
-  }
-}
-
-class _StatutBadge extends StatelessWidget {
-  final String statut;
-  const _StatutBadge(this.statut);
-
-  @override
-  Widget build(BuildContext context) {
-    final map = {
-      'planifiee':  (AppColors.bleu,    'Planifiée'),
-      'en_cours':   (AppColors.orange,  'En cours'),
-      'terminee':   (AppColors.vertVif, 'Terminée'),
-      'annulee':    (AppColors.rouge,   'Annulée'),
-    };
-    final (color, label) = map[statut] ??
-        (AppColors.grisTexte, statut);
-
-    return Container(
-      padding: const EdgeInsets.symmetric(
-          horizontal: 10, vertical: 5),
-      decoration: BoxDecoration(
-        color:        color.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(20),
-        border:       Border.all(color: color.withValues(alpha: 0.3)),
-      ),
-      child: Text(label,
-        style: TextStyle(
-          fontSize: 11, fontWeight: FontWeight.w700,
-          color: color,
+                const SizedBox(height: 12),
+                const Text(
+                  'Le suivi des collectes depuis l\'application arrive '
+                  'bientôt.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontSize: 16, color: AppColors.noir),
+                ),
+                const SizedBox(height: 8),
+                const Text(
+                  'En attendant, vos collectes (dates, zones, producteurs) '
+                  'vous sont communiquées par l\'équipe MaketLakay depuis le '
+                  'tableau de bord. Contactez votre responsable pour toute '
+                  'question.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontSize: 14, color: AppColors.grisTexte, height: 1.4),
+                ),
+                const SizedBox(height: 32),
+                OutlinedButton.icon(
+                  icon:  const Icon(Icons.logout),
+                  label: const Text('Se déconnecter'),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: AppColors.rouge,
+                    side: const BorderSide(color: AppColors.rouge),
+                    minimumSize: const Size(double.infinity, 48),
+                  ),
+                  onPressed: () => ref.read(authProvider.notifier).logout(),
+                ),
+              ],
+            ),
+          ),
         ),
       ),
     );

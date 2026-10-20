@@ -239,7 +239,8 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (ctx, state, child) => CollecteurShell(child: child),
         routes: [
           GoRoute(path: '/collecteur/collectes', builder: (_, __) => const CollectesTerrainScreen()),
-          GoRoute(path: '/collecteur/profil',    builder: (_, __) => const Placeholder()),
+          // Écran unique pour l'instant (pas d'API collecteur côté backend)
+          GoRoute(path: '/collecteur/profil',    redirect: (_, __) => '/collecteur/collectes'),
         ],
       ),
 
@@ -330,16 +331,9 @@ class CollecteurShell extends ConsumerWidget {
   final Widget child;
   const CollecteurShell({required this.child, super.key});
 
+  // Un seul écran (message d'information) : pas de barre de navigation
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    return Scaffold(
-      body: child,
-      bottomNavigationBar: _buildBottomNav(context, [
-        const _NavItem(icon: Icons.local_shipping_outlined, iconActif: Icons.local_shipping, label: 'Collectes', route: '/collecteur/collectes'),
-        const _NavItem(icon: Icons.person_outline, iconActif: Icons.person,          label: 'Profil',    route: '/collecteur/profil'),
-      ]),
-    );
-  }
+  Widget build(BuildContext context, WidgetRef ref) => child;
 }
 
 class PosShell extends ConsumerStatefulWidget {

@@ -38,6 +38,7 @@ final _ecrans = [
   _Ecran('ent_membres',      '/producteur/membres',     () => utilisateurMembre, entreprise: 7),
   _Ecran('ent_wallet',       '/producteur/wallet',      () => utilisateurMembre, entreprise: 7),
   _Ecran('ent_en_attente',   '/producteur/dashboard',   () => utilisateurEnAttente, entreprise: 9),
+  _Ecran('collecteur',       '/collecteur/collectes',   () => utilisateurCollecteur),
   _Ecran('pos_vente',        '/pos/vente',              () => utilisateurCaissier),
   _Ecran('pos_session',      '/pos/session',            () => utilisateurCaissier),
   _Ecran('pos_historique',   '/pos/historique',         () => utilisateurCaissier),
