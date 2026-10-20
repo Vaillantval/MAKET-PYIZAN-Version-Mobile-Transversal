@@ -94,7 +94,6 @@ class AppEndpoints {
   // Wallet (portefeuille prépayé HTG)
   static const String wallet                  = '/api/wallet/';
   static const String walletTransactions      = '/api/wallet/transactions/';
-  static const String walletRecharges         = '/api/wallet/recharges/';
   static const String walletRechargeInitier   = '/api/wallet/recharge/initier/';
   static const String walletRechargeVerifier  = '/api/wallet/recharge/verifier/';
   static const String walletRechargeHorsLigne = '/api/wallet/recharge/hors-ligne/';

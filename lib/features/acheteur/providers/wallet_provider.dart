@@ -5,7 +5,6 @@ import '../../../core/api/api_client.dart';
 import '../../../core/api/api_endpoints.dart';
 import '../../../models/wallet.dart';
 import '../../../models/wallet_transaction.dart';
-import '../../../models/wallet_recharge.dart';
 import '../../../models/wallet_retrait.dart';
 import '../../../models/bon_cadeau.dart';
 import '../../../models/wallet_code_paiement.dart';
@@ -71,12 +70,6 @@ final walletTransactionsProvider =
         AsyncValue<List<WalletTransaction>>>((ref) {
   ref.watch(entrepriseActiveIdProvider); // portefeuille perso ↔ entreprise
   return WalletTransactionsNotifier(ref.read(apiClientProvider));
-});
-
-final walletRechargesProvider =
-    StateNotifierProvider<WalletRechargesNotifier,
-        AsyncValue<List<WalletRecharge>>>((ref) {
-  return WalletRechargesNotifier(ref.read(apiClientProvider));
 });
 
 final walletRetraitsProvider =
@@ -369,45 +362,6 @@ class WalletTransactionsNotifier
 
     final r = await _chargerPage(
       _api, _nextUrl!, WalletTransaction.fromJson, 'Erreur transactions');
-    _nextUrl = r.next;
-    if (r.erreur == null) {
-      state = AsyncValue.data([...(state.valueOrNull ?? const []), ...r.items]);
-    }
-    _chargementPlus = false;
-    state = AsyncValue.data(List.of(state.valueOrNull ?? const []));
-  }
-}
-
-class WalletRechargesNotifier
-    extends StateNotifier<AsyncValue<List<WalletRecharge>>> {
-  final ApiClient _api;
-  String? _nextUrl;
-  bool    _chargementPlus = false;
-
-  WalletRechargesNotifier(this._api) : super(const AsyncValue.loading()) {
-    charger();
-  }
-
-  bool get hasPlus => _nextUrl != null;
-  bool get chargementPlus => _chargementPlus;
-
-  Future<void> charger() async {
-    state = const AsyncValue.loading();
-    final r = await _chargerPage(
-      _api, AppEndpoints.walletRecharges, WalletRecharge.fromJson, 'Erreur recharges');
-    _nextUrl = r.next;
-    state = (r.erreur != null && r.items.isEmpty)
-        ? AsyncValue.error(r.erreur!, StackTrace.current)
-        : AsyncValue.data(r.items);
-  }
-
-  Future<void> chargerPlus() async {
-    if (_nextUrl == null || _chargementPlus) return;
-    _chargementPlus = true;
-    state = AsyncValue.data(List.of(state.valueOrNull ?? const []));
-
-    final r = await _chargerPage(
-      _api, _nextUrl!, WalletRecharge.fromJson, 'Erreur recharges');
     _nextUrl = r.next;
     if (r.erreur == null) {
       state = AsyncValue.data([...(state.valueOrNull ?? const []), ...r.items]);
