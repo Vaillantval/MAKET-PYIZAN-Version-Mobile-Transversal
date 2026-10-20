@@ -43,13 +43,13 @@ class NotificationHandler {
         return;
 
       case 'producteur_commande':
-        _versEspaceEntreprise(context, '/producteur/commandes');
+        _versEspaceEntreprise(context, data, '/producteur/commandes');
         return;
       case 'producteur_collecte':
-        _versEspaceEntreprise(context, '/producteur/collectes');
+        _versEspaceEntreprise(context, data, '/producteur/collectes');
         return;
       case 'producteur_stock':
-        _versEspaceEntreprise(context, '/producteur/catalogue');
+        _versEspaceEntreprise(context, data, '/producteur/catalogue');
         return;
 
       case 'admin_commande':
@@ -70,7 +70,7 @@ class NotificationHandler {
       case 'nouvelle_commande':
         final role = data['role'] as String? ?? '';
         if (role == 'producteur') {
-          _versEspaceEntreprise(context, '/producteur/commandes');
+          _versEspaceEntreprise(context, data, '/producteur/commandes');
         } else {
           context.go('/admin/commandes');
         }
@@ -96,12 +96,12 @@ class NotificationHandler {
         if (role == 'collecteur') {
           context.go('/collecteur/collectes');
         } else {
-          _versEspaceEntreprise(context, '/producteur/collectes');
+          _versEspaceEntreprise(context, data, '/producteur/collectes');
         }
         break;
 
       case 'producteur_valide':
-        _versEspaceEntreprise(context, '/producteur/dashboard');
+        _versEspaceEntreprise(context, data, '/producteur/dashboard');
         break;
 
       case 'validation_producteur':
@@ -114,22 +114,29 @@ class NotificationHandler {
     }
   }
 
-  /// Les notifications « entreprise » ne disent pas de quelle entreprise il
-  /// s'agit : on garde l'entreprise active, on entre dans la seule
-  /// entreprise du compte, sinon on laisse choisir depuis le Profil.
+  /// Notification « entreprise » : le backend joint `entreprise_id` —
+  /// on bascule sur cette entreprise si le compte en est membre. À défaut
+  /// (anciennes notifications), on garde l'entreprise active, on entre dans
+  /// la seule entreprise du compte, sinon on laisse choisir depuis le Profil.
   static Future<void> _versEspaceEntreprise(
-      BuildContext context, String route) async {
+      BuildContext context, Map<String, dynamic> data, String route) async {
     final container   = ProviderScope.containerOf(context, listen: false);
     final entreprises =
         container.read(authProvider).user?.entreprises ?? const [];
-    if (container.read(entrepriseActiveProvider) == null) {
+    final active      = container.read(entrepriseActiveIdProvider.notifier);
+
+    final idCible = int.tryParse('${data['entreprise_id'] ?? ''}');
+    final cible   = entreprises.where((e) => e.id == idCible).firstOrNull;
+    if (cible != null) {
+      if (container.read(entrepriseActiveIdProvider) != cible.id) {
+        await active.activer(cible);
+      }
+    } else if (container.read(entrepriseActiveProvider) == null) {
       if (entreprises.length != 1) {
         context.go('/acheteur/profil');
         return;
       }
-      await container
-          .read(entrepriseActiveIdProvider.notifier)
-          .activer(entreprises.first);
+      await active.activer(entreprises.first);
     }
     if (context.mounted) context.go(route);
   }
