@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../../core/utils/string_utils.dart';
+import '../../../shared/widgets/categorie_chip.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/constants/app_colors.dart';
@@ -92,8 +92,8 @@ class _CatalogueScreenState extends ConsumerState<CatalogueScreen> {
                         itemCount: cats.length + 1,
                         itemBuilder: (_, i) {
                           if (i == 0) {
-                            return _FilterChip(
-                              label: '🛒 Tout',
+                            return CategorieChip(
+                              categorie: null, compact: true,
                               selected: catState.filtre.categorieSlug.isEmpty,
                               onTap: () => ref
                                   .read(catalogueProvider.notifier)
@@ -105,9 +105,8 @@ class _CatalogueScreenState extends ConsumerState<CatalogueScreen> {
                           }
                           final cat = cats[i - 1];
                           final slug = cat['slug'] as String;
-                          return _FilterChip(
-                            label:
-                                StringUtils.libelleCategorie(cat),
+                          return CategorieChip(
+                            categorie: cat, compact: true,
                             selected:
                                 catState.filtre.categorieSlug == slug,
                             onTap: () => ref
@@ -213,40 +212,4 @@ class _CatalogueScreenState extends ConsumerState<CatalogueScreen> {
       ),
     );
   }
-}
-
-class _FilterChip extends StatelessWidget {
-  final String label;
-  final bool selected;
-  final VoidCallback onTap;
-
-  const _FilterChip({
-    required this.label,
-    required this.selected,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) => GestureDetector(
-    onTap: onTap,
-    child: Container(
-      margin: const EdgeInsets.symmetric(horizontal: 4),
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      decoration: BoxDecoration(
-        color: selected ? AppColors.vertFonce : Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: selected ? AppColors.vertFonce : AppColors.grisBord,
-        ),
-      ),
-      child: Text(
-        label,
-        style: TextStyle(
-          fontSize: 12,
-          fontWeight: FontWeight.w600,
-          color: selected ? Colors.white : AppColors.noir,
-        ),
-      ),
-    ),
-  );
 }

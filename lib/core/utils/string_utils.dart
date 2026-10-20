@@ -1,15 +1,4 @@
 class StringUtils {
-  /// Libellé d'une catégorie avec son icône. Le backend renvoie dans
-  /// `icone` une classe Font Awesome du site web (ex: "fas fa-leaf"),
-  /// inutilisable ici : on ne garde qu'un emoji, sinon 🌿.
-  static String libelleCategorie(Map<String, dynamic> cat) {
-    final icone = (cat['icone'] ?? '').toString().trim();
-    final emoji = icone.isEmpty || RegExp(r'^[a-z0-9 _-]+$', caseSensitive: false).hasMatch(icone)
-        ? '🌿'
-        : icone;
-    return '$emoji ${cat['nom'] ?? ''}';
-  }
-
   static const Map<String, String> _accents = {
     'à': 'a', 'â': 'a', 'ä': 'a', 'á': 'a',
     'è': 'e', 'ê': 'e', 'ë': 'e', 'é': 'e',

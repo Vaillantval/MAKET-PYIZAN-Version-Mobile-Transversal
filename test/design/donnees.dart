@@ -122,7 +122,7 @@ Map<String, dynamic> reponseFactice(String path, Map<String, dynamic> user) {
     case '/api/products/categories/':
       return _ok([
         {'id': 1, 'nom': 'Légumes', 'slug': 'legumes', 'icone': 'fas fa-leaf'},
-        {'id': 2, 'nom': 'Fruits', 'slug': 'fruits'},
+        {'id': 2, 'nom': 'Fruits', 'slug': 'fruits', 'emoji': '🥭'},
         {'id': 3, 'nom': 'Café', 'slug': 'cafe'},
         {'id': 4, 'nom': 'Céréales', 'slug': 'cereales'},
       ]);
