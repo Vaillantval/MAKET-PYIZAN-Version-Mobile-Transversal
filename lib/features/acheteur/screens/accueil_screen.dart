@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/utils/string_utils.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/constants/app_colors.dart';
@@ -262,7 +263,7 @@ class AccueilScreen extends ConsumerWidget {
                             final cat = cats[i - 1];
                             final slug = cat['slug'] as String;
                             return _CategorieChip(
-                              label:    '${cat['icone'] ?? '🌿'} ${cat['nom']}',
+                              label:    StringUtils.libelleCategorie(cat),
                               selected: catState.filtre.categorieSlug == slug,
                               onTap: () => ref
                                   .read(catalogueProvider.notifier)

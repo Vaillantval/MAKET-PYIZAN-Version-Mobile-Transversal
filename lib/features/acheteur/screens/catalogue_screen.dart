@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/utils/string_utils.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/constants/app_colors.dart';
@@ -106,7 +107,7 @@ class _CatalogueScreenState extends ConsumerState<CatalogueScreen> {
                           final slug = cat['slug'] as String;
                           return _FilterChip(
                             label:
-                                '${cat['icone'] ?? '🌿'} ${cat['nom']}',
+                                StringUtils.libelleCategorie(cat),
                             selected:
                                 catState.filtre.categorieSlug == slug,
                             onTap: () => ref
