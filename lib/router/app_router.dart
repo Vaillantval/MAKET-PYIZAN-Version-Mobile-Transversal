@@ -55,6 +55,8 @@ import '../features/admin/screens/admin_stocks_screen.dart';
 import '../features/admin/screens/admin_catalogue_screen.dart';
 import '../features/admin/screens/admin_users_screen.dart';
 import '../features/admin/screens/admin_collectes_screen.dart';
+import '../features/admin/screens/admin_plus_screen.dart';
+import '../features/admin/providers/admin_stats_provider.dart';
 
 // Notifie go_router à chaque changement d'authState pour qu'il réévalue
 // son `redirect`, SANS reconstruire l'objet GoRouter lui-même. Recréer tout
@@ -268,6 +270,7 @@ final routerProvider = Provider<GoRouter>((ref) {
           GoRoute(path: '/admin/stocks',       builder: (_, __) => const AdminStocksScreen()),
           GoRoute(path: '/admin/collectes',    builder: (_, __) => const AdminCollectesScreen()),
           GoRoute(path: '/admin/utilisateurs', builder: (_, __) => const AdminUsersScreen()),
+          GoRoute(path: '/admin/plus',         builder: (_, __) => const AdminPlusScreen()),
         ],
       ),
     ],
@@ -298,11 +301,11 @@ class AcheteurShell extends ConsumerWidget {
     return Scaffold(
       body: child,
       bottomNavigationBar: _buildBottomNav(context, [
-        const _NavItem(icon: Icons.home_outlined, iconActif: Icons.home,      label: 'Accueil',   route: '/acheteur/accueil'),
-        const _NavItem(icon: Icons.store_outlined, iconActif: Icons.store,     label: 'Catalogue', route: '/acheteur/catalogue'),
-        _NavItem(icon: Icons.shopping_cart_outlined, iconActif: Icons.shopping_cart, label: 'Panier',route: '/acheteur/panier', badge: nbPanier),
-        const _NavItem(icon: Icons.receipt_outlined, iconActif: Icons.receipt,   label: 'Commandes', route: '/acheteur/commandes'),
-        const _NavItem(icon: Icons.person_outline, iconActif: Icons.person,     label: 'Profil',    route: '/acheteur/profil'),
+        const _NavItem(icon: Icons.home_outlined, iconActif: Icons.home_rounded, label: 'Accueil', route: '/acheteur/accueil'),
+        const _NavItem(icon: Icons.grid_view_outlined, iconActif: Icons.grid_view_rounded, label: 'Boutique', route: '/acheteur/catalogue', autres: ['/acheteur/produit']),
+        _NavItem(icon: Icons.shopping_bag_outlined, iconActif: Icons.shopping_bag_rounded, label: 'Panier', route: '/acheteur/panier', badge: nbPanier, autres: const ['/acheteur/checkout', '/acheteur/paiement']),
+        const _NavItem(icon: Icons.receipt_long_outlined, iconActif: Icons.receipt_long_rounded, label: 'Commandes', route: '/acheteur/commandes', autres: ['/acheteur/commande']),
+        const _NavItem(icon: Icons.person_outline_rounded, iconActif: Icons.person_rounded, label: 'Profil', route: '/acheteur/profil', autres: ['/acheteur/wallet', '/acheteur/adresses', '/acheteur/entreprise']),
       ]),
     );
   }
@@ -317,11 +320,11 @@ class ProducteurShell extends ConsumerWidget {
     return Scaffold(
       body: child,
       bottomNavigationBar: _buildBottomNav(context, [
-        const _NavItem(icon: Icons.dashboard_outlined, iconActif: Icons.dashboard,  label: 'Dashboard',  route: '/producteur/dashboard'),
-        const _NavItem(icon: Icons.receipt_outlined, iconActif: Icons.receipt,    label: 'Commandes',  route: '/producteur/commandes'),
-        const _NavItem(icon: Icons.inventory_outlined, iconActif: Icons.inventory,  label: 'Catalogue',  route: '/producteur/catalogue'),
-        const _NavItem(icon: Icons.local_shipping_outlined, iconActif: Icons.local_shipping, label: 'Collectes', route: '/producteur/collectes'),
-        const _NavItem(icon: Icons.person_outline, iconActif: Icons.person,      label: 'Profil',     route: '/producteur/profil'),
+        const _NavItem(icon: Icons.space_dashboard_outlined, iconActif: Icons.space_dashboard_rounded, label: 'Accueil', route: '/producteur/dashboard'),
+        const _NavItem(icon: Icons.receipt_long_outlined, iconActif: Icons.receipt_long_rounded, label: 'Commandes', route: '/producteur/commandes'),
+        const _NavItem(icon: Icons.inventory_2_outlined, iconActif: Icons.inventory_2_rounded, label: 'Produits', route: '/producteur/catalogue'),
+        const _NavItem(icon: Icons.local_shipping_outlined, iconActif: Icons.local_shipping_rounded, label: 'Collectes', route: '/producteur/collectes'),
+        const _NavItem(icon: Icons.person_outline_rounded, iconActif: Icons.person_rounded, label: 'Profil', route: '/producteur/profil', autres: ['/producteur/entreprise', '/producteur/membres', '/producteur/wallet']),
       ]),
     );
   }
@@ -367,10 +370,10 @@ class _PosShellState extends ConsumerState<PosShell> {
         ],
       ),
       bottomNavigationBar: _buildBottomNav(context, [
-        const _NavItem(icon: Icons.point_of_sale,     label: 'Vente',      route: '/pos/vente'),
-        const _NavItem(icon: Icons.lock_clock_outlined, iconActif: Icons.lock_clock, label: 'Session',  route: '/pos/session'),
-        const _NavItem(icon: Icons.history,            label: 'Historique', route: '/pos/historique'),
-        const _NavItem(icon: Icons.person_outline, iconActif: Icons.person,     label: 'Profil',     route: '/pos/profil'),
+        const _NavItem(icon: Icons.point_of_sale_outlined, iconActif: Icons.point_of_sale_rounded, label: 'Vente', route: '/pos/vente', autres: ['/pos/paiement']),
+        const _NavItem(icon: Icons.lock_clock_outlined, iconActif: Icons.lock_clock_rounded, label: 'Session', route: '/pos/session'),
+        const _NavItem(icon: Icons.history_rounded, iconActif: Icons.history_rounded, label: 'Historique', route: '/pos/historique'),
+        const _NavItem(icon: Icons.person_outline_rounded, iconActif: Icons.person_rounded, label: 'Profil', route: '/pos/profil'),
       ]),
     );
   }
@@ -382,41 +385,17 @@ class AdminShell extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final aVerifier = ref.watch(adminStatsProvider).valueOrNull?.paiementsAVerifier ?? 0;
     return Scaffold(
-      appBar: AppBar(title: const Text('MaketLakay Admin')),
-      drawer: _buildAdminDrawer(context),
       body: child,
-    );
-  }
-
-  Widget _buildAdminDrawer(BuildContext context) {
-    return Drawer(
-      child: ListView(
-        children: [
-          const DrawerHeader(
-            decoration: BoxDecoration(color: AppColors.vertFonce),
-            child: Text('Admin', style: TextStyle(color: Colors.white, fontSize: 20)),
-          ),
-          for (final item in [
-            const _NavItem(icon: Icons.bar_chart, label: 'Dashboard', route: '/admin/dashboard'),
-            const _NavItem(icon: Icons.people,    label: 'Producteurs', route: '/admin/producteurs'),
-            const _NavItem(icon: Icons.receipt,   label: 'Commandes', route: '/admin/commandes'),
-            const _NavItem(icon: Icons.payment,   label: 'Paiements', route: '/admin/paiements'),
-            const _NavItem(icon: Icons.inventory, label: 'Catalogue', route: '/admin/catalogue'),
-            const _NavItem(icon: Icons.warehouse, label: 'Stocks', route: '/admin/stocks'),
-            const _NavItem(icon: Icons.local_shipping, label: 'Collectes', route: '/admin/collectes'),
-            const _NavItem(icon: Icons.manage_accounts, label: 'Utilisateurs', route: '/admin/utilisateurs'),
-          ])
-            ListTile(
-              leading: Icon(item.icon),
-              title: Text(item.label),
-              onTap: () {
-                Navigator.pop(context);
-                context.go(item.route);
-              },
-            ),
-        ],
-      ),
+      bottomNavigationBar: _buildBottomNav(context, [
+        const _NavItem(icon: Icons.space_dashboard_outlined, iconActif: Icons.space_dashboard_rounded, label: 'Accueil', route: '/admin/dashboard'),
+        const _NavItem(icon: Icons.receipt_long_outlined, iconActif: Icons.receipt_long_rounded, label: 'Commandes', route: '/admin/commandes'),
+        _NavItem(icon: Icons.account_balance_wallet_outlined, iconActif: Icons.account_balance_wallet_rounded, label: 'Paiements', route: '/admin/paiements', badge: aVerifier),
+        const _NavItem(icon: Icons.storefront_outlined, iconActif: Icons.storefront_rounded, label: 'Entreprises', route: '/admin/producteurs'),
+        const _NavItem(icon: Icons.menu_rounded, iconActif: Icons.menu_rounded, label: 'Plus', route: '/admin/plus',
+            autres: ['/admin/catalogue', '/admin/stocks', '/admin/collectes', '/admin/utilisateurs']),
+      ]),
     );
   }
 }
@@ -425,7 +404,8 @@ class AdminShell extends ConsumerWidget {
 Widget _buildBottomNav(BuildContext context, List<_NavItem> items) {
   final location = GoRouterState.of(context).matchedLocation;
   final currentIndex = items.indexWhere(
-    (i) => location.startsWith(i.route),
+    (i) => location.startsWith(i.route) ||
+        i.autres.any((a) => location.startsWith(a)),
   ).clamp(0, items.length - 1);
 
   return DecoratedBox(
@@ -448,7 +428,7 @@ Widget _iconeNav(IconData icone, int badge) => badge > 0
     ? Badge(
         label: Text('$badge'),
         backgroundColor: AppColors.jaune,
-        textColor: AppColors.noir,
+        textColor: AppColors.blanc,
         child: Icon(icone),
       )
     : Icon(icone);
@@ -459,11 +439,14 @@ class _NavItem {
   final String    label;
   final String    route;
   final int       badge;
+  /// Autres routes rattachées à cet onglet (écrans de détail, sous-menus).
+  final List<String> autres;
   const _NavItem({
     required this.icon,
     required this.label,
     required this.route,
     this.iconActif,
     this.badge = 0,
+    this.autres = const [],
   });
 }

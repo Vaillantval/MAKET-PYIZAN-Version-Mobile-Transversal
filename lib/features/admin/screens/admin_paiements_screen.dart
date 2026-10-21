@@ -4,10 +4,14 @@ import 'package:cached_network_image/cached_network_image.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/utils/format_utils.dart';
 import '../../../core/utils/image_utils.dart';
+import '../../../shared/ui/ui.dart';
 import '../providers/admin_paiements_provider.dart';
+import '../providers/admin_stats_provider.dart';
 import '../../../shared/widgets/loading_widget.dart';
 import '../../../shared/widgets/empty_state.dart';
+import '../widgets/admin_scaffold.dart';
 
+/// Paiements manuels soumis (MonCash hors ligne, virement…) à vérifier.
 class AdminPaiementsScreen extends ConsumerWidget {
   const AdminPaiementsScreen({super.key});
 
@@ -15,173 +19,183 @@ class AdminPaiementsScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(adminPaiementsProvider);
 
-    return Scaffold(
-      appBar: AppBar(title: const Text('Paiements à vérifier')),
-      body: state.when(
+    return AdminScaffold(
+      titre: 'Paiements',
+      sousTitre: state.whenOrNull(data: (l) => '${l.length} à vérifier'),
+      corps: state.when(
         loading: () => const LoadingWidget(),
         error:   (e, _) => Center(child: Text('$e')),
         data:    (paiements) {
           if (paiements.isEmpty) {
             return const EmptyState(
-              emoji:       '✅',
+              icone:       Icons.task_alt_rounded,
               titre:       'Aucun paiement en attente',
               description: 'Tous les paiements ont été traités.',
             );
           }
-
-          return ListView.builder(
-            padding:   const EdgeInsets.all(12),
-            itemCount: paiements.length,
-            itemBuilder: (_, i) {
-              final p = paiements[i];
-              return Container(
-                margin:  const EdgeInsets.only(bottom: 12),
-                decoration: BoxDecoration(
-                  color:        Colors.white,
-                  borderRadius: BorderRadius.circular(14),
-                  boxShadow: [
-                    BoxShadow(
-                      color:     Colors.black.withValues(alpha: 0.06),
-                      blurRadius: 8,
-                    ),
-                  ],
-                ),
-                child: Column(
-                  children: [
-                    // Header
-                    Container(
-                      padding: const EdgeInsets.all(14),
-                      decoration: BoxDecoration(
-                        color: AppColors.orange.withValues(alpha: 0.08),
-                        borderRadius: const BorderRadius.vertical(
-                          top: Radius.circular(14),
-                        ),
-                      ),
-                      child: Row(
-                        children: [
-                          const Icon(Icons.payment,
-                            color: AppColors.orange),
-                          const SizedBox(width: 10),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment:
-                                  CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  p['reference'] as String? ?? '—',
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.w800,
-                                    color: AppColors.vertFonce,
-                                  ),
-                                ),
-                                Text(
-                                  p['commande_numero'] as String? ?? '',
-                                  style: const TextStyle(
-                                    fontSize: 12,
-                                    color:    AppColors.grisTexte,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          Text(
-                            FormatUtils.htg(p['montant']),
-                            style: const TextStyle(
-                              fontWeight: FontWeight.w900,
-                              fontSize:   18,
-                              color:      AppColors.vertFonce,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-
-                    // Détails + preuve
-                    Padding(
-                      padding: const EdgeInsets.all(14),
-                      child: Column(
-                        children: [
-                          _Row('Type',
-                            p['type_label'] as String? ?? ''),
-                          _Row('Statut',
-                            p['statut_label'] as String? ?? ''),
-                          _Row('Date',
-                            FormatUtils.date(
-                              p['created_at'] as String?)),
-
-                          if (p['preuve_image'] != null) ...[
-                            const SizedBox(height: 12),
-                            const Text('🖼️ Preuve de paiement',
-                              style: TextStyle(
-                                fontWeight: FontWeight.w700,
-                                color: AppColors.vertFonce,
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            GestureDetector(
-                              onTap: () => _voirPreuve(
-                                context,
-                                ImageUtils.imageUrl(
-                                  p['preuve_image'] as String,
-                                ),
-                              ),
-                              child: ClipRRect(
-                                borderRadius:
-                                    BorderRadius.circular(8),
-                                child: CachedNetworkImage(
-                                  imageUrl: ImageUtils.imageUrl(
-                                    p['preuve_image'] as String,
-                                  ),
-                                  height: 120,
-                                  width:  double.infinity,
-                                  fit:    BoxFit.cover,
-                                ),
-                              ),
-                            ),
-                          ],
-
-                          const SizedBox(height: 14),
-
-                          Row(children: [
-                            Expanded(
-                              child: OutlinedButton.icon(
-                                icon: const Icon(Icons.close),
-                                label: const Text('Rejeter'),
-                                onPressed: () => _traiter(
-                                  context, ref,
-                                  p['id'] as int, 'rejeter',
-                                ),
-                                style: OutlinedButton.styleFrom(
-                                  foregroundColor: AppColors.rouge,
-                                  side: const BorderSide(
-                                      color: AppColors.rouge),
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: ElevatedButton.icon(
-                                icon: const Icon(Icons.check),
-                                label: const Text('Confirmer'),
-                                onPressed: () => _traiter(
-                                  context, ref,
-                                  p['id'] as int, 'confirmer',
-                                ),
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: AppColors.vertVif,
-                                ),
-                              ),
-                            ),
-                          ]),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              );
-            },
+          return RefreshIndicator(
+            color: AppColors.vertFonce,
+            onRefresh: () =>
+                ref.read(adminPaiementsProvider.notifier).charger(),
+            child: ListView.separated(
+              padding:   const EdgeInsets.fromLTRB(16, 8, 16, 24),
+              itemCount: paiements.length,
+              separatorBuilder: (_, __) => const SizedBox(height: 12),
+              itemBuilder: (_, i) => _CartePaiement(
+                paiement: paiements[i],
+                onTraiter: (statut) =>
+                    _traiter(context, ref, paiements[i]['id'] as int, statut),
+              ),
+            ),
           );
         },
+      ),
+    );
+  }
+
+  Future<void> _traiter(
+    BuildContext ctx, WidgetRef ref, int id, String statut,
+  ) async {
+    final success = await ref
+        .read(adminPaiementsProvider.notifier)
+        .traiter(id, statut);
+    if (success) ref.read(adminStatsProvider.notifier).charger();
+    if (ctx.mounted) {
+      afficherMessage(
+        ctx,
+        !success
+            ? 'Le paiement n\'a pas pu être traité'
+            : statut == 'confirme'
+                ? 'Paiement confirmé'
+                : 'Paiement rejeté',
+        succes: success,
+      );
+    }
+  }
+}
+
+class _CartePaiement extends StatelessWidget {
+  final Map<String, dynamic> paiement;
+  final ValueChanged<String> onTraiter;
+  const _CartePaiement({required this.paiement, required this.onTraiter});
+
+  @override
+  Widget build(BuildContext context) {
+    final p = paiement;
+    final preuve = p['preuve_image'] as String?;
+
+    return Surface(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const TuileIcone(Icons.account_balance_wallet_outlined,
+                  couleur: AppColors.violet, taille: 42),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(p['reference'] as String? ?? '—',
+                        style: const TextStyle(
+                            fontWeight: FontWeight.w700, fontSize: 14.5)),
+                    Text(
+                      'Commande ${p['commande_numero'] ?? '—'}',
+                      style: const TextStyle(
+                          fontSize: 12.5, color: AppColors.grisTexte),
+                    ),
+                  ],
+                ),
+              ),
+              Text(FormatUtils.htg(p['montant']),
+                  style: const TextStyle(
+                      fontWeight: FontWeight.w700, fontSize: 16)),
+            ],
+          ),
+          const SizedBox(height: 10),
+          const Divider(),
+          const SizedBox(height: 4),
+          LigneInfo(Icons.person_outline_rounded, 'Acheteur',
+              (p['acheteur'] ?? '—').toString()),
+          LigneInfo(Icons.payments_outlined, 'Mode',
+              p['type_label'] as String? ?? '—'),
+          if ((p['numero_expediteur'] ?? '').toString().isNotEmpty)
+            LigneInfo(Icons.phone_iphone_rounded, 'Expéditeur',
+                p['numero_expediteur'].toString()),
+          if ((p['id_transaction'] ?? '').toString().isNotEmpty)
+            LigneInfo(Icons.tag_rounded, 'Transaction',
+                p['id_transaction'].toString()),
+          LigneInfo(Icons.event_outlined, 'Soumis le',
+              FormatUtils.dateHeure(p['created_at'] as String?)),
+          if (preuve != null) ...[
+            const SizedBox(height: 10),
+            GestureDetector(
+              onTap: () => _voirPreuve(context, ImageUtils.imageUrl(preuve)),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: Stack(
+                  children: [
+                    CachedNetworkImage(
+                      imageUrl: ImageUtils.imageUrl(preuve),
+                      height: 130,
+                      width:  double.infinity,
+                      fit:    BoxFit.cover,
+                      errorWidget: (_, __, ___) => Container(
+                        height: 130,
+                        color: AppColors.surface2,
+                        child: const Center(
+                          child: Icon(Icons.broken_image_outlined,
+                              color: AppColors.grisLeger),
+                        ),
+                      ),
+                    ),
+                    Positioned(
+                      left: 8, bottom: 8,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 10, vertical: 5),
+                        decoration: BoxDecoration(
+                          color: AppColors.noir.withValues(alpha: 0.7),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: const Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.zoom_in_rounded,
+                                size: 14, color: AppColors.blanc),
+                            SizedBox(width: 4),
+                            Text('Preuve de paiement',
+                                style: TextStyle(
+                                    color: AppColors.blanc, fontSize: 11.5)),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+          const SizedBox(height: 14),
+          Row(children: [
+            Expanded(
+              child: OutlinedButton(
+                onPressed: () => onTraiter('echoue'),
+                style: OutlinedButton.styleFrom(
+                    foregroundColor: AppColors.rouge),
+                child: const Text('Rejeter'),
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: FilledButton(
+                onPressed: () => onTraiter('confirme'),
+                child: const Text('Confirmer'),
+              ),
+            ),
+          ]),
+        ],
       ),
     );
   }
@@ -190,60 +204,11 @@ class AdminPaiementsScreen extends ConsumerWidget {
     showDialog(
       context: ctx,
       builder: (_) => Dialog(
+        clipBehavior: Clip.antiAlias,
         child: InteractiveViewer(
           child: CachedNetworkImage(imageUrl: url),
         ),
       ),
     );
   }
-
-  Future<void> _traiter(
-    BuildContext ctx, WidgetRef ref,
-    int id, String action,
-  ) async {
-    final success = await ref
-        .read(adminPaiementsProvider.notifier)
-        .traiter(id, action);
-    if (ctx.mounted) {
-      ScaffoldMessenger.of(ctx).showSnackBar(SnackBar(
-        content: Text(success
-            ? action == 'confirmer'
-                ? '✅ Paiement confirmé !'
-                : '❌ Paiement rejeté'
-            : 'Erreur'),
-        backgroundColor: success
-            ? (action == 'confirmer'
-                ? AppColors.vertVif
-                : AppColors.orange)
-            : AppColors.rouge,
-      ));
-    }
-  }
-}
-
-class _Row extends StatelessWidget {
-  final String label;
-  final String valeur;
-  const _Row(this.label, this.valeur);
-
-  @override
-  Widget build(BuildContext context) => Padding(
-    padding: const EdgeInsets.only(bottom: 6),
-    child: Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(label,
-          style: const TextStyle(
-            color: AppColors.grisTexte, fontSize: 13,
-          ),
-        ),
-        Text(valeur,
-          style: const TextStyle(
-            fontWeight: FontWeight.w600, fontSize: 13,
-            color: AppColors.vertFonce,
-          ),
-        ),
-      ],
-    ),
-  );
 }

@@ -33,7 +33,7 @@ class CommandesScreen extends ConsumerWidget {
         data: (commandes) {
           if (commandes.isEmpty) {
             return EmptyState(
-              emoji:       '📦',
+              icone:       Icons.receipt_long_outlined,
               titre:       'Aucune commande',
               description: 'Vos commandes apparaîtront ici.',
               boutonLabel: 'Voir le catalogue',

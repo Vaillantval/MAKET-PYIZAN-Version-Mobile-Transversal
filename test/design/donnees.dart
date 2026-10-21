@@ -29,6 +29,10 @@ final utilisateurEnAttente = _user('acheteur', [
 ]);
 final utilisateurCaissier  = _user('pos_operator', []);
 final utilisateurCollecteur = _user('collecteur', []);
+final utilisateurAdmin = {
+  ..._user('superadmin', []), 'first_name': 'Valéry', 'last_name': 'Pierre',
+  'is_superuser': true, 'is_staff': true,
+};
 
 Map<String, dynamic> _produit(int id, String nom, String prix, String unite, int stock,
         {String categorie = 'Légumes', bool vedette = false, String commune = 'Kenscoff'}) => {
@@ -190,9 +194,77 @@ Map<String, dynamic> reponseFactice(String path, Map<String, dynamic> user) {
         ]},
       ]});
   }
+  final admin = _reponseAdmin(path);
+  if (admin != null) return admin;
   if (path.startsWith('/api/products/public/')) return _ok(produits.first);
   if (path.startsWith('/api/auth/commandes/') || path.startsWith('/api/auth/producteur/commandes/')) {
     return _ok(commandes.first);
   }
   return _ok(<dynamic>[]);
 }
+
+Map<String, dynamic>? _reponseAdmin(String path) => switch (path) {
+  '/api/admin/stats/' => _ok({
+    'total_users': 1284, 'total_producteurs': 86, 'producteurs_actifs': 71,
+    'producteurs_attente': 4, 'total_acheteurs': 1190, 'nouveaux_users_30j': 132,
+    'total_commandes': 642, 'commandes_en_attente': 18, 'commandes_livrees': 548,
+    'commandes_annulees': 31, 'commandes_litige': 2, 'commandes_mois': 96,
+    'revenu_total': '2846500.00', 'revenu_mois': '418250.00', 'revenu_7j': '96400.00',
+    'paiements_a_verifier': 5, 'montant_a_verifier': '23850.00',
+    'total_produits': 412, 'produits_epuises': 17, 'alertes_stock': 6,
+    'collectes_planifiees': 3, 'collectes_en_cours': 1, 'collectes_en_retard': 1,
+    'vouchers_actifs': 24,
+  }),
+  '/api/admin/commandes/' => _ok([
+    for (final (n, st, lb, t) in [
+      ('CMD-2026-00131', 'en_attente', 'En attente', '4250.00'),
+      ('CMD-2026-00130', 'confirmee', 'Confirmée', '1800.00'),
+      ('CMD-2026-00129', 'en_preparation', 'En préparation', '12600.00'),
+      ('CMD-2026-00128', 'livree', 'Livrée', '950.00'),
+      ('CMD-2026-00127', 'litige', 'Litige', '3200.00'),
+    ])
+      {'numero_commande': n, 'statut': st, 'statut_label': lb, 'total': t,
+       'acheteur_nom': 'Marie Joseph', 'producteur_nom': 'Jaden Kenscoff',
+       'created_at': '2026-10-19T14:12:00-04:00'},
+  ]),
+  '/api/admin/paiements/' => _ok([
+    {'id': 1, 'reference': 'PAY-2026-0412', 'commande_numero': 'CMD-2026-00131',
+     'acheteur': 'Marie Joseph', 'type_label': 'MonCash (manuel)', 'statut': 'soumis',
+     'statut_label': 'Soumis', 'montant': '4250.00', 'numero_expediteur': '+509 3700 0000',
+     'id_transaction': 'MC-88213', 'preuve_image': null,
+     'created_at': '2026-10-20T09:41:00-04:00'},
+  ]),
+  '/api/admin/producteurs/' => _ok([
+    {'id': 7, 'nom_affiche': 'Jaden Kenscoff', 'type_label': 'Producteur',
+     'code_producteur': 'PROD-2026-0007', 'commune': 'Kenscoff',
+     'departement_label': 'Ouest', 'statut': 'actif', 'statut_label': 'Actif', 'nb_produits': 12},
+    {'id': 9, 'nom_affiche': 'Kafe Lakay', 'type_label': 'Entreprise',
+     'code_producteur': 'PROD-2026-0009', 'commune': 'Thiotte',
+     'departement_label': 'Sud-Est', 'statut': 'en_attente', 'statut_label': 'En attente', 'nb_produits': 0},
+  ]),
+  '/api/admin/catalogue/' => _ok([
+    for (final p in produits.take(4))
+      {...p, 'producteur_nom': 'Jaden Kenscoff'},
+  ]),
+  '/api/admin/stocks/lots/' => _ok([
+    {'id': 1, 'numero_lot': 'LOT-2026-0081', 'produit_nom': 'Carottes',
+     'producteur_nom': 'Jaden Kenscoff', 'quantite_initiale': 200,
+     'quantite_actuelle': 64, 'statut': 'disponible', 'statut_label': 'Disponible'},
+  ]),
+  '/api/admin/stocks/alertes/' => _ok([
+    {'id': 1, 'produit_nom': 'Mamba', 'producteur_nom': 'Kafe Lakay',
+     'niveau': 'critique', 'stock_actuel': 2, 'seuil': 10},
+  ]),
+  '/api/admin/collectes/' => _ok([
+    {'id': 1, 'reference': 'COL-2026-014', 'statut': 'planifiee', 'statut_label': 'Planifiée',
+     'est_en_retard': false, 'zone': 'Kenscoff', 'point': 'Marché de Furcy',
+     'collecteur': 'Jean Baptiste', 'date_planifiee': '2026-10-24', 'nb_producteurs': 6},
+  ]),
+  '/api/admin/users/' => _ok([
+    {'id': 42, 'first_name': 'Marie', 'last_name': 'Joseph', 'email': 'marie.joseph@example.ht',
+     'role': 'acheteur', 'is_active': true, 'entreprises': [{'nom': 'Jaden Kenscoff'}]},
+    {'id': 43, 'first_name': 'Jean', 'last_name': 'Baptiste', 'email': 'jean@example.ht',
+     'role': 'collecteur', 'is_active': true},
+  ]),
+  _ => null,
+};

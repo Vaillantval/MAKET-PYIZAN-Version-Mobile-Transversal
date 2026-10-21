@@ -3,6 +3,7 @@
 // téléphone. Toute erreur de rendu (débordement RenderFlex, exception de
 // build…) fait échouer le test. `--update-goldens` écrit les captures dans
 // test/design/captures/ pour la revue visuelle.
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'donnees.dart';
@@ -43,6 +44,15 @@ final _ecrans = [
   _Ecran('pos_session',      '/pos/session',            () => utilisateurCaissier),
   _Ecran('pos_historique',   '/pos/historique',         () => utilisateurCaissier),
   _Ecran('pos_profil',       '/pos/profil',             () => utilisateurCaissier),
+  _Ecran('admin_dashboard',  '/admin/dashboard',        () => utilisateurAdmin),
+  _Ecran('admin_commandes',  '/admin/commandes',        () => utilisateurAdmin),
+  _Ecran('admin_paiements',  '/admin/paiements',        () => utilisateurAdmin),
+  _Ecran('admin_entreprises','/admin/producteurs',      () => utilisateurAdmin),
+  _Ecran('admin_plus',       '/admin/plus',             () => utilisateurAdmin),
+  _Ecran('admin_catalogue',  '/admin/catalogue',        () => utilisateurAdmin),
+  _Ecran('admin_stocks',     '/admin/stocks',           () => utilisateurAdmin),
+  _Ecran('admin_collectes',  '/admin/collectes',        () => utilisateurAdmin),
+  _Ecran('admin_users',      '/admin/utilisateurs',     () => utilisateurAdmin),
 ];
 
 void main() {
@@ -59,5 +69,14 @@ void main() {
       await monterApp(tester, chemin: e.chemin, utilisateur: e.utilisateur(),
           entrepriseActive: e.entreprise, taille: petitTelephone);
     });
+
+    // Capture pleine hauteur pour la revue visuelle (--update-goldens)
+    if (autoUpdateGoldenFiles) {
+      testWidgets('${e.nom} (long)', (tester) async {
+        await monterApp(tester, chemin: e.chemin, utilisateur: e.utilisateur(),
+            entrepriseActive: e.entreprise, taille: const Size(390, 1900));
+        await capture(tester, '${e.nom}_long');
+      });
+    }
   }
 }

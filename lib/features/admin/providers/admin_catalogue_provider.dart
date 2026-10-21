@@ -38,21 +38,15 @@ class AdminCatalogueNotifier
     } catch (e, st) { state = AsyncValue.error(e, st); }
   }
 
-  Future<bool> toggleActif(String slug) async {
-    try {
-      final res  = await _api.patch(
-        '${AppEndpoints.adminCatalogue}$slug/toggle-actif/',
-      );
-      final data = res.data as Map<String, dynamic>;
-      if (data['success'] == true) { await charger(); return true; }
-      return false;
-    } catch (_) { return false; }
-  }
+  Future<bool> toggleActif(int id) => _basculer(id, 'is_active');
 
-  Future<bool> toggleVedette(String slug) async {
+  Future<bool> toggleVedette(int id) => _basculer(id, 'is_featured');
+
+  Future<bool> _basculer(int id, String champ) async {
     try {
       final res  = await _api.patch(
-        '${AppEndpoints.adminCatalogue}$slug/toggle-vedette/',
+        '${AppEndpoints.adminCatalogue}$id/toggle/',
+        data: {'champ': champ},
       );
       final data = res.data as Map<String, dynamic>;
       if (data['success'] == true) { await charger(); return true; }

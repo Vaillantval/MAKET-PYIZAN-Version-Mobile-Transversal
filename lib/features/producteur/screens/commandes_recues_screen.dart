@@ -88,7 +88,7 @@ class _CommandesList extends ConsumerWidget {
       data:    (commandes) {
         if (commandes.isEmpty) {
           return const EmptyState(
-            emoji:       '📭',
+            icone:       Icons.inbox_outlined,
             titre:       'Aucune commande',
             description: 'Aucune commande dans cette catégorie.',
           );

@@ -17,6 +17,7 @@ class AdminStats {
   final int    commandesEnAttente;
   final int    commandesLivrees;
   final int    commandesLitige;
+  final int    commandesAnnulees;
   final int    commandesMois;
   // Revenus
   final double revenuTotal;
@@ -47,6 +48,7 @@ class AdminStats {
     this.commandesEnAttente   = 0,
     this.commandesLivrees     = 0,
     this.commandesLitige      = 0,
+    this.commandesAnnulees    = 0,
     this.commandesMois        = 0,
     this.revenuTotal          = 0,
     this.revenuMois           = 0,
@@ -73,6 +75,7 @@ class AdminStats {
     commandesEnAttente:  j['commandes_en_attente']   as int?    ?? 0,
     commandesLivrees:    j['commandes_livrees']      as int?    ?? 0,
     commandesLitige:     j['commandes_litige']       as int?    ?? 0,
+    commandesAnnulees:   j['commandes_annulees']     as int?    ?? 0,
     commandesMois:       j['commandes_mois']         as int?    ?? 0,
     revenuTotal:         double.tryParse(j['revenu_total']?.toString() ?? '0')  ?? 0,
     revenuMois:          double.tryParse(j['revenu_mois']?.toString()  ?? '0')  ?? 0,

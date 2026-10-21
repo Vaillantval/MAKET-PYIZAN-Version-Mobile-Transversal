@@ -35,7 +35,7 @@ class MesProduitsScreen extends ConsumerWidget {
         data:    (produits) {
           if (produits.isEmpty) {
             return EmptyState(
-              emoji:       '🌿',
+              icone:       Icons.inventory_2_outlined,
               titre:       'Aucun produit',
               description: 'Ajoutez votre premier produit !',
               boutonLabel: 'Ajouter un produit',

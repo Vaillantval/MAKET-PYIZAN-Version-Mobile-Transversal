@@ -31,13 +31,14 @@ class AdminPaiementsNotifier
     } catch (e, st) { state = AsyncValue.error(e, st); }
   }
 
+  /// [statut] : confirme | echoue (rejet) | verifie | annule.
   Future<bool> traiter(
-    int id, String action, {String note = ''}
+    int id, String statut, {String note = ''}
   ) async {
     try {
       final res = await _api.patch(
         '${AppEndpoints.adminPaiements}$id/statut/',
-        data: {'action': action, if (note.isNotEmpty) 'note': note},
+        data: {'statut': statut, if (note.isNotEmpty) 'note': note},
       );
       final data = res.data as Map<String, dynamic>;
       if (data['success'] == true) { await charger(); return true; }

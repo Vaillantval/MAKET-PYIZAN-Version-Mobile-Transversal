@@ -35,10 +35,12 @@ class AdminCollectesNotifier
     } catch (e, st) { state = AsyncValue.error(e, st); }
   }
 
-  Future<bool> changerStatut(int id, String action) async {
+  /// [statut] : en_cours | terminee | annulee (PATCH …/statut/).
+  Future<bool> changerStatut(int id, String statut) async {
     try {
       final res  = await _api.patch(
-        '${AppEndpoints.adminCollectes}$id/$action/',
+        '${AppEndpoints.adminCollectes}$id/statut/',
+        data: {'statut': statut},
       );
       final data = res.data as Map<String, dynamic>;
       if (data['success'] == true) { await charger(); return true; }

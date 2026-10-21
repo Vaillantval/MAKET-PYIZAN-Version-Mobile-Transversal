@@ -32,7 +32,7 @@ class CollectesProducteurScreen extends ConsumerWidget {
         data:    (participations) {
           if (participations.isEmpty) {
             return const EmptyState(
-              emoji:       '🚛',
+              icone:       Icons.local_shipping_outlined,
               titre:       'Aucune collecte planifiée',
               description: 'Vous serez notifié(e) dès qu\'une '
                   'collecte est organisée dans votre zone.',

@@ -1,284 +1,204 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../shared/ui/ui.dart';
 import '../providers/admin_stocks_provider.dart';
 import '../../../shared/widgets/loading_widget.dart';
+import '../../../shared/widgets/empty_state.dart';
+import '../widgets/admin_scaffold.dart';
 
 class AdminStocksScreen extends ConsumerStatefulWidget {
   const AdminStocksScreen({super.key});
 
   @override
-  ConsumerState<AdminStocksScreen> createState() =>
-      _AdminStocksScreenState();
+  ConsumerState<AdminStocksScreen> createState() => _AdminStocksScreenState();
 }
 
-class _AdminStocksScreenState
-    extends ConsumerState<AdminStocksScreen>
-    with SingleTickerProviderStateMixin {
-  late TabController _tabs;
-
-  @override
-  void initState() {
-    super.initState();
-    _tabs = TabController(length: 2, vsync: this);
-  }
-
-  @override
-  void dispose() { _tabs.dispose(); super.dispose(); }
+class _AdminStocksScreenState extends ConsumerState<AdminStocksScreen> {
+  String _vue = 'alertes';
 
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(adminStocksProvider);
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Stocks & Alertes'),
-        bottom: TabBar(
-          controller:          _tabs,
-          labelColor:          AppColors.jaune,
-          unselectedLabelColor: Colors.white70,
-          indicatorColor:      AppColors.jaune,
-          tabs: const [
-            Tab(text: '⚠️ Alertes'),
-            Tab(text: '📦 Lots'),
-          ],
-        ),
+    return AdminScaffold(
+      titre: 'Stocks',
+      retour: '/admin/plus',
+      filtres: PastillesFiltre(
+        options: [
+          ('alertes', 'Alertes${_compte(state, 'alertes')}'),
+          ('lots',    'Lots${_compte(state, 'lots')}'),
+        ],
+        valeur: _vue,
+        onChanged: (v) => setState(() => _vue = v),
       ),
-      body: state.when(
+      corps: state.when(
         loading: () => const LoadingWidget(),
         error:   (e, _) => Center(child: Text('$e')),
-        data:    (data) => TabBarView(
-          controller: _tabs,
-          children: [
-            _AlertesList(
-              alertes: (data['alertes'] as List?)
-                  ?.cast<Map<String, dynamic>>() ?? [],
-            ),
-            _LotsList(
-              lots: (data['lots'] as List?)
-                  ?.cast<Map<String, dynamic>>() ?? [],
-            ),
-          ],
-        ),
+        data:    (data) {
+          final liste = (data[_vue] as List?)
+                  ?.cast<Map<String, dynamic>>() ?? const [];
+          if (liste.isEmpty) {
+            return _vue == 'alertes'
+                ? const EmptyState(
+                    icone: Icons.task_alt_rounded,
+                    titre: 'Aucune alerte de stock')
+                : const EmptyState(
+                    icone: Icons.inventory_2_outlined,
+                    titre: 'Aucun lot enregistré');
+          }
+          return ListView.separated(
+            padding:   const EdgeInsets.fromLTRB(16, 8, 16, 24),
+            itemCount: liste.length,
+            separatorBuilder: (_, __) => const SizedBox(height: 10),
+            itemBuilder: (_, i) => _vue == 'alertes'
+                ? _CarteAlerte(liste[i])
+                : _CarteLot(liste[i]),
+          );
+        },
       ),
     );
   }
+
+  String _compte(AsyncValue<Map<String, dynamic>> s, String cle) {
+    final n = (s.valueOrNull?[cle] as List?)?.length;
+    return n == null ? '' : ' · $n';
+  }
 }
 
-class _AlertesList extends StatelessWidget {
-  final List<Map<String, dynamic>> alertes;
-  const _AlertesList({required this.alertes});
+Color _couleurNiveau(String? niveau) => switch (niveau) {
+      'critique' || 'rupture' => AppColors.rouge,
+      'alerte' || 'bas'       => AppColors.orange,
+      _                       => AppColors.bleu,
+    };
+
+class _CarteAlerte extends StatelessWidget {
+  final Map<String, dynamic> a;
+  const _CarteAlerte(this.a);
 
   @override
   Widget build(BuildContext context) {
-    if (alertes.isEmpty) {
-      return const Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text('✅', style: TextStyle(fontSize: 48)),
-            SizedBox(height: 12),
-            Text('Aucune alerte de stock',
-              style: TextStyle(
-                fontWeight: FontWeight.w700,
-                color: AppColors.vertFonce,
-              ),
-            ),
-          ],
-        ),
-      );
-    }
-
-    return ListView.builder(
-      padding:   const EdgeInsets.all(12),
-      itemCount: alertes.length,
-      itemBuilder: (_, i) {
-        final a = alertes[i];
-        final niveauColor = {
-          'critique': AppColors.rouge,
-          'alerte':   AppColors.orange,
-          'bas':      AppColors.statutAttente,
-          'info':     AppColors.bleu,
-        }[a['niveau']] ?? AppColors.grisTexte;
-
-        return Container(
-          margin:  const EdgeInsets.only(bottom: 8),
-          padding: const EdgeInsets.all(14),
-          decoration: BoxDecoration(
-            color:        Colors.white,
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: niveauColor.withValues(alpha: 0.3),
-            ),
-            boxShadow: [
-              BoxShadow(
-                color:     Colors.black.withValues(alpha: 0.05),
-                blurRadius: 6,
-              ),
-            ],
-          ),
-          child: Row(
+    final couleur = _couleurNiveau(a['niveau'] as String?);
+    final stock = num.tryParse('${a['stock_actuel']}') ?? 0;
+    final seuil = num.tryParse('${a['seuil']}') ?? 0;
+    return Surface(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
             children: [
-              Container(
-                width:  6,
-                height: 50,
-                decoration: BoxDecoration(
-                  color:        niveauColor,
-                  borderRadius: BorderRadius.circular(3),
-                ),
-              ),
+              TuileIcone(Icons.warning_amber_rounded, couleur: couleur, taille: 40),
               const SizedBox(width: 12),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      a['produit'] as String? ?? '—',
-                      style: const TextStyle(
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.vertFonce,
-                      ),
-                    ),
-                    Text(
-                      a['producteur'] as String? ?? '',
-                      style: const TextStyle(
-                        fontSize: 12,
-                        color:    AppColors.grisTexte,
-                      ),
-                    ),
-                    Text(
-                      'Stock : ${a['stock_actuel']} '
-                      '(seuil : ${a['seuil']})',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color:    niveauColor,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
+                    Text((a['produit_nom'] ?? a['produit'] ?? '—').toString(),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                            fontWeight: FontWeight.w700, fontSize: 14.5)),
+                    Text((a['producteur_nom'] ?? a['producteur'] ?? '').toString(),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                            fontSize: 12.5, color: AppColors.grisTexte)),
                   ],
                 ),
               ),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color:        niveauColor.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Text(
-                  (a['niveau'] as String? ?? '')
-                      .toUpperCase(),
-                  style: TextStyle(
-                    fontSize:   10,
-                    fontWeight: FontWeight.w800,
-                    color:      niveauColor,
-                  ),
-                ),
-              ),
+              PuceStatut(
+                  (a['niveau'] as String? ?? 'info').replaceAll('_', ' '),
+                  couleur: couleur),
             ],
           ),
-        );
-      },
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Text('Stock $stock',
+                  style: TextStyle(
+                      fontSize: 12.5, fontWeight: FontWeight.w600, color: couleur)),
+              const Spacer(),
+              Text('Seuil $seuil',
+                  style: const TextStyle(
+                      fontSize: 12.5, color: AppColors.grisTexte)),
+            ],
+          ),
+          const SizedBox(height: 6),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(6),
+            child: LinearProgressIndicator(
+              value: seuil == 0 ? 0 : (stock / seuil).clamp(0, 1).toDouble(),
+              minHeight: 6,
+              color: couleur,
+              backgroundColor: AppColors.surface2,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
 
-class _LotsList extends StatelessWidget {
-  final List<Map<String, dynamic>> lots;
-  const _LotsList({required this.lots});
+class _CarteLot extends StatelessWidget {
+  final Map<String, dynamic> l;
+  const _CarteLot(this.l);
 
   @override
   Widget build(BuildContext context) {
-    if (lots.isEmpty) {
-      return const Center(
-        child: Text('Aucun lot disponible'),
-      );
-    }
+    final qtAct  = num.tryParse('${l['quantite_actuelle']}') ?? 0;
+    final qtInit = num.tryParse('${l['quantite_initiale']}') ?? 0;
+    final taux   = qtInit == 0 ? 0.0 : (qtAct / qtInit).toDouble();
+    final couleur = taux > 0.5
+        ? AppColors.vertVif
+        : taux > 0.2 ? AppColors.orange : AppColors.rouge;
 
-    return ListView.builder(
-      padding:   const EdgeInsets.all(12),
-      itemCount: lots.length,
-      itemBuilder: (_, i) {
-        final l = lots[i];
-        final qtAct  = l['quantite_actuelle'] as int? ?? 0;
-        final qtInit = l['quantite_initiale'] as int? ?? 1;
-        final taux   = qtAct / qtInit;
-
-        return Container(
-          margin:  const EdgeInsets.only(bottom: 8),
-          padding: const EdgeInsets.all(14),
-          decoration: BoxDecoration(
-            color:        Colors.white,
-            borderRadius: BorderRadius.circular(12),
-            boxShadow: [
-              BoxShadow(
-                color:     Colors.black.withValues(alpha: 0.05),
-                blurRadius: 6,
+    return Surface(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Text(l['numero_lot'] as String? ?? '—',
+                    style: const TextStyle(
+                        fontWeight: FontWeight.w700, fontSize: 14.5)),
               ),
+              PuceStatut(
+                  (l['statut_label'] ?? l['statut'] ?? '').toString(),
+                  couleur: AppColors.grisTexte),
             ],
           ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          const SizedBox(height: 2),
+          Text(
+            [l['produit_nom'] ?? l['produit'], l['producteur_nom'] ?? l['producteur']]
+                .where((v) => (v ?? '').toString().isNotEmpty)
+                .join(' · '),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(fontSize: 12.5, color: AppColors.grisTexte),
+          ),
+          const SizedBox(height: 12),
+          Row(
             children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    l['numero_lot'] as String? ?? '—',
-                    style: const TextStyle(
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.vertFonce,
-                    ),
+              Expanded(
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(6),
+                  child: LinearProgressIndicator(
+                    value: taux.clamp(0.0, 1.0),
+                    minHeight: 6,
+                    backgroundColor: AppColors.surface2,
+                    color: couleur,
                   ),
-                  Text(
-                    l['statut'] as String? ?? '',
-                    style: const TextStyle(
-                      fontSize: 12,
-                      color:    AppColors.grisTexte,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 4),
-              Text(
-                '${l['produit']} — ${l['producteur']}',
-                style: const TextStyle(
-                  fontSize: 13,
-                  color:    AppColors.grisTexte,
                 ),
               ),
-              const SizedBox(height: 8),
-              Row(
-                children: [
-                  Expanded(
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(4),
-                      child: LinearProgressIndicator(
-                        value:      taux.clamp(0.0, 1.0),
-                        minHeight:  8,
-                        backgroundColor: Colors.grey[200],
-                        color:      taux > 0.5
-                            ? AppColors.vertVif
-                            : taux > 0.2
-                                ? AppColors.orange
-                                : AppColors.rouge,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Text(
-                    '$qtAct / $qtInit kg',
-                    style: const TextStyle(
-                      fontSize:   12,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ],
-              ),
+              const SizedBox(width: 12),
+              Text('$qtAct / $qtInit',
+                  style: const TextStyle(
+                      fontSize: 12.5, fontWeight: FontWeight.w600)),
             ],
           ),
-        );
-      },
+        ],
+      ),
     );
   }
 }

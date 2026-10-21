@@ -24,7 +24,7 @@ class AdressesScreen extends ConsumerWidget {
         data: (adresses) {
           if (adresses.isEmpty) {
             return EmptyState(
-              emoji: '📍',
+              icone: Icons.place_outlined,
               titre: 'Aucune adresse',
               description: 'Ajoutez votre première adresse.',
               boutonLabel: 'Ajouter une adresse',

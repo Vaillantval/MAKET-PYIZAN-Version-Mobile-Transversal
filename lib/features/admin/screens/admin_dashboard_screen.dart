@@ -4,8 +4,8 @@ import 'package:go_router/go_router.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/utils/format_utils.dart';
 import '../../../providers/auth_provider.dart';
+import '../../../shared/ui/ui.dart';
 import '../providers/admin_stats_provider.dart';
-import '../widgets/kpi_card.dart';
 import '../../../shared/widgets/loading_widget.dart';
 import '../../../core/offline/offline_banner.dart';
 import '../../../core/notifications/notification_provider.dart';
@@ -20,402 +20,45 @@ class AdminDashboardScreen extends ConsumerWidget {
     final notifCount = ref.watch(notificationProvider).unreadCount;
 
     return Scaffold(
-      backgroundColor: AppColors.grisClair,
       body: SafeArea(
         child: Column(
           children: [
             const OfflineBanner(),
             Expanded(
               child: RefreshIndicator(
-                color:     AppColors.vertVif,
+                color:     AppColors.vertFonce,
                 onRefresh: () =>
                     ref.read(adminStatsProvider.notifier).charger(),
-                child: CustomScrollView(
-                  slivers: [
-
-                    // ── Header ──────────────────────────────
-                    SliverToBoxAdapter(
-                      child: Container(
-                        decoration: const BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [
-                              Color(0xFF0D3B1A),
-                              AppColors.vertFonce,
-                            ],
-                          ),
+                child: ListView(
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 32),
+                  children: [
+                    EnTeteEcran(
+                      user?.firstName ?? 'Admin',
+                      surtitre: 'Bonjour,',
+                      padding: const EdgeInsets.fromLTRB(4, 12, 0, 16),
+                      actions: [
+                        BoutonRond(
+                          Icons.notifications_none_rounded,
+                          badge: notifCount,
+                          tooltip: 'Notifications',
+                          onTap: () => ref
+                              .read(notificationProvider.notifier)
+                              .markAllRead(),
                         ),
-                        padding: const EdgeInsets.fromLTRB(
-                            20, 16, 20, 24),
-                        child: Column(
-                          children: [
-                            Row(
-                              mainAxisAlignment:
-                                  MainAxisAlignment.spaceBetween,
-                              children: [
-                                Column(
-                                  crossAxisAlignment:
-                                      CrossAxisAlignment.start,
-                                  children: [
-                                    const Text(
-                                      '👑 Superadmin',
-                                      style: TextStyle(
-                                        color:      AppColors.jaune,
-                                        fontSize:   12,
-                                        fontWeight: FontWeight.w700,
-                                        letterSpacing: 1,
-                                      ),
-                                    ),
-                                    Text(
-                                      'Bonjou ${user?.firstName ?? ''} !',
-                                      style: const TextStyle(
-                                        color:      Colors.white,
-                                        fontSize:   22,
-                                        fontFamily: 'PlayfairDisplay',
-                                        fontWeight: FontWeight.w700,
-                                      ),
-                                    ),
-                                    const Text(
-                                      'maketlakay.ht',
-                                      style: TextStyle(
-                                        color:   Color(0x88FFFFFF),
-                                        fontSize: 12,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                // Cloche notifications
-                                GestureDetector(
-                                  onTap: () {
-                                    ref.read(notificationProvider
-                                        .notifier).markAllRead();
-                                  },
-                                  child: Stack(
-                                    children: [
-                                      const CircleAvatar(
-                                        backgroundColor:
-                                            Color(0x33FFFFFF),
-                                        child: Icon(
-                                          Icons.notifications_outlined,
-                                          color: Colors.white,
-                                        ),
-                                      ),
-                                      if (notifCount > 0)
-                                        Positioned(
-                                          top: 0, right: 0,
-                                          child: Container(
-                                            width:  18, height: 18,
-                                            decoration: const BoxDecoration(
-                                              color: AppColors.rouge,
-                                              shape: BoxShape.circle,
-                                            ),
-                                            child: Center(
-                                              child: Text(
-                                                '$notifCount',
-                                                style: const TextStyle(
-                                                  color:      Colors.white,
-                                                  fontSize:   10,
-                                                  fontWeight: FontWeight.w800,
-                                                ),
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-
-                            // Revenus en évidence
-                            stats.whenOrNull(
-                              data: (s) => Container(
-                                margin:  const EdgeInsets.only(top: 20),
-                                padding: const EdgeInsets.all(16),
-                                decoration: BoxDecoration(
-                                  color:        Colors.white
-                                      .withValues(alpha: 0.1),
-                                  borderRadius:
-                                      BorderRadius.circular(12),
-                                  border: Border.all(
-                                    color: Colors.white
-                                        .withValues(alpha: 0.2),
-                                  ),
-                                ),
-                                child: Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    _RevStat(
-                                      label:  'Ce mois',
-                                      valeur: FormatUtils.htg(s.revenuMois),
-                                      jaune:  true,
-                                    ),
-                                    _RevStat(
-                                      label:  '7 derniers jours',
-                                      valeur: FormatUtils.htg(s.revenu7j),
-                                    ),
-                                    _RevStat(
-                                      label:  'Total',
-                                      valeur: FormatUtils.htg(s.revenuTotal),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ) ?? const SizedBox.shrink(),
-                          ],
-                        ),
-                      ),
+                      ],
                     ),
-
-                    // ── Alertes urgentes ─────────────────────
-                    stats.whenOrNull(
-                      data: (s) {
-                        final alerts = <_Alert>[];
-                        if (s.paiementsAVerifier > 0) {
-                          alerts.add(_Alert(
-                            '💳 ${s.paiementsAVerifier} paiement(s) à vérifier',
-                            () => context.go('/admin/paiements'),
-                          ));
-                        }
-                        if (s.producteursAttente > 0) {
-                          alerts.add(_Alert(
-                            '🌾 ${s.producteursAttente} producteur(s) en attente',
-                            () => context.go('/admin/producteurs'),
-                          ));
-                        }
-                        if (s.alertesStock > 0) {
-                          alerts.add(_Alert(
-                            '⚠️ ${s.alertesStock} alerte(s) de stock',
-                            () => context.go('/admin/stocks'),
-                          ));
-                        }
-                        if (s.commandesLitige > 0) {
-                          alerts.add(_Alert(
-                            '⚡ ${s.commandesLitige} commande(s) en litige',
-                            () => context.go('/admin/commandes'),
-                          ));
-                        }
-
-                        if (alerts.isEmpty) return null;
-
-                        return SliverToBoxAdapter(
-                          child: Padding(
-                            padding: const EdgeInsets.fromLTRB(
-                                16, 16, 16, 0),
-                            child: Column(
-                              crossAxisAlignment:
-                                  CrossAxisAlignment.start,
-                              children: [
-                                const Text('🚨 Actions requises',
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.w800,
-                                    fontSize:   15,
-                                    color:      AppColors.vertFonce,
-                                  ),
-                                ),
-                                const SizedBox(height: 8),
-                                ...alerts.map((a) => GestureDetector(
-                                  onTap: a.onTap,
-                                  child: Container(
-                                    margin: const EdgeInsets.only(
-                                        bottom: 6),
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 14, vertical: 10,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color:        AppColors.rouge
-                                          .withValues(alpha: 0.08),
-                                      borderRadius:
-                                          BorderRadius.circular(8),
-                                      border: Border.all(
-                                        color: AppColors.rouge
-                                            .withValues(alpha: 0.25),
-                                      ),
-                                    ),
-                                    child: Row(
-                                      children: [
-                                        Expanded(
-                                          child: Text(a.label,
-                                            style: const TextStyle(
-                                              fontSize:   13,
-                                              fontWeight: FontWeight.w600,
-                                              color:      AppColors.rouge,
-                                            ),
-                                          ),
-                                        ),
-                                        const Icon(
-                                          Icons.chevron_right,
-                                          color: AppColors.rouge,
-                                          size:  18,
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                )),
-                              ],
-                            ),
-                          ),
-                        );
-                      },
-                    ) ?? const SliverToBoxAdapter(
-                      child: SizedBox.shrink()),
-
-                    // ── KPIs Utilisateurs ────────────────────
-                    _sectionTitle('👥 Utilisateurs'),
-                    stats.when(
-                      loading: () => const SliverToBoxAdapter(
-                        child: LoadingWidget()),
-                      error: (e, _) => SliverToBoxAdapter(
-                        child: Center(child: Text('$e'))),
-                      data: (s) => _kpiGrid([
-                        KpiCard(
-                          emoji:  '👤',
-                          valeur: '${s.totalUsers}',
-                          label:  'Total',
-                          couleur: AppColors.vertFonce,
-                          tendance: '+${s.nouveauxUsers30j} ce mois',
-                          onTap: () => context.go('/admin/utilisateurs'),
+                    ...stats.when(
+                      loading: () => const [
+                        SizedBox(height: 200, child: LoadingWidget()),
+                      ],
+                      error: (e, _) => [
+                        Surface(
+                          child: Text('Statistiques indisponibles.\n$e',
+                              style: const TextStyle(color: AppColors.grisTexte)),
                         ),
-                        KpiCard(
-                          emoji:  '🌾',
-                          valeur: '${s.producteursActifs}',
-                          label:  'Producteurs actifs',
-                          couleur: AppColors.vertVif,
-                          onTap: () => context.go('/admin/producteurs'),
-                        ),
-                        KpiCard(
-                          emoji:  '⏳',
-                          valeur: '${s.producteursAttente}',
-                          label:  'En attente',
-                          couleur: AppColors.orange,
-                          urgent:  s.producteursAttente > 0,
-                          onTap: () => context.go('/admin/producteurs'),
-                        ),
-                        KpiCard(
-                          emoji:  '🛒',
-                          valeur: '${s.totalAcheteurs}',
-                          label:  'Acheteurs',
-                          couleur: AppColors.bleu,
-                          onTap: () => context.go('/admin/utilisateurs'),
-                        ),
-                      ]),
+                      ],
+                      data: (s) => _contenu(context, s),
                     ),
-
-                    // ── KPIs Commandes ───────────────────────
-                    _sectionTitle('📦 Commandes'),
-                    stats.whenOrNull(
-                      data: (s) => _kpiGrid([
-                        KpiCard(
-                          emoji:  '📊',
-                          valeur: '${s.totalCommandes}',
-                          label:  'Total',
-                          couleur: AppColors.vertFonce,
-                          tendance: '${s.commandesMois} ce mois',
-                          onTap: () => context.go('/admin/commandes'),
-                        ),
-                        KpiCard(
-                          emoji:  '⏳',
-                          valeur: '${s.commandesEnAttente}',
-                          label:  'En attente',
-                          couleur: AppColors.orange,
-                          urgent:  s.commandesEnAttente > 0,
-                          onTap: () => context.go('/admin/commandes'),
-                        ),
-                        KpiCard(
-                          emoji:  '✅',
-                          valeur: '${s.commandesLivrees}',
-                          label:  'Livrées',
-                          couleur: AppColors.vertVif,
-                        ),
-                        KpiCard(
-                          emoji:  '⚡',
-                          valeur: '${s.commandesLitige}',
-                          label:  'En litige',
-                          couleur: AppColors.rouge,
-                          urgent:  s.commandesLitige > 0,
-                          onTap: () => context.go('/admin/commandes'),
-                        ),
-                      ]),
-                    ) ?? const SliverToBoxAdapter(
-                        child: SizedBox.shrink()),
-
-                    // ── KPIs Paiements & Stock ───────────────
-                    _sectionTitle('💳 Paiements & Stock'),
-                    stats.whenOrNull(
-                      data: (s) => _kpiGrid([
-                        KpiCard(
-                          emoji:  '🔍',
-                          valeur: '${s.paiementsAVerifier}',
-                          label:  'Paiements à vérifier',
-                          couleur: AppColors.orange,
-                          urgent:  s.paiementsAVerifier > 0,
-                          tendance: FormatUtils.htg(s.montantAVerifier),
-                          onTap: () => context.go('/admin/paiements'),
-                        ),
-                        KpiCard(
-                          emoji:  '🌿',
-                          valeur: '${s.totalProduits}',
-                          label:  'Produits actifs',
-                          couleur: AppColors.vertVif,
-                          onTap: () => context.go('/admin/catalogue'),
-                        ),
-                        KpiCard(
-                          emoji:  '🔴',
-                          valeur: '${s.produitsEpuises}',
-                          label:  'Épuisés',
-                          couleur: AppColors.rouge,
-                          onTap: () => context.go('/admin/stocks'),
-                        ),
-                        KpiCard(
-                          emoji:  '⚠️',
-                          valeur: '${s.alertesStock}',
-                          label:  'Alertes stock',
-                          couleur: AppColors.orange,
-                          urgent:  s.alertesStock > 0,
-                          onTap: () => context.go('/admin/stocks'),
-                        ),
-                      ]),
-                    ) ?? const SliverToBoxAdapter(
-                        child: SizedBox.shrink()),
-
-                    // ── KPIs Collectes ───────────────────────
-                    _sectionTitle('🚛 Collectes'),
-                    stats.whenOrNull(
-                      data: (s) => _kpiGrid([
-                        KpiCard(
-                          emoji:  '📅',
-                          valeur: '${s.collectesPlanifiees}',
-                          label:  'Planifiées',
-                          couleur: AppColors.bleu,
-                          onTap: () => context.go('/admin/collectes'),
-                        ),
-                        KpiCard(
-                          emoji:  '🚛',
-                          valeur: '${s.collectesEnCours}',
-                          label:  'En cours',
-                          couleur: AppColors.orange,
-                          onTap: () => context.go('/admin/collectes'),
-                        ),
-                        KpiCard(
-                          emoji:  '⏰',
-                          valeur: '${s.collectesEnRetard}',
-                          label:  'En retard',
-                          couleur: AppColors.rouge,
-                          urgent:  s.collectesEnRetard > 0,
-                          onTap: () => context.go('/admin/collectes'),
-                        ),
-                        KpiCard(
-                          emoji:  '🎟️',
-                          valeur: '${s.vouchersActifs}',
-                          label:  'Vouchers actifs',
-                          couleur: AppColors.violet,
-                        ),
-                      ]),
-                    ) ?? const SliverToBoxAdapter(
-                        child: SizedBox.shrink()),
-
-                    const SliverPadding(
-                        padding: EdgeInsets.only(bottom: 80)),
                   ],
                 ),
               ),
@@ -425,68 +68,251 @@ class AdminDashboardScreen extends ConsumerWidget {
       ),
     );
   }
+
+  List<Widget> _contenu(BuildContext context, AdminStats s) {
+    final alertes = [
+      if (s.paiementsAVerifier > 0)
+        LigneReglage(
+          icone: Icons.account_balance_wallet_outlined,
+          tuile: AppColors.violet,
+          titre: '${s.paiementsAVerifier} paiement(s) à vérifier',
+          onTap: () => context.go('/admin/paiements'),
+        ),
+      if (s.producteursAttente > 0)
+        LigneReglage(
+          icone: Icons.storefront_outlined,
+          tuile: AppColors.bleu,
+          titre: '${s.producteursAttente} entreprise(s) à valider',
+          onTap: () => context.go('/admin/producteurs'),
+        ),
+      if (s.alertesStock > 0)
+        LigneReglage(
+          icone: Icons.inventory_2_outlined,
+          tuile: AppColors.orange,
+          titre: '${s.alertesStock} alerte(s) de stock',
+          onTap: () => context.go('/admin/stocks'),
+        ),
+      if (s.commandesLitige > 0)
+        LigneReglage(
+          icone: Icons.report_gmailerrorred_rounded,
+          tuile: AppColors.rouge,
+          titre: '${s.commandesLitige} commande(s) en litige',
+          onTap: () => context.go('/admin/commandes'),
+        ),
+      if (s.collectesEnRetard > 0)
+        LigneReglage(
+          icone: Icons.schedule_rounded,
+          tuile: AppColors.rouge,
+          titre: '${s.collectesEnRetard} collecte(s) en retard',
+          onTap: () => context.go('/admin/collectes'),
+        ),
+    ];
+
+    final autresCommandes = (s.totalCommandes -
+            s.commandesEnAttente -
+            s.commandesLivrees -
+            s.commandesAnnulees -
+            s.commandesLitige)
+        .clamp(0, s.totalCommandes);
+
+    return [
+      // ── Revenus ─────────────────────────────────────────────
+      Surface(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                const Expanded(
+                  child: Text('Revenus du mois',
+                      style: TextStyle(
+                          fontSize: 13, color: AppColors.grisTexte)),
+                ),
+                PuceStatut('${s.commandesMois} commande(s)',
+                    couleur: AppColors.vertVif),
+              ],
+            ),
+            const SizedBox(height: 6),
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: Alignment.centerLeft,
+              child: Text(FormatUtils.htg(s.revenuMois),
+                  style: const TextStyle(
+                      fontSize: 28,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: -0.8)),
+            ),
+            const SizedBox(height: 14),
+            BarreProgression(
+              s.revenuMois == 0 ? 0 : s.revenu7j / s.revenuMois,
+              couleur: AppColors.vertFonce,
+            ),
+            const SizedBox(height: 10),
+            Row(
+              children: [
+                Expanded(
+                  child: _MiniStat('7 derniers jours', FormatUtils.htg(s.revenu7j)),
+                ),
+                Expanded(
+                  child: _MiniStat('Depuis le début', FormatUtils.htg(s.revenuTotal)),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+
+      if (alertes.isNotEmpty) ...[
+        const TitreSection('À traiter'),
+        GroupeLignes(alertes),
+      ],
+
+      // ── Indicateurs clés ────────────────────────────────────
+      const TitreSection("Vue d'ensemble"),
+      GrilleIndicateurs([
+        CarteIndicateur(
+          libelle: 'Commandes en attente',
+          valeur: '${s.commandesEnAttente}',
+          precision: 'sur ${s.totalCommandes} au total',
+          icone: Icons.receipt_long_outlined,
+          couleur: AppColors.orange,
+          onTap: () => context.go('/admin/commandes'),
+        ),
+        CarteIndicateur(
+          libelle: 'Paiements à vérifier',
+          valeur: '${s.paiementsAVerifier}',
+          precision: FormatUtils.htg(s.montantAVerifier),
+          icone: Icons.account_balance_wallet_outlined,
+          couleur: AppColors.violet,
+          onTap: () => context.go('/admin/paiements'),
+        ),
+        CarteIndicateur(
+          libelle: 'Entreprises actives',
+          valeur: '${s.producteursActifs}',
+          precision: '${s.producteursAttente} à valider',
+          icone: Icons.storefront_outlined,
+          couleur: AppColors.bleu,
+          onTap: () => context.go('/admin/producteurs'),
+        ),
+        CarteIndicateur(
+          libelle: 'Produits actifs',
+          valeur: '${s.totalProduits}',
+          precision: '${s.produitsEpuises} épuisé(s)',
+          icone: Icons.inventory_2_outlined,
+          couleur: AppColors.vertVif,
+          onTap: () => context.go('/admin/catalogue'),
+        ),
+      ]),
+
+      // ── Commandes ───────────────────────────────────────────
+      TitreSection('Commandes',
+          action: 'Voir tout', onAction: () => context.go('/admin/commandes')),
+      Surface(
+        child: Repartition(
+          [
+            ('En attente', s.commandesEnAttente, AppColors.orange),
+            ('En cours', autresCommandes, AppColors.bleu),
+            ('Livrées', s.commandesLivrees, AppColors.vertVif),
+            ('Annulées', s.commandesAnnulees, AppColors.grisLeger),
+            ('Litiges', s.commandesLitige, AppColors.rouge),
+          ],
+          centre: '${s.totalCommandes}',
+          sousCentre: 'commandes',
+          taille: 112,
+        ),
+      ),
+
+      // ── Utilisateurs ────────────────────────────────────────
+      TitreSection('Utilisateurs',
+          action: 'Voir tout',
+          onAction: () => context.go('/admin/utilisateurs')),
+      Surface(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Text('${s.totalUsers}',
+                    style: const TextStyle(
+                        fontSize: 26,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: -0.6)),
+                const SizedBox(width: 8),
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 5),
+                  child: Text('comptes · +${s.nouveauxUsers30j} en 30 jours',
+                      style: const TextStyle(
+                          fontSize: 12.5, color: AppColors.grisTexte)),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            BarresComparees([
+              ('Acheteurs', s.totalAcheteurs, AppColors.vertVif),
+              ('Entreprises', s.totalProducteurs, AppColors.bleu),
+              ('Entreprises à valider', s.producteursAttente, AppColors.orange),
+            ]),
+          ],
+        ),
+      ),
+
+      // ── Logistique ──────────────────────────────────────────
+      TitreSection('Collectes et stock',
+          action: 'Voir tout', onAction: () => context.go('/admin/collectes')),
+      GrilleIndicateurs([
+        CarteIndicateur(
+          libelle: 'Collectes planifiées',
+          valeur: '${s.collectesPlanifiees}',
+          precision: '${s.collectesEnCours} en cours',
+          icone: Icons.event_outlined,
+          couleur: AppColors.bleu,
+          onTap: () => context.go('/admin/collectes'),
+        ),
+        CarteIndicateur(
+          libelle: 'Collectes en retard',
+          valeur: '${s.collectesEnRetard}',
+          icone: Icons.schedule_rounded,
+          couleur: AppColors.rouge,
+          onTap: () => context.go('/admin/collectes'),
+        ),
+        CarteIndicateur(
+          libelle: 'Alertes de stock',
+          valeur: '${s.alertesStock}',
+          icone: Icons.warning_amber_rounded,
+          couleur: AppColors.orange,
+          onTap: () => context.go('/admin/stocks'),
+        ),
+        CarteIndicateur(
+          libelle: 'Bons actifs',
+          valeur: '${s.vouchersActifs}',
+          icone: Icons.confirmation_number_outlined,
+          couleur: AppColors.violet,
+        ),
+      ]),
+    ];
+  }
 }
 
-// ── Helpers internes ──────────────────────────────────────────
-
-class _Alert {
-  final String label;
-  final VoidCallback onTap;
-  const _Alert(this.label, this.onTap);
-}
-
-class _RevStat extends StatelessWidget {
-  final String label;
+class _MiniStat extends StatelessWidget {
+  final String libelle;
   final String valeur;
-  final bool   jaune;
-  const _RevStat({
-    required this.label,
-    required this.valeur,
-    this.jaune = false,
-  });
+  const _MiniStat(this.libelle, this.valeur);
 
   @override
   Widget build(BuildContext context) => Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      Text(label,
-        style: const TextStyle(
-          color: Color(0xAAFFFFFF), fontSize: 11,
-        ),
-      ),
-      Text(valeur,
-        style: TextStyle(
-          color:      jaune ? AppColors.jaune : Colors.white,
-          fontSize:   jaune ? 18 : 14,
-          fontWeight: FontWeight.w800,
-        ),
-      ),
-    ],
-  );
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(libelle,
+              style: const TextStyle(fontSize: 12, color: AppColors.grisTexte)),
+          const SizedBox(height: 2),
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: Text(valeur,
+                style: const TextStyle(
+                    fontSize: 14.5, fontWeight: FontWeight.w700)),
+          ),
+        ],
+      );
 }
-
-Widget _sectionTitle(String titre) => SliverToBoxAdapter(
-  child: Padding(
-    padding: const EdgeInsets.fromLTRB(16, 20, 16, 8),
-    child: Text(titre,
-      style: const TextStyle(
-        fontSize:   15,
-        fontWeight: FontWeight.w800,
-        color:      AppColors.vertFonce,
-      ),
-    ),
-  ),
-);
-
-Widget _kpiGrid(List<KpiCard> cards) => SliverPadding(
-  padding: const EdgeInsets.symmetric(horizontal: 12),
-  sliver: SliverGrid(
-    delegate: SliverChildListDelegate(cards),
-    gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-      maxCrossAxisExtent: 180,
-      childAspectRatio: 1.2,
-      mainAxisSpacing:  10,
-      crossAxisSpacing: 10,
-    ),
-  ),
-);

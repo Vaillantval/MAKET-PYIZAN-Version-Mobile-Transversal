@@ -134,7 +134,7 @@ class _CatalogueScreenState extends ConsumerState<CatalogueScreen> {
                 else if (catState.produits.isEmpty)
                   const SliverFillRemaining(
                     child: EmptyState(
-                      emoji: '🔍',
+                      icone: Icons.search_off_rounded,
                       titre: 'Aucun produit trouvé',
                       description: 'Essayez une autre recherche.',
                     ),

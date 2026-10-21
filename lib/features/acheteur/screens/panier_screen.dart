@@ -40,7 +40,7 @@ class PanierScreen extends ConsumerWidget {
         data:    (panier) {
           if (panier.items.isEmpty) {
             return EmptyState(
-              emoji:       '🛒',
+              icone:       Icons.shopping_bag_outlined,
               titre:       'Votre panier est vide',
               description: 'Ajoutez des produits depuis le catalogue.',
               boutonLabel: 'Voir le catalogue',
