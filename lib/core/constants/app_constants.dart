@@ -1,4 +1,8 @@
 class AppConstants {
+  /// Supervision des caisses (tableau de bord web superadmin)
+  static const String urlSupervisionPos =
+      'https://maketlakay.ht/dashboard/superadmin/pos/';
+
   // API
   static const String baseUrl = String.fromEnvironment(
     'BASE_URL',

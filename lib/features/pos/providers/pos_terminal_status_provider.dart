@@ -9,7 +9,7 @@ import '../../../core/api/api_endpoints.dart';
 /// Volontairement non-bloquant : ce statut alimente un badge (voir
 /// PosTerminalBanner et l'onglet Profil), jamais une redirection forcée —
 /// l'opérateur reste libre de naviguer même terminal non actif.
-enum PosTerminalStatut { actif, enAttente, rejetee, revoque, inconnu }
+enum PosTerminalStatut { actif, enAttente, rejetee, revoque, roleInvalide, inconnu }
 
 class PosTerminalInfo {
   final PosTerminalStatut statut;
@@ -72,11 +72,36 @@ class PosTerminalStatusNotifier extends StateNotifier<PosTerminalInfo> {
     );
   }
 
+  /// Code d'une 403 sur /api/pos/* ({code}) : met à jour le statut et
+  /// renvoie vrai s'il s'agit d'un refus lié au terminal ou au compte.
+  bool depuisCode(String? code) {
+    final statut = switch (code) {
+      'TERMINAL_EN_ATTENTE' => PosTerminalStatut.enAttente,
+      'TERMINAL_REVOQUE'    => PosTerminalStatut.revoque,
+      'ROLE_INVALIDE'       => PosTerminalStatut.roleInvalide,
+      _                     => null,
+    };
+    if (statut == null) return false;
+    definir(statut);
+    return true;
+  }
+
+  /// Statut reçu dans un push pos_terminal (rejete / revoque / actif).
+  void depuisPush(String? statut) {
+    final s = _parse(statut);
+    if (s == PosTerminalStatut.actif || s == PosTerminalStatut.inconnu) {
+      verifier();
+    } else {
+      definir(s);
+    }
+  }
+
   static PosTerminalStatut _parse(String? s) {
     switch (s) {
       case 'actif':      return PosTerminalStatut.actif;
       case 'en_attente': return PosTerminalStatut.enAttente;
-      case 'rejetee':    return PosTerminalStatut.rejetee;
+      case 'rejetee':
+      case 'rejete':     return PosTerminalStatut.rejetee;
       case 'revoque':    return PosTerminalStatut.revoque;
       default:           return PosTerminalStatut.inconnu;
     }

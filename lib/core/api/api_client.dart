@@ -52,9 +52,10 @@ class ApiClient {
       options.headers['Authorization'] = 'Bearer $token';
     }
 
-    // Terminal POS : joindre le device_uid du terminal à toutes les requêtes
+    // Terminal POS : joindre le device_uid à toutes les routes /api/pos/*
+    // (403 HEADER_MANQUANT sinon), et à tout appel d'un opérateur de caisse
     final role = await _storage.getUserRole();
-    if (role == 'pos_operator') {
+    if (role == 'pos_operator' || options.uri.path.startsWith('/api/pos/')) {
       final deviceUid = await _storage.getString(AppConstants.keyPosDeviceUid);
       if (deviceUid != null && deviceUid.isNotEmpty) {
         options.headers['X-POS-Device'] = deviceUid;

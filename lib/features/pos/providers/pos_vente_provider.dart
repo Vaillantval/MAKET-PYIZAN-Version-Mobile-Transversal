@@ -289,6 +289,7 @@ class PosHistoriqueNotifier extends StateNotifier<AsyncValue<List<PosSale>>> {
         // expiré, session fermée…) — Dio le lève en exception.
         final refus = _refusMetier(e);
         if (refus != null) {
+          _verifierSessionFermee(refus.message);
           final code = _classifierErreurWallet(refus.code, refus.message);
           throw PosVenteException(code, _messageErreurWallet(code, refus.message));
         }
@@ -311,8 +312,10 @@ class PosHistoriqueNotifier extends StateNotifier<AsyncValue<List<PosSale>>> {
             syncStatus:  'synchronisee',
           );
         } else {
-          throw PosVenteException('REJETEE', extraireMessageErreur(
-              data['error'], 'Vente refusée par le serveur.'));
+          final message = extraireMessageErreur(
+              data['error'], 'Vente refusée par le serveur.');
+          _verifierSessionFermee(message);
+          throw PosVenteException('REJETEE', message);
         }
       } on PosVenteException {
         rethrow;
@@ -327,6 +330,7 @@ class PosHistoriqueNotifier extends StateNotifier<AsyncValue<List<PosSale>>> {
         }
         final refus = _refusMetier(e);
         if (refus != null) {
+          _verifierSessionFermee(refus.message);
           throw PosVenteException('REJETEE', refus.message);
         }
         // Réseau ou erreur serveur (5xx) : la vente a pu passer ou non —
@@ -375,21 +379,34 @@ class PosHistoriqueNotifier extends StateNotifier<AsyncValue<List<PosSale>>> {
     }
   }
 
-  /// 403 TERMINAL_* : met à jour le badge de statut du terminal et
-  /// renvoie le code (null sinon).
+  /// 403 TERMINAL_* / ROLE_INVALIDE : met à jour le statut du terminal
+  /// (écran bloquant de la caisse) et renvoie le code (null sinon).
   String? _signalerTerminalNonAutorise(Object e) {
     final code = codePosErreur(e);
-    if (code == 'TERMINAL_EN_ATTENTE' || code == 'TERMINAL_REVOQUE') {
-      _ref.read(posTerminalStatusProvider.notifier).definir(code == 'TERMINAL_EN_ATTENTE'
-          ? PosTerminalStatut.enAttente
-          : PosTerminalStatut.revoque);
-      return code;
-    }
-    return null;
+    return _ref.read(posTerminalStatusProvider.notifier).depuisCode(code)
+        ? code
+        : null;
   }
 
   /// Refus métier du backend (HTTP 4xx avec {success:false, error, code?}
   /// ou {code, message} pour les permissions POS).
+  /// « Aucune session de caisse ouverte » : l'administration a clôturé la
+  /// session depuis le tableau de bord. Oublier la session locale et
+  /// signaler SESSION_FERMEE (l'écran propose d'en ouvrir une nouvelle).
+  void _verifierSessionFermee(String message) {
+    final m = message.toLowerCase();
+    if (!m.contains('session') || !(m.contains('aucune') || m.contains('clôtur') ||
+        m.contains('ferm'))) {
+      return;
+    }
+    _ref.read(posSessionProvider.notifier).sessionFermeeParServeur();
+    throw const PosVenteException(
+      'SESSION_FERMEE',
+      'Votre session de caisse a été clôturée par l\'administration. '
+      'Ouvrez une nouvelle session pour continuer à vendre.',
+    );
+  }
+
   ({String? code, String message})? _refusMetier(Object e) {
     if (e is! DioException) return null;
     final status = e.response?.statusCode ?? 0;

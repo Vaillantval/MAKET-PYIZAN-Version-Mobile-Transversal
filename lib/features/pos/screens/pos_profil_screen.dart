@@ -162,6 +162,7 @@ class _TerminalStatutCardState extends ConsumerState<_TerminalStatutCard> {
       PosTerminalStatut.enAttente  => (AppColors.orange, Icons.hourglass_top_rounded, 'En attente de validation'),
       PosTerminalStatut.rejetee    => (AppColors.rouge, Icons.block_rounded, 'Rejeté'),
       PosTerminalStatut.revoque    => (AppColors.rouge, Icons.block_rounded, 'Révoqué'),
+      PosTerminalStatut.roleInvalide => (AppColors.rouge, Icons.no_accounts_outlined, 'Compte non caissier'),
       PosTerminalStatut.inconnu    => (AppColors.grisTexte, Icons.help_outline_rounded, 'Inconnu'),
     };
 

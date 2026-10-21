@@ -37,6 +37,11 @@ class PosTerminalBanner extends ConsumerWidget {
         icone   = Icons.block_rounded;
         texte   = 'Terminal révoqué — contactez votre administrateur';
         break;
+      case PosTerminalStatut.roleInvalide:
+        couleur = AppColors.rouge;
+        icone   = Icons.no_accounts_outlined;
+        texte   = "Ce compte n'est pas un compte opérateur de caisse";
+        break;
       case PosTerminalStatut.actif:
       case PosTerminalStatut.inconnu:
         couleur = AppColors.grisTexte;

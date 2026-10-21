@@ -1,8 +1,13 @@
+import 'dart:async';
+
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../api/api_client.dart';
 import '../api/api_endpoints.dart';
+import '../firebase_init.dart';
 import '../storage/secure_storage.dart';
+import 'notifications_locales.dart';
 
 final fcmServiceProvider = Provider<FcmService>((ref) {
   return FcmService(
@@ -11,86 +16,73 @@ final fcmServiceProvider = Provider<FcmService>((ref) {
   );
 });
 
-/// Gestionnaire des notifications push Firebase
+/// Jeton FCM de l'appareil, enregistré sur le compte connecté.
+///
+/// Le backend ne peut pousser une notification qu'aux comptes dont le
+/// `fcm_token` est rempli (POST /api/auth/fcm-token/, qui abonne aussi au
+/// topic du rôle). [enregistrer] est donc appelé après chaque connexion
+/// ET à chaque démarrage avec une session ouverte ; le jeton est renvoyé à
+/// chaque rotation (onTokenRefresh).
 class FcmService {
-  final ApiClient      _api;
-  final SecureStorage  _storage;
-  final _messaging     = FirebaseMessaging.instance;
+  static const _cleJeton = 'fcm_token';
+
+  final ApiClient     _api;
+  final SecureStorage _storage;
+  StreamSubscription<String>? _rotation;
+  bool _envoyeCeLancement = false;
 
   FcmService(this._api, this._storage);
 
-  /// Initialiser FCM après login
-  Future<void> initialize({required String role}) async {
-    // Demander la permission
-    final settings = await _messaging.requestPermission(
-      alert:       true,
-      badge:       true,
-      sound:       true,
-      provisional: false,
-    );
+  /// [uneFoisParLancement] : au rafraîchissement du profil, ne pas renvoyer
+  /// le jeton s'il l'a déjà été depuis le démarrage de l'app.
+  Future<void> enregistrer({bool uneFoisParLancement = false}) async {
+    if (uneFoisParLancement && _envoyeCeLancement) return;
+    _envoyeCeLancement = true;
+    // Firebase est initialisé sans bloquer le démarrage (voir FirebaseInit)
+    if (!await FirebaseInit.ready) return;
+    final messaging = FirebaseMessaging.instance;
 
-    if (settings.authorizationStatus !=
-        AuthorizationStatus.authorized) {
-      return;
-    }
-
-    // Récupérer le token device
-    final token = await _messaging.getToken();
-    if (token == null) return;
-
-    // Sauvegarder localement
-    await _storage.setString('fcm_token', token);
-
-    // Envoyer au backend (s'abonne au topic du rôle)
+    await NotificationsLocales.initialiser(); // canal haute importance
     try {
-      await _api.post(AppEndpoints.fcmToken, data: {
-        'fcm_token': token,
-      });
-    } catch (_) {}
-
-    // Écouter les refreshes de token
-    _messaging.onTokenRefresh.listen((newToken) async {
-      await _storage.setString('fcm_token', newToken);
-      try {
-        await _api.post(AppEndpoints.fcmToken, data: {
-          'fcm_token': newToken,
-        });
-      } catch (_) {}
-    });
-  }
-
-  /// Désinscrire au logout
-  Future<void> dispose() async {
-    final token = await _storage.getString('fcm_token');
-    if (token != null) {
-      try {
-        final refresh = await _storage.getRefreshToken();
-        await _api.post(AppEndpoints.logout, data: {
-          'refresh':   refresh ?? '',
-          'fcm_token': token,
-        });
-      } catch (_) {}
+      // Android 13+ : POST_NOTIFICATIONS. Un refus n'empêche pas
+      // d'enregistrer le jeton (l'utilisateur peut l'autoriser plus tard).
+      await messaging.requestPermission(alert: true, badge: true, sound: true);
+    } catch (e) {
+      debugPrint('Permission notifications : $e');
     }
-    await _messaging.deleteToken();
+
+    try {
+      final jeton = await messaging.getToken();
+      if (jeton != null) await _envoyer(jeton);
+    } catch (e) {
+      debugPrint('Jeton FCM indisponible : $e');
+    }
+    _rotation ??= messaging.onTokenRefresh.listen(_envoyer);
   }
 
-  /// Message reçu en foreground
-  Stream<RemoteMessage> get onForegroundMessage =>
-      FirebaseMessaging.onMessage;
+  Future<void> _envoyer(String jeton) async {
+    await _storage.setString(_cleJeton, jeton);
+    if (await _storage.getAccessToken() == null) return; // pas de compte
+    try {
+      await _api.post(AppEndpoints.fcmToken, data: {'fcm_token': jeton});
+    } catch (e) {
+      debugPrint('Enregistrement du jeton FCM refusé : $e');
+    }
+  }
 
-  /// Tap sur notification (app en background)
-  Stream<RemoteMessage> get onNotificationTap =>
-      FirebaseMessaging.onMessageOpenedApp;
+  /// Jeton à joindre à POST /api/auth/logout/ (le serveur l'efface du
+  /// compte et le désabonne des topics).
+  Future<String?> jetonActuel() => _storage.getString(_cleJeton);
 
-  /// Notification initiale (app fermée)
-  Future<RemoteMessage?> get initialMessage =>
-      _messaging.getInitialMessage();
-}
-
-// ── Background handler (doit être top-level) ──────────────────
-@pragma('vm:entry-point')
-Future<void> firebaseMessagingBackgroundHandler(
-  RemoteMessage message,
-) async {
-  // Firebase affiche la notification automatiquement
+  /// Après la déconnexion : ne plus suivre les rotations du jeton et en
+  /// obtenir un neuf pour le prochain compte.
+  Future<void> oublier() async {
+    await _rotation?.cancel();
+    _rotation = null;
+    _envoyeCeLancement = false;
+    if (!await FirebaseInit.ready) return;
+    try {
+      await FirebaseMessaging.instance.deleteToken();
+    } catch (_) {}
+  }
 }

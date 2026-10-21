@@ -166,7 +166,33 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     ),
                   ),
                 ),
-                const SizedBox(height: 12),
+                // Agents (caisse, collecte) créés par l'administration : pas
+                // de mot de passe tant que le lien de l'email n'est pas ouvert
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: AppColors.surface2,
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  child: const Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Icon(Icons.mark_email_read_outlined,
+                          size: 18, color: AppColors.grisTexte),
+                      SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          'Première connexion ? Choisissez votre mot de passe '
+                          'via le lien reçu par email (ou « Mot de passe '
+                          'oublié ? » si vous ne le retrouvez pas).',
+                          style: TextStyle(
+                              fontSize: 12.5, color: AppColors.grisTexte, height: 1.4),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 16),
 
                 // Bouton connexion
                 ElevatedButton(

@@ -55,6 +55,7 @@ import '../features/admin/screens/admin_stocks_screen.dart';
 import '../features/admin/screens/admin_catalogue_screen.dart';
 import '../features/admin/screens/admin_users_screen.dart';
 import '../features/admin/screens/admin_collectes_screen.dart';
+import '../features/pos/widgets/pos_terminal_bloque.dart';
 import '../features/admin/screens/admin_plus_screen.dart';
 import '../features/admin/providers/admin_stats_provider.dart';
 
@@ -158,9 +159,8 @@ final routerProvider = Provider<GoRouter>((ref) {
       }
 
       // POS : un terminal non (ou plus) autorisé (TERMINAL_EN_ATTENTE /
-      // TERMINAL_REVOQUE) n'est volontairement PAS bloquant ici — voir
-      // PosTerminalBanner et l'onglet Profil pour le statut affiché à
-      // l'opérateur, qui reste libre de naviguer.
+      // TERMINAL_REVOQUE / ROLE_INVALIDE) n'est pas géré par redirection
+      // mais par PosShell, qui affiche alors PosTerminalBloque.
 
       return null;
     },
@@ -370,7 +370,7 @@ class _PosShellState extends ConsumerState<PosShell> {
   @override
   void initState() {
     super.initState();
-    // Vérification non-bloquante au démarrage/reprise de l'app — un appel
+    // Vérification au démarrage/reprise de l'app — un appel
     // POS réel (catalogue, session…) alimente déjà ce statut en direct sur
     // un 403, mais l'opérateur peut aussi naviguer directement sur Session/
     // Historique/Profil sans jamais déclencher un tel appel.
@@ -379,6 +379,12 @@ class _PosShellState extends ConsumerState<PosShell> {
 
   @override
   Widget build(BuildContext context) {
+    // Terminal en attente, refusé, désactivé ou compte non caissier :
+    // aucune vente possible, écran bloquant à la place de la caisse
+    final terminal = ref.watch(posTerminalStatusProvider);
+    if (posTerminalBloque(terminal.statut)) {
+      return PosTerminalBloque(info: terminal);
+    }
     return Scaffold(
       body: Column(
         children: [

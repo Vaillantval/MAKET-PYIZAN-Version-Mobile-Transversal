@@ -61,11 +61,7 @@ class PosCatalogueNotifier extends StateNotifier<AsyncValue<List<PosProduitCatal
       }
     } catch (e) {
       final code = codePosErreur(e);
-      if (code == 'TERMINAL_EN_ATTENTE') {
-        _ref.read(posTerminalStatusProvider.notifier).definir(PosTerminalStatut.enAttente);
-      } else if (code == 'TERMINAL_REVOQUE') {
-        _ref.read(posTerminalStatusProvider.notifier).definir(PosTerminalStatut.revoque);
-      }
+      _ref.read(posTerminalStatusProvider.notifier).depuisCode(code);
       if (cached == null) {
         state = AsyncValue.error(e, StackTrace.current);
       }

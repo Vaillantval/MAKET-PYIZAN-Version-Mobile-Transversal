@@ -101,6 +101,8 @@ class _PosPaiementScreenState extends ConsumerState<PosPaiementScreen> {
         if (_codeSaisi.length == 6) await _verifierCode(silencieux: true);
       } else if (e.code == 'OFFLINE') {
         _proposerBasculeCash(e.message);
+      } else if (e.code == 'SESSION_FERMEE') {
+        _proposerNouvelleSession(e.message);
       } else if (methodePaiement != 'wallet' && montantWallet <= 0) {
         // Vente sans wallet refusée par le serveur (session fermée,
         // terminal non autorisé, produit/unité invalide…) : le panier est
@@ -123,6 +125,29 @@ class _PosPaiementScreenState extends ConsumerState<PosPaiementScreen> {
     }
   }
 
+
+  /// Session clôturée par l'administration : le panier est conservé, il
+  /// suffit d'ouvrir une nouvelle session puis de revenir encaisser.
+  Future<void> _proposerNouvelleSession(String message) async {
+    final ouvrir = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Session clôturée'),
+        content: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Plus tard'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Ouvrir une session'),
+          ),
+        ],
+      ),
+    );
+    if (ouvrir == true && mounted) context.go('/pos/session');
+  }
   void _proposerBasculeCash(String message) {
     showDialog(
       context: context,

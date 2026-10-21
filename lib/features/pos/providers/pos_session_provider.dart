@@ -38,6 +38,14 @@ class PosSessionNotifier extends StateNotifier<AsyncValue<PosSession?>> {
 
   bool get isOuverte => state.whenOrNull(data: (s) => s?.statut == 'ouverte') ?? false;
 
+  /// La session a été clôturée hors de l'app (administration, push
+  /// pos_session ou refus « aucune session ouverte ») : l'oublier
+  /// localement pour proposer d'en ouvrir une nouvelle.
+  Future<void> sessionFermeeParServeur() async {
+    await _posStorage.clearSession();
+    state = const AsyncValue.data(null);
+  }
+
   /// Ouvre une session de caisse. RÈGLE : nécessite d'être en ligne.
   /// Retourne un message d'erreur, ou null si succès.
   Future<String?> ouvrir(double fondsOuverture) async {
@@ -76,11 +84,7 @@ class PosSessionNotifier extends StateNotifier<AsyncValue<PosSession?>> {
   /// statut (PosTerminalBanner, onglet Profil), sans bloquer l'opérateur.
   void _majStatutTerminal(Object e) {
     final code = codePosErreur(e);
-    if (code == 'TERMINAL_EN_ATTENTE') {
-      _ref.read(posTerminalStatusProvider.notifier).definir(PosTerminalStatut.enAttente);
-    } else if (code == 'TERMINAL_REVOQUE') {
-      _ref.read(posTerminalStatusProvider.notifier).definir(PosTerminalStatut.revoque);
-    }
+    _ref.read(posTerminalStatusProvider.notifier).depuisCode(code);
   }
 
   /// Ferme la session. Bloque tant que des ventes locales restent en

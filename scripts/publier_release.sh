@@ -8,17 +8,22 @@
 # de version restent).
 #
 # Usage : scripts/publier_release.sh notes.md
-#   (l'APK doit être construit : flutter build apk --release)
+#   (APK à construire avant : flutter build apk --release --split-per-abi ;
+#   on publie l'APK arm64-v8a, ~3 fois plus léger que l'APK universel et
+#   compatible avec les téléphones Android actuels)
 set -euo pipefail
 
 REPO="Vaillantval/MaketLakay_Version_Mobile_Tr"
 NOM_APK="MaketLakay.apk"
-APK="build/app/outputs/flutter-apk/app-release.apk"
+APK="build/app/outputs/flutter-apk/app-arm64-v8a-release.apk"
+# Android 32 bits (certains terminaux de caisse d'entrée de gamme)
+NOM_APK_32="MaketLakay-32bits.apk"
+APK_32="build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk"
 NOTES="${1:?Usage : $0 notes.md}"
 
 VERSION=$(sed -n 's/^version: *\([0-9.]*\)+.*/\1/p' pubspec.yaml)
 TAG="v$VERSION"
-[ -f "$APK" ] || { echo "APK introuvable : $APK (flutter build apk --release)"; exit 1; }
+[ -f "$APK" ] || { echo "APK introuvable : $APK (flutter build apk --release --split-per-abi)"; exit 1; }
 
 TOKEN=$(printf "protocol=https\nhost=github.com\n\n" | git credential fill | sed -n 's/^password=//p')
 [ -n "$TOKEN" ] || { echo "Jeton GitHub introuvable (git credential)"; exit 1; }
@@ -30,10 +35,14 @@ CORPS=$(python -c "import json,sys;print(json.dumps({'tag_name':sys.argv[1],'tar
 ID=$(curl -sf "${auth[@]}" -X POST "$API/releases" -d "$CORPS" | python -c "import json,sys;print(json.load(sys.stdin)['id'])")
 echo "Release $TAG créée ($ID)"
 
-# 2. APK sous le nom fixe
-curl -sf "${auth[@]}" -H "Content-Type: application/vnd.android.package-archive" \
-  --data-binary @"$APK" "https://uploads.github.com/repos/$REPO/releases/$ID/assets?name=$NOM_APK" >/dev/null
-echo "APK déposé : $NOM_APK"
+# 2. APK sous le nom fixe (+ variante 32 bits pour les anciens terminaux)
+deposer() {
+  curl -sf "${auth[@]}" -H "Content-Type: application/vnd.android.package-archive" \
+    --data-binary @"$1" "https://uploads.github.com/repos/$REPO/releases/$ID/assets?name=$2" >/dev/null
+  echo "APK déposé : $2"
+}
+deposer "$APK" "$NOM_APK"
+if [ -f "$APK_32" ]; then deposer "$APK_32" "$NOM_APK_32"; fi
 
 # 3. Supprimer les APK des autres releases
 curl -sf "${auth[@]}" "$API/releases?per_page=100" | python -c "
@@ -48,3 +57,4 @@ for r in json.load(sys.stdin):
 done
 
 echo "Lien permanent : https://github.com/$REPO/releases/latest/download/$NOM_APK"
+echo "Terminaux 32 bits : https://github.com/$REPO/releases/latest/download/$NOM_APK_32"

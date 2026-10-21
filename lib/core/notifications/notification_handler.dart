@@ -1,39 +1,64 @@
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../constants/app_colors.dart';
+import 'package:url_launcher/url_launcher.dart';
+import '../constants/app_constants.dart';
+import '../../features/acheteur/providers/wallet_provider.dart';
+import '../../features/pos/providers/pos_session_provider.dart';
 import '../../features/pos/providers/pos_terminal_status_provider.dart';
+import '../../features/pos/providers/pos_vente_provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/entreprise_provider.dart';
 
-/// Navigue vers le bon écran selon le type de notification
+/// Navigue vers le bon écran selon les données d'un push (clé `screen`,
+/// toutes les valeurs sont des chaînes) : toucher d'une notification en
+/// arrière-plan, au lancement de l'app, ou d'une notification locale.
 class NotificationHandler {
   static void handle(
-    RemoteMessage message,
+    Map<String, dynamic> data,
     BuildContext context,
   ) {
-    final data = message.data;
+    final container = ProviderScope.containerOf(context, listen: false);
     final screen = data['screen'] as String? ?? '';
     final numero = (data['numero'] ?? data['numero_commande']) as String?;
 
     // Clé `screen` envoyée par le backend MaketLakay (apps/emails/
     // fcm_notifications.py, wallet, POS)
     switch (screen) {
-      // Notifications wallet (cashback crédité, bonus parrainage, retrait
-      // payé, recharge validée…) : portefeuille personnel
+      // Portefeuille (cashback, parrainage, retrait payé, recharge validée,
+      // paiement ou remboursement au comptoir) : solde à jour
       case 'wallet':
+        container.read(walletProvider.notifier).rafraichir();
+        container.read(walletTransactionsProvider.notifier).charger();
         context.go('/acheteur/wallet');
         return;
 
-      // Terminal POS validé par un admin — pousser un rafraîchissement
-      // immédiat du statut (badge, onglet Profil) plutôt que d'attendre le
-      // prochain appel POS pour le découvrir.
+      // Terminal POS validé : débloquer la caisse (ouvrir sa session)
       case 'pos_terminal_valide':
+        container.read(posTerminalStatusProvider.notifier).verifier();
         context.go('/pos/vente');
-        ProviderScope.containerOf(context, listen: false)
-            .read(posTerminalStatusProvider.notifier)
-            .verifier();
+        return;
+
+      // Terminal refusé / désactivé / réactivé : la caisse affiche l'écran
+      // correspondant (PosTerminalBloque)
+      case 'pos_terminal':
+        container.read(posTerminalStatusProvider.notifier)
+            .depuisPush(data['statut'] as String?);
+        context.go('/pos/vente');
+        return;
+
+      // Session clôturée par l'administration
+      case 'pos_session':
+        container.read(posSessionProvider.notifier).sessionFermeeParServeur();
+        container.read(posHistoriqueProvider.notifier).charger();
+        context.go('/pos/historique');
+        return;
+
+      // Supervision POS (demande de terminal, écart de caisse) : pas
+      // d'écran dédié dans l'app, ouvrir le tableau de bord web
+      case 'admin_pos':
+        launchUrl(Uri.parse(AppConstants.urlSupervisionPos),
+            mode: LaunchMode.externalApplication);
         return;
 
       case 'acheteur_commande':
@@ -139,40 +164,5 @@ class NotificationHandler {
       await active.activer(entreprises.first);
     }
     if (context.mounted) context.go(route);
-  }
-
-  /// Afficher une bannière in-app
-  static void showInAppBanner(
-    RemoteMessage message,
-    BuildContext context,
-  ) {
-    final notification = message.notification;
-    if (notification == null) return;
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              notification.title ?? '',
-              style: const TextStyle(fontWeight: FontWeight.w700),
-            ),
-            if (notification.body != null)
-              Text(
-                notification.body!,
-                style: const TextStyle(fontSize: 12),
-              ),
-          ],
-        ),
-        action: SnackBarAction(
-          label: 'Voir',
-          onPressed: () => handle(message, context),
-        ),
-        duration:        const Duration(seconds: 5),
-        backgroundColor: AppColors.vertFonce,
-      ),
-    );
   }
 }

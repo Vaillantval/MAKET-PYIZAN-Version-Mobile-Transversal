@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../core/api/api_client.dart';
 import '../core/api/api_endpoints.dart';
@@ -106,6 +108,9 @@ class AuthNotifier extends StateNotifier<AuthState> {
           status: AuthStatus.authenticated,
           user:   user,
         );
+        // Session ouverte au démarrage : renvoyer le jeton FCM (sinon un
+        // compte resté connecté n'est jamais joignable par push)
+        unawaited(_ref.read(fcmServiceProvider).enregistrer(uneFoisParLancement: true));
       }
     } catch (_) {
       // Pas de réseau → utiliser le cache
@@ -140,11 +145,8 @@ class AuthNotifier extends StateNotifier<AuthState> {
           user:      user,
           isLoading: false,
         );
-        try {
-          await _ref.read(fcmServiceProvider)
-              .initialize(role: user.role)
-              .timeout(const Duration(seconds: 5));
-        } catch (_) {}
+        // Jeton FCM : sans attendre (demande de permission, réseau)
+        unawaited(_ref.read(fcmServiceProvider).enregistrer());
         return true;
       }
 
@@ -228,11 +230,8 @@ class AuthNotifier extends StateNotifier<AuthState> {
           user:      user,
           isLoading: false,
         );
-        try {
-          await _ref.read(fcmServiceProvider)
-              .initialize(role: user.role)
-              .timeout(const Duration(seconds: 5));
-        } catch (_) {}
+        // Jeton FCM : sans attendre (demande de permission, réseau)
+        unawaited(_ref.read(fcmServiceProvider).enregistrer());
         return true;
       }
 
@@ -251,15 +250,17 @@ class AuthNotifier extends StateNotifier<AuthState> {
   }
 
   Future<void> logout() async {
-    try {
-      await _ref.read(fcmServiceProvider).dispose().timeout(
-        const Duration(seconds: 5),
-      );
-    } catch (_) {}
+    // Le serveur invalide le refresh et retire ce jeton FCM du compte
+    final fcm     = _ref.read(fcmServiceProvider);
     final refresh = await _storage.getRefreshToken();
+    final jeton   = await fcm.jetonActuel();
     try {
-      await _api.post(AppEndpoints.logout, data: {'refresh': refresh});
+      await _api.post(AppEndpoints.logout, data: {
+        'refresh': refresh ?? '',
+        if (jeton != null) 'fcm_token': jeton,
+      });
     } catch (_) {}
+    unawaited(fcm.oublier());
     await _storage.clearAll();
     await _cache.clearAll();
     await _ref.read(entrepriseActiveIdProvider.notifier).quitter();
