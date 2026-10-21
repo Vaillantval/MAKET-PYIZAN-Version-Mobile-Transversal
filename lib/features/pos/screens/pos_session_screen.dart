@@ -3,7 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/offline/connectivity_service.dart';
 import '../../../core/utils/format_utils.dart';
+import '../../../shared/ui/ui.dart';
 import '../providers/pos_session_provider.dart';
+import '../providers/pos_vente_provider.dart';
 
 class PosSessionScreen extends ConsumerStatefulWidget {
   const PosSessionScreen({super.key});
@@ -22,12 +24,8 @@ class _PosSessionScreenState extends ConsumerState<PosSessionScreen> {
     super.dispose();
   }
 
-  void _showSnack(String msg, {bool isError = false}) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      content: Text(msg),
-      backgroundColor: isError ? AppColors.rouge : AppColors.vertVif,
-    ));
-  }
+  void _showSnack(String msg, {bool isError = false}) =>
+      afficherMessage(context, msg, succes: !isError);
 
   Future<void> _ouvrir() async {
     final montant = double.tryParse(_fondsCtrl.text.trim().replaceAll(',', '.'));
@@ -77,10 +75,10 @@ class _PosSessionScreenState extends ConsumerState<PosSessionScreen> {
             onPressed: () => Navigator.pop(ctx),
             child: const Text('Annuler'),
           ),
-          ElevatedButton(
+          FilledButton(
             onPressed: () => Navigator.pop(ctx,
                 double.tryParse(comptageCtrl.text.trim().replaceAll(',', '.'))),
-            child: const Text('Clôturer cette session'),
+            child: const Text('Clôturer'),
           ),
         ],
       ),
@@ -174,112 +172,150 @@ class _PosSessionScreenState extends ConsumerState<PosSessionScreen> {
   @override
   Widget build(BuildContext context) {
     final sessionState = ref.watch(posSessionProvider);
-    final isOnline      = ref.watch(isOnlineProvider);
+    final isOnline     = ref.watch(isOnlineProvider);
+    // Ventes du jour (historique local + serveur) pour les indicateurs
+    final ventes = ref.watch(posHistoriqueProvider).valueOrNull ?? const [];
+    final chiffre = ventes.fold<double>(0, (t, v) => t + v.montantTotal);
+    final enAttente = ventes.where((v) => v.syncStatus == 'enAttente').length;
 
     return Scaffold(
-      backgroundColor: AppColors.grisClair,
-      appBar: AppBar(title: const Text('Session de caisse')),
-      body: sessionState.when(
-        loading: () => const Center(child: CircularProgressIndicator(color: AppColors.vertVif)),
-        error:   (e, _) => Center(child: Text('Erreur : $e')),
-        data: (session) {
-          final ouverte = session != null && session.statut == 'ouverte';
+      body: SafeArea(
+        child: sessionState.when(
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error:   (e, _) => Center(child: Text('Erreur : $e')),
+          data: (session) {
+            final ouverte = session != null && session.statut == 'ouverte';
 
-          return SingleChildScrollView(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            return ListView(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 32),
               children: [
-                if (!isOnline)
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(14),
-                    margin: const EdgeInsets.only(bottom: 16),
-                    decoration: BoxDecoration(
-                      color: AppColors.orange.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: AppColors.orange),
-                    ),
-                    child: const Text(
-                      'Hors ligne — l\'ouverture et la fermeture de session '
-                      'nécessitent une connexion internet. Les ventes restent '
-                      'possibles si une session est déjà ouverte.',
-                      style: TextStyle(fontSize: 13, color: AppColors.orange),
-                    ),
-                  ),
+                const EnTeteEcran('Session', padding: EdgeInsets.fromLTRB(4, 12, 0, 12)),
 
-                Container(
-                  padding: const EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    color: ouverte ? AppColors.vertFonce : Colors.white,
-                    borderRadius: BorderRadius.circular(16),
+                if (!isOnline) ...[
+                  const BandeauAlerte(
+                    icone: Icons.cloud_off_outlined,
+                    couleur: AppColors.orange,
+                    texte: 'Hors ligne : ouvrir ou fermer une session demande '
+                        'internet. Les ventes restent possibles si une session '
+                        'est déjà ouverte.',
                   ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                  const SizedBox(height: 4),
+                ],
+
+                // ── État de la session ──────────────────────────────
+                Container(
+                  padding: const EdgeInsets.fromLTRB(20, 18, 20, 20),
+                  decoration: BoxDecoration(
+                    color: ouverte ? AppColors.noir : AppColors.blanc,
+                    borderRadius: BorderRadius.circular(22),
+                    border: ouverte ? null : Border.all(color: AppColors.grisBord),
+                  ),
+                  child: Row(
                     children: [
-                      Text(
-                        ouverte ? 'Session en cours' : 'Aucune session ouverte',
-                        style: TextStyle(
-                          fontSize: 18, fontWeight: FontWeight.w800,
-                          color: ouverte ? Colors.white : AppColors.vertFonce,
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              ouverte ? 'Session en cours' : 'Caisse fermée',
+                              style: TextStyle(
+                                fontSize: 13,
+                                color: ouverte ? const Color(0xB3FFFFFF) : AppColors.grisTexte,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              ouverte
+                                  ? 'Depuis ${FormatUtils.heure(session.ouverteLe)}'
+                                  : 'Aucune session ouverte',
+                              style: TextStyle(
+                                fontSize: 22,
+                                fontWeight: FontWeight.w700,
+                                letterSpacing: -0.5,
+                                color: ouverte ? AppColors.blanc : AppColors.noir,
+                              ),
+                            ),
+                            if (ouverte) ...[
+                              const SizedBox(height: 6),
+                              Text('Fonds d\'ouverture ${FormatUtils.htg(session.fondsOuverture)}',
+                                  style: const TextStyle(
+                                      fontSize: 13, color: Color(0xB3FFFFFF))),
+                            ],
+                          ],
                         ),
                       ),
-                      if (ouverte) ...[
-                        const SizedBox(height: 8),
-                        Text(
-                          'Ouverte depuis ${FormatUtils.heure(session.ouverteLe)} — '
-                          'fonds : ${FormatUtils.htg(session.fondsOuverture)}',
-                          style: const TextStyle(color: Colors.white70, fontSize: 13),
-                        ),
-                      ],
+                      TuileIcone(
+                        ouverte ? Icons.lock_open_rounded : Icons.lock_outline_rounded,
+                        couleur: ouverte ? AppColors.vertVif : AppColors.grisTexte,
+                        taille: 48,
+                        plein: ouverte,
+                      ),
                     ],
                   ),
                 ),
-                const SizedBox(height: 20),
 
-                Text(
-                  ouverte ? 'Fermer la session' : 'Ouvrir une session',
-                  style: const TextStyle(
-                    fontSize: 15, fontWeight: FontWeight.w700,
-                    color: AppColors.vertFonce,
+                // ── Indicateurs du jour ─────────────────────────────
+                const TitreSection("Aujourd'hui"),
+                GrilleIndicateurs([
+                  CarteIndicateur(
+                    libelle: 'Ventes',
+                    valeur: '${ventes.length}',
+                    precision: enAttente > 0 ? '$enAttente à synchroniser' : 'synchronisées',
+                    icone: Icons.receipt_long_outlined,
+                    couleur: AppColors.bleu,
                   ),
-                ),
-                const SizedBox(height: 10),
-                TextField(
-                  controller: _fondsCtrl,
-                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                  decoration: InputDecoration(
-                    labelText: ouverte ? 'Fonds de fermeture' : 'Fonds d\'ouverture',
-                    suffixText: 'HTG',
-                    filled: true,
-                    fillColor: Colors.white,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide.none,
-                    ),
+                  CarteIndicateur(
+                    libelle: "Chiffre d'affaires",
+                    valeur: FormatUtils.htg(chiffre),
+                    icone: Icons.payments_outlined,
+                    couleur: AppColors.vertVif,
                   ),
-                ),
-                const SizedBox(height: 16),
-                ElevatedButton(
-                  onPressed: (!isOnline || _loading) ? null : (ouverte ? _fermer : _ouvrir),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: ouverte ? AppColors.rouge : AppColors.noir,
-                    minimumSize: const Size(double.infinity, 54),
-                  ),
-                  child: _loading
-                      ? const SizedBox(
-                          height: 22, width: 22,
-                          child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
-                        )
-                      : Text(
-                          ouverte ? 'Fermer la session' : 'Ouvrir la session',
-                          style: const TextStyle(fontSize: 16),
+                ], hauteur: 112),
+
+                // ── Ouvrir / fermer ─────────────────────────────────
+                TitreSection(ouverte ? 'Fermer la session' : 'Ouvrir une session'),
+                Surface(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Text(
+                        ouverte
+                            ? 'Comptez l\'argent de la caisse et saisissez le montant : '
+                              'l\'écart avec les ventes est calculé automatiquement.'
+                            : 'Saisissez le fonds de caisse de départ (monnaie disponible).',
+                        style: const TextStyle(
+                            fontSize: 13, color: AppColors.grisTexte, height: 1.4),
+                      ),
+                      const SizedBox(height: 14),
+                      TextField(
+                        controller: _fondsCtrl,
+                        keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                        decoration: InputDecoration(
+                          labelText: ouverte ? 'Montant compté' : 'Fonds d\'ouverture',
+                          suffixText: 'HTG',
+                          prefixIcon: const Icon(Icons.payments_outlined),
                         ),
+                      ),
+                      const SizedBox(height: 16),
+                      ElevatedButton(
+                        onPressed: (!isOnline || _loading) ? null : (ouverte ? _fermer : _ouvrir),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: ouverte ? AppColors.rouge : AppColors.noir,
+                        ),
+                        child: _loading
+                            ? const SizedBox(
+                                height: 22, width: 22,
+                                child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                              )
+                            : Text(ouverte ? 'Fermer la session' : 'Ouvrir la session'),
+                      ),
+                    ],
+                  ),
                 ),
               ],
-            ),
-          );
-        },
+            );
+          },
+        ),
       ),
     );
   }

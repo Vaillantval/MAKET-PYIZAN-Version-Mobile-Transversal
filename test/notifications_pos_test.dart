@@ -25,12 +25,12 @@ void main() {
   ]) {
     testWidgets('403 $code : la caisse est bloquée', (tester) async {
       final c = await monterApp(tester, chemin: '/pos/vente', utilisateur: utilisateurCaissier);
-      expect(find.text('Vente comptoir'), findsOneWidget);
+      expect(find.text('Rechercher un produit…'), findsOneWidget);
 
       expect(c.read(posTerminalStatusProvider.notifier).depuisCode(code), isTrue);
       await laisserCharger(tester);
       expect(find.text(titre), findsOneWidget);
-      expect(find.text('Vente comptoir'), findsNothing);
+      expect(find.text('Rechercher un produit…'), findsNothing);
       expect(find.text('Se déconnecter'), findsOneWidget);
     });
   }
@@ -51,7 +51,7 @@ void main() {
     // Le serveur répond « actif » (données factices)
     NotificationHandler.handle({'screen': 'pos_terminal_valide'}, _contexte(c));
     await laisserCharger(tester);
-    expect(find.text('Vente comptoir'), findsOneWidget);
+    expect(find.text('Rechercher un produit…'), findsOneWidget);
   });
 
   testWidgets('push pos_session : historique de caisse', (tester) async {

@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../shared/ui/ui.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/storage/local_storage.dart';
 import '../providers/pos_device_provider.dart';
@@ -22,7 +23,7 @@ class PosAppairageScreen extends ConsumerWidget {
   void _copier(BuildContext context, String uid) {
     Clipboard.setData(ClipboardData(text: uid));
     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-      content: Text('Identifiant copié dans le presse-papiers'),
+      content: Text('Identifiant copié'),
       duration: Duration(seconds: 2),
     ));
   }
@@ -32,21 +33,22 @@ class PosAppairageScreen extends ConsumerWidget {
     final deviceUid = ref.watch(posDeviceUidProvider);
 
     return Scaffold(
-      backgroundColor: AppColors.grisClair,
-      appBar: AppBar(title: const Text('Terminal POS')),
+      appBar: AppBar(title: const Text('Terminal de caisse')),
       body: Padding(
         padding: const EdgeInsets.all(24),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const Icon(Icons.point_of_sale, size: 64, color: AppColors.vertFonce),
-            const SizedBox(height: 16),
+            const Center(
+              child: TuileIcone(Icons.point_of_sale_rounded,
+                  couleur: AppColors.vertFonce, taille: 80),
+            ),
+            const SizedBox(height: 20),
             const Text(
               'Enregistrement du terminal',
               style: TextStyle(
-                fontSize: 20, fontWeight: FontWeight.w800,
-                color: AppColors.vertFonce,
+                fontSize: 22, fontWeight: FontWeight.w700, letterSpacing: -0.4,
               ),
               textAlign: TextAlign.center,
             ),
@@ -60,15 +62,9 @@ class PosAppairageScreen extends ConsumerWidget {
             ),
             const SizedBox(height: 28),
             if (deviceUid == null)
-              const Center(child: CircularProgressIndicator(color: AppColors.vertVif))
+              const Center(child: CircularProgressIndicator())
             else
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: AppColors.vertVif.withValues(alpha: 0.3)),
-                ),
+              Surface(
                 child: Column(
                   children: [
                     SelectableText(
@@ -82,7 +78,7 @@ class PosAppairageScreen extends ConsumerWidget {
                     const SizedBox(height: 12),
                     OutlinedButton.icon(
                       onPressed: () => _copier(context, deviceUid),
-                      icon: const Icon(Icons.copy, size: 18),
+                      icon: const Icon(Icons.copy_rounded, size: 18),
                       label: const Text('Copier l\'identifiant'),
                     ),
                   ],

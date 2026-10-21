@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../shared/ui/ui.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/offline/connectivity_service.dart';
 import '../../../core/printing/pos_printer_service.dart';
@@ -243,32 +244,39 @@ class _PosPaiementScreenState extends ConsumerState<PosPaiementScreen> {
     final total = _total;
 
     return Scaffold(
-      backgroundColor: AppColors.grisClair,
       appBar: AppBar(title: const Text('Paiement')),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Container(
               width: double.infinity,
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.fromLTRB(20, 18, 20, 20),
               decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(14),
+                color: AppColors.noir,
+                borderRadius: BorderRadius.circular(22),
               ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('Total à payer',
-                      style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700)),
-                  Text(FormatUtils.htg(total),
-                      style: const TextStyle(
-                          fontSize: 22, fontWeight: FontWeight.w900, color: AppColors.vertFonce)),
+                  Text('Total à payer · ${ref.watch(posPanierProvider).length} article(s)',
+                      style: const TextStyle(fontSize: 13, color: Color(0xB3FFFFFF))),
+                  const SizedBox(height: 6),
+                  FittedBox(
+                    fit: BoxFit.scaleDown,
+                    alignment: Alignment.centerLeft,
+                    child: Text(FormatUtils.htg(total),
+                        style: const TextStyle(
+                            fontSize: 32,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: -0.8,
+                            color: AppColors.blanc)),
+                  ),
                 ],
               ),
             ),
-            const SizedBox(height: 16),
+            const Surtitre('Moyen de paiement'),
 
             // ── Sélecteur de méthode ─────────────────────────────
             Row(
@@ -303,7 +311,7 @@ class _PosPaiementScreenState extends ConsumerState<PosPaiementScreen> {
                 )),
               ],
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 16),
 
             if (_methode == 'cash')
               _SectionCash(
@@ -388,13 +396,13 @@ class _MethodeTile extends StatelessWidget {
     onTap: disabled ? null : onTap,
     child: AnimatedContainer(
       duration: const Duration(milliseconds: 150),
-      padding: const EdgeInsets.symmetric(vertical: 10),
+      padding: const EdgeInsets.symmetric(vertical: 12),
       decoration: BoxDecoration(
-        color: selected ? AppColors.vertMenthe : Colors.white,
-        borderRadius: BorderRadius.circular(12),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: selected ? AppColors.vertVif : AppColors.grisBord,
-          width: selected ? 2 : 1,
+          color: selected ? AppColors.noir : AppColors.grisBord,
+          width: selected ? 1.8 : 1,
         ),
       ),
       child: Opacity(
@@ -420,8 +428,8 @@ class _MethodeTile extends StatelessWidget {
               label,
               style: TextStyle(
                 fontSize: 12,
-                fontWeight: selected ? FontWeight.w800 : FontWeight.w600,
-                color: selected ? AppColors.vertFonce : AppColors.noir,
+                fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+                color: selected ? AppColors.noir : AppColors.grisTexte,
               ),
             ),
           ],
@@ -465,10 +473,9 @@ class _SectionCashState extends State<_SectionCash> {
             controller: widget.recuCtrl,
             autofocus: true,
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
-            decoration: InputDecoration(
+            decoration: const InputDecoration(
               labelText: 'Montant reçu',
               suffixText: 'HTG',
-              border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
             ),
             onChanged: (_) => setState(() {}),
           ),
@@ -482,7 +489,7 @@ class _SectionCashState extends State<_SectionCash> {
                   FormatUtils.htg(monnaie < 0 ? 0 : monnaie),
                   style: TextStyle(
                     fontWeight: FontWeight.w800, fontSize: 16,
-                    color: monnaie < 0 ? AppColors.rouge : AppColors.vertFonce,
+                    color: monnaie < 0 ? AppColors.rouge : AppColors.vertVif,
                   ),
                 ),
               ],
@@ -533,9 +540,8 @@ class _SectionDeclaratif extends StatelessWidget {
         const SizedBox(height: 14),
         TextField(
           controller: referenceCtrl,
-          decoration: InputDecoration(
+          decoration: const InputDecoration(
             labelText: 'Référence de transaction (optionnel)',
-            border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
           ),
         ),
         const SizedBox(height: 16),
@@ -622,7 +628,7 @@ class _SectionWallet extends StatelessWidget {
             if (verifying)
               const Padding(
                 padding: EdgeInsets.symmetric(vertical: 8),
-                child: CircularProgressIndicator(color: AppColors.vertVif),
+                child: CircularProgressIndicator(),
               ),
             if (erreur != null)
               Padding(
@@ -648,14 +654,20 @@ class _SectionWallet extends StatelessWidget {
         children: [
           Row(
             children: [
-              const Icon(Icons.account_circle, color: AppColors.vertFonce),
+              AvatarInitiales(client!.nom, taille: 40),
               const SizedBox(width: 8),
               Expanded(
                 child: Text(client!.nom,
                     style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 15)),
               ),
-              Text('Solde : ${FormatUtils.htg(solde)}',
-                  style: const TextStyle(fontWeight: FontWeight.w700, color: AppColors.vertFonce)),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  const Text('Solde', style: TextStyle(fontSize: 11.5, color: AppColors.grisTexte)),
+                  Text(FormatUtils.htg(solde),
+                      style: const TextStyle(fontWeight: FontWeight.w700)),
+                ],
+              ),
             ],
           ),
           const SizedBox(height: 16),
@@ -750,10 +762,9 @@ class _RenduMonnaieComplementState extends State<_RenduMonnaieComplement> {
         TextField(
           controller: widget.controller,
           keyboardType: const TextInputType.numberWithOptions(decimal: true),
-          decoration: InputDecoration(
+          decoration: const InputDecoration(
             labelText: 'Montant reçu (complément cash)',
             suffixText: 'HTG',
-            border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
           ),
           onChanged: (_) => setState(() {}),
         ),
@@ -767,7 +778,7 @@ class _RenduMonnaieComplementState extends State<_RenduMonnaieComplement> {
                 FormatUtils.htg(monnaie < 0 ? 0 : monnaie),
                 style: TextStyle(
                   fontWeight: FontWeight.w800,
-                  color: monnaie < 0 ? AppColors.rouge : AppColors.vertFonce,
+                  color: monnaie < 0 ? AppColors.rouge : AppColors.vertVif,
                 ),
               ),
             ],
@@ -817,15 +828,9 @@ class _Carte extends StatelessWidget {
   const _Carte({required this.child});
 
   @override
-  Widget build(BuildContext context) => Container(
+  Widget build(BuildContext context) => SizedBox(
     width: double.infinity,
-    padding: const EdgeInsets.all(16),
-    decoration: BoxDecoration(
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(14),
-      boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 6)],
-    ),
-    child: child,
+    child: Surface(child: child),
   );
 }
 
@@ -862,13 +867,13 @@ class _CaseCode extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-    width: 40, height: 48,
+    width: 42, height: 52,
     margin: const EdgeInsets.symmetric(horizontal: 4),
     alignment: Alignment.center,
     decoration: BoxDecoration(
-      color: AppColors.grisClair,
-      borderRadius: BorderRadius.circular(8),
-      border: Border.all(color: digit != null ? AppColors.vertFonce : Colors.transparent, width: 2),
+      color: digit != null ? AppColors.blanc : AppColors.surface2,
+      borderRadius: BorderRadius.circular(12),
+      border: Border.all(color: digit != null ? AppColors.noir : Colors.transparent, width: 1.6),
     ),
     child: Text(
       digit ?? '',
@@ -884,7 +889,7 @@ class _PaveNumerique extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final touches = ['1','2','3','4','5','6','7','8','9','','0','⌫'];
+    final touches = ['1','2','3','4','5','6','7','8','9','','0','<'];
     return GridView.count(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
@@ -895,13 +900,13 @@ class _PaveNumerique extends StatelessWidget {
       children: touches.map((t) {
         if (t.isEmpty) return const SizedBox.shrink();
         return Material(
-          color: AppColors.grisClair,
-          borderRadius: BorderRadius.circular(10),
+          color: AppColors.surface2,
+          borderRadius: BorderRadius.circular(16),
           child: InkWell(
-            borderRadius: BorderRadius.circular(10),
-            onTap: t == '⌫' ? onBackspace : () => onDigit(t),
+            borderRadius: BorderRadius.circular(16),
+            onTap: t == '<' ? onBackspace : () => onDigit(t),
             child: Center(
-              child: t == '⌫'
+              child: t == '<'
                   ? const Icon(Icons.backspace_outlined, size: 20)
                   : Text(t, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700)),
             ),
@@ -990,20 +995,26 @@ class _EcranConfirmationState extends ConsumerState<_EcranConfirmation> {
     final imprimanteDisponible = ref.watch(posPrinterProvider).disponible;
 
     return Scaffold(
-      backgroundColor: AppColors.grisClair,
-      appBar: AppBar(title: const Text('Vente confirmée'), automaticallyImplyLeading: false),
-      body: Padding(
+      body: SafeArea(
+        child: Padding(
         padding: const EdgeInsets.all(24),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.check_circle, size: 72, color: AppColors.vertVif),
-            const SizedBox(height: 16),
-            Text(
-              sale.numeroVente != null ? 'Vente n° ${sale.numeroVente}' : 'Vente enregistrée',
-              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w800, color: AppColors.vertFonce),
-              textAlign: TextAlign.center,
+            const CircleAvatar(
+              radius: 40,
+              backgroundColor: AppColors.noir,
+              child: Icon(Icons.check_rounded, size: 44, color: AppColors.blanc),
             ),
+            const SizedBox(height: 18),
+            const Text('Vente enregistrée',
+                style: TextStyle(fontSize: 24, fontWeight: FontWeight.w700, letterSpacing: -0.5)),
+            if (sale.numeroVente != null)
+              Text(
+                'N° ${sale.numeroVente}',
+                style: const TextStyle(fontSize: 14, color: AppColors.grisTexte),
+                textAlign: TextAlign.center,
+              ),
             if (sale.syncStatus == 'enAttente')
               const Padding(
                 padding: EdgeInsets.only(top: 6),
@@ -1013,17 +1024,16 @@ class _EcranConfirmationState extends ConsumerState<_EcranConfirmation> {
                 ),
               ),
             const SizedBox(height: 24),
-            Container(
+            SizedBox(
               width: double.infinity,
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(14)),
+              child: Surface(
               child: Column(
                 children: [
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       const Text('Total', style: TextStyle(fontWeight: FontWeight.w700)),
-                      HtgLabel(sale.montantTotal),
+                      HtgLabel(sale.montantTotal, fontSize: 18),
                     ],
                   ),
                   if (hasWallet) ...[
@@ -1060,10 +1070,11 @@ class _EcranConfirmationState extends ConsumerState<_EcranConfirmation> {
                 ],
               ),
             ),
+            ),
             const SizedBox(height: 24),
             ElevatedButton.icon(
               onPressed: widget.onNouvelleVente,
-              icon: const Icon(Icons.add_shopping_cart),
+              icon: const Icon(Icons.add_rounded),
               label: const Text('Nouvelle vente'),
               style: ElevatedButton.styleFrom(
                 minimumSize: const Size(double.infinity, 54),
@@ -1076,7 +1087,7 @@ class _EcranConfirmationState extends ConsumerState<_EcranConfirmation> {
                 icon: _impressionEnCours
                     ? const SizedBox(
                         height: 18, width: 18,
-                        child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.vertFonce),
+                        child: CircularProgressIndicator(strokeWidth: 2),
                       )
                     : const Icon(Icons.print_outlined),
                 label: const Text('Imprimer le reçu'),
@@ -1084,6 +1095,7 @@ class _EcranConfirmationState extends ConsumerState<_EcranConfirmation> {
               ),
             ],
           ],
+        ),
         ),
       ),
     );
