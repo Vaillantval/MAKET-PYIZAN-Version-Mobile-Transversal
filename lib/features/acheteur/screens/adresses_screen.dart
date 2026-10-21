@@ -5,6 +5,7 @@ import '../providers/adresse_provider.dart';
 import '../../../shared/widgets/geo_selector.dart';
 import '../../../shared/widgets/loading_widget.dart';
 import '../../../shared/widgets/empty_state.dart';
+import '../../../shared/ui/ui.dart';
 
 class AdressesScreen extends ConsumerWidget {
   const AdressesScreen({super.key});
@@ -14,10 +15,7 @@ class AdressesScreen extends ConsumerWidget {
     final state = ref.watch(adressesProvider);
 
     return Scaffold(
-      backgroundColor: AppColors.grisClair,
-      appBar: AppBar(
-        title: const Text('Mes Adresses'),
-      ),
+      appBar: AppBar(title: const Text('Mes adresses')),
       body: state.when(
         loading: () => const LoadingWidget(message: 'Chargement...'),
         error: (e, _) => Center(child: Text('Erreur : $e')),
@@ -32,136 +30,64 @@ class AdressesScreen extends ConsumerWidget {
             );
           }
 
-          return ListView.builder(
-            padding: const EdgeInsets.all(12),
+          return ListView.separated(
+            padding: const EdgeInsets.fromLTRB(16, 4, 16, 96),
             itemCount: adresses.length,
+            separatorBuilder: (_, __) => const SizedBox(height: 10),
             itemBuilder: (_, i) {
               final addr = adresses[i];
-              return Container(
-                margin: const EdgeInsets.only(bottom: 10),
-                padding: const EdgeInsets.all(14),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: addr.isDefault
-                        ? AppColors.vertVif
-                        : Colors.transparent,
-                    width: addr.isDefault ? 2 : 1,
-                  ),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+              return Surface(
+                padding: const EdgeInsets.fromLTRB(14, 14, 4, 14),
+                child: Row(
                   children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment:
-                                CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                addr.rue,
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.w700,
-                                  fontSize: 14,
-                                  color: AppColors.vertFonce,
-                                ),
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                '${addr.commune}, ${addr.departement}',
-                                style: const TextStyle(
-                                  fontSize: 12,
-                                  color: AppColors.grisTexte,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        if (addr.isDefault)
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 4,
-                            ),
-                            decoration: BoxDecoration(
-                              color: AppColors.vertVif
-                                  .withValues(alpha: 0.15),
-                              borderRadius:
-                                  BorderRadius.circular(12),
-                            ),
-                            child: const Text(
-                              '⭐ Par défaut',
-                              style: TextStyle(
-                                fontSize: 10,
-                                fontWeight: FontWeight.w600,
-                                color: AppColors.vertVif,
-                              ),
-                            ),
-                          ),
-                      ],
+                    TuileIcone(
+                      addr.isDefault ? Icons.home_rounded : Icons.place_outlined,
+                      couleur: addr.isDefault ? AppColors.vertFonce : AppColors.grisTexte,
+                      taille: 42,
                     ),
-                    const SizedBox(height: 10),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(addr.rue,
+                            style: const TextStyle(
+                              fontWeight: FontWeight.w600,
+                              fontSize: 14.5,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text('${addr.commune}, ${addr.departement}',
+                            style: const TextStyle(
+                              fontSize: 12.5,
+                              color: AppColors.grisTexte,
+                            ),
+                          ),
+                          if (addr.isDefault) ...[
+                            const SizedBox(height: 6),
+                            const PuceStatut('Par défaut', couleur: AppColors.vertVif),
+                          ],
+                        ],
+                      ),
+                    ),
+                    PopupMenuButton<String>(
+                      icon: const Icon(Icons.more_vert_rounded,
+                          color: AppColors.grisTexte),
+                      onSelected: (v) {
+                        if (v == 'defaut') {
+                          ref.read(adressesProvider.notifier).setDefault(addr.id);
+                        } else {
+                          _confirmerSuppression(context, ref, addr.id);
+                        }
+                      },
+                      itemBuilder: (_) => [
                         if (!addr.isDefault)
-                          TextButton(
-                            onPressed: () => ref
-                                .read(adressesProvider.notifier)
-                                .setDefault(addr.id),
-                            child: const Text(
-                              'Par défaut',
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: AppColors.vertVif,
-                              ),
-                            ),
-                          ),
-                        const SizedBox(width: 8),
-                        TextButton(
-                          onPressed: () {
-                            showDialog(
-                              context: context,
-                              builder: (_) => AlertDialog(
-                                title: const Text(
-                                    'Supprimer cette adresse ?'),
-                                actions: [
-                                  TextButton(
-                                    onPressed: () =>
-                                        Navigator.pop(context),
-                                    child:
-                                        const Text('Annuler'),
-                                  ),
-                                  ElevatedButton(
-                                    onPressed: () {
-                                      Navigator.pop(context);
-                                      ref
-                                          .read(adressesProvider
-                                              .notifier)
-                                          .supprimer(addr.id);
-                                    },
-                                    style: ElevatedButton
-                                        .styleFrom(
-                                      backgroundColor:
-                                          AppColors.rouge,
-                                    ),
-                                    child: const Text(
-                                        'Supprimer'),
-                                  ),
-                                ],
-                              ),
-                            );
-                          },
-                          child: const Text(
-                            'Supprimer',
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: AppColors.rouge,
-                            ),
-                          ),
+                          const PopupMenuItem(
+                              value: 'defaut', child: Text('Définir par défaut')),
+                        const PopupMenuItem(
+                          value: 'supprimer',
+                          child: Text('Supprimer',
+                              style: TextStyle(color: AppColors.rouge)),
                         ),
                       ],
                     ),
@@ -172,10 +98,33 @@ class AdressesScreen extends ConsumerWidget {
           );
         },
       ),
-      floatingActionButton: FloatingActionButton(
+      floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _afficherModalCreation(context, ref),
-        backgroundColor: AppColors.vertFonce,
-        child: const Icon(Icons.add),
+        icon: const Icon(Icons.add_rounded),
+        label: const Text('Adresse'),
+      ),
+    );
+  }
+
+  void _confirmerSuppression(BuildContext context, WidgetRef ref, int id) {
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('Supprimer cette adresse ?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Annuler'),
+          ),
+          FilledButton(
+            onPressed: () {
+              Navigator.pop(context);
+              ref.read(adressesProvider.notifier).supprimer(id);
+            },
+            style: FilledButton.styleFrom(backgroundColor: AppColors.rouge),
+            child: const Text('Supprimer'),
+          ),
+        ],
       ),
     );
   }
@@ -219,12 +168,7 @@ class _ModalCreationAdresseState
     if (_dept.isEmpty ||
         _commune.isEmpty ||
         _rueCtrl.text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Veuillez remplir tous les champs'),
-          backgroundColor: AppColors.orange,
-        ),
-      );
+      afficherMessage(context, 'Veuillez remplir tous les champs', succes: false);
       return;
     }
 
@@ -243,20 +187,10 @@ class _ModalCreationAdresseState
 
     if (mounted) {
       if (success) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('✅ Adresse ajoutée'),
-            backgroundColor: AppColors.vertVif,
-          ),
-        );
+        afficherMessage(context, 'Adresse ajoutée');
         Navigator.pop(context);
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('❌ Erreur lors de la création'),
-            backgroundColor: AppColors.rouge,
-          ),
-        );
+        afficherMessage(context, 'L\'adresse n\'a pas pu être créée', succes: false);
       }
     }
   }
@@ -267,13 +201,7 @@ class _ModalCreationAdresseState
       bottom: MediaQuery.of(context).viewInsets.bottom,
     ),
     child: Container(
-      padding: const EdgeInsets.all(20),
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.vertical(
-          top: Radius.circular(20),
-        ),
-      ),
+      padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
       child: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -283,8 +211,7 @@ class _ModalCreationAdresseState
               'Ajouter une adresse',
               style: TextStyle(
                 fontSize: 18,
-                fontWeight: FontWeight.w800,
-                color: AppColors.vertFonce,
+                fontWeight: FontWeight.w700,
               ),
             ),
             const SizedBox(height: 20),
@@ -304,13 +231,9 @@ class _ModalCreationAdresseState
             // Rue
             TextField(
               controller: _rueCtrl,
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 labelText: 'Rue / Lieu-dit',
-                filled: true,
-                fillColor: Colors.white,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
+                prefixIcon: Icon(Icons.signpost_outlined),
               ),
             ),
             const SizedBox(height: 20),
@@ -319,18 +242,15 @@ class _ModalCreationAdresseState
             Row(
               children: [
                 Expanded(
-                  child: TextButton(
+                  child: OutlinedButton(
                     onPressed: () => Navigator.pop(context),
                     child: const Text('Annuler'),
                   ),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
-                  child: ElevatedButton(
+                  child: FilledButton(
                     onPressed: _isLoading ? null : _creer,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.vertFonce,
-                    ),
                     child: _isLoading
                         ? const SizedBox(
                             height: 16,

@@ -10,6 +10,7 @@ import '../providers/panier_provider.dart';
 import '../providers/wallet_provider.dart';
 import '../../../shared/widgets/htg_text.dart';
 import '../../../shared/widgets/logo_paiement.dart';
+import '../../../shared/ui/ui.dart';
 
 class CheckoutScreen extends ConsumerStatefulWidget {
   const CheckoutScreen({super.key});
@@ -38,10 +39,8 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
     // Le solde affiché n'est jamais faisant autorité — le backend tranche.
     if (_methodePaiement == 'wallet' &&
         !ref.read(isOnlineProvider)) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text('Le portefeuille est disponible uniquement en ligne.'),
-        backgroundColor: AppColors.rouge,
-      ));
+      afficherMessage(context,
+          'Le portefeuille est disponible uniquement en ligne.', succes: false);
       return;
     }
 
@@ -58,12 +57,8 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
 
     if (result?['success'] != true) {
       setState(() => _isLoading = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(result?['error']?.toString() ?? 'Erreur'),
-          backgroundColor: AppColors.rouge,
-        ),
-      );
+      afficherMessage(context, result?['error']?.toString() ?? 'Erreur',
+          succes: false);
       return;
     }
 
@@ -77,10 +72,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
       if (!mounted) return;
 
       if (payRes['success'] == true) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content: Text('✅ Commande payée avec votre portefeuille !'),
-          backgroundColor: AppColors.vertVif,
-        ));
+        afficherMessage(context, 'Commande payée avec votre portefeuille');
         context.go('/acheteur/commandes');
       } else {
         _gererEchecPaiementWallet(payRes['error']?.toString(), numero);
@@ -92,14 +84,13 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
     if (_walletHybride && numero != null) {
       final payRes = await ref.read(walletProvider.notifier).payerPartiel(numero);
       if (mounted && payRes['success'] != true) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text(
-            'Le paiement partiel via le portefeuille a échoué '
-            '(${payRes['error']?.toString() ?? 'erreur inconnue'}). '
-            'Le montant total reste à régler via ${_libelleMethode(_methodePaiement)}.',
-          ),
-          backgroundColor: AppColors.orange,
-        ));
+        afficherMessage(
+          context,
+          'Le paiement partiel via le portefeuille a échoué '
+          '(${payRes['error']?.toString() ?? 'erreur inconnue'}). '
+          'Le montant total reste à régler via ${_libelleMethode(_methodePaiement)}.',
+          succes: false,
+        );
       }
     }
 
@@ -117,28 +108,22 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
     }
 
     // Succès → aller aux commandes
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(data['message']?.toString() ??
-            'Commande passée avec succès !'),
-        backgroundColor: AppColors.vertVif,
-      ),
-    );
+    afficherMessage(context,
+        data['message']?.toString() ?? 'Commande passée avec succès');
     context.go('/acheteur/commandes');
   }
 
   void _gererEchecPaiementWallet(String? error, String numero) {
     final soldeInsuffisant = (error ?? '').toUpperCase().contains('SOLDE_INSUFFISANT') ||
         (error ?? '').toLowerCase().contains('insuffisant');
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      content: Text(
-        soldeInsuffisant
-            ? 'Solde insuffisant pour régler cette commande (votre solde a peut-être changé). '
-              'Votre commande a été créée — choisissez un autre moyen de paiement pour la régler.'
-            : error ?? 'Erreur lors du paiement par portefeuille.',
-      ),
-      backgroundColor: AppColors.rouge,
-    ));
+    afficherMessage(
+      context,
+      soldeInsuffisant
+          ? 'Solde insuffisant pour régler cette commande (votre solde a peut-être changé). '
+            'Votre commande a été créée — choisissez un autre moyen de paiement pour la régler.'
+          : error ?? 'Erreur lors du paiement par portefeuille.',
+      succes: false,
+    );
     context.push('/acheteur/commande/$numero');
   }
 
@@ -166,16 +151,16 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
         soldeWallet > 0 && soldeWallet < total;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Confirmer la commande')),
+      appBar: AppBar(title: const Text('Validation')),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
 
             // ── Méthode de paiement ──────────────────────────
             _Section(
-              titre: '💳 Méthode de paiement',
+              titre: 'Paiement',
               child: RadioGroup<String>(
                 groupValue: _methodePaiement,
                 onChanged: (v) => setState(() {
@@ -198,7 +183,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                             Text(m.$2),
                           ],
                         ),
-                        activeColor: AppColors.vertVif,
+                        activeColor: AppColors.noir,
                         contentPadding: EdgeInsets.zero,
                       ),
 
@@ -220,7 +205,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                             ),
                           ],
                         ),
-                        activeColor: AppColors.vertVif,
+                        activeColor: AppColors.noir,
                         enabled: walletCouvreTout,
                         contentPadding: EdgeInsets.zero,
                       ),
@@ -251,7 +236,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                           value: _walletHybride,
                           onChanged: (v) =>
                               setState(() => _walletHybride = v ?? false),
-                          activeColor: AppColors.vertVif,
+                          activeColor: AppColors.noir,
                           controlAffinity: ListTileControlAffinity.leading,
                           contentPadding: EdgeInsets.zero,
                           title: Text(
@@ -266,37 +251,41 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                 ),
               ),
             ),
-            const SizedBox(height: 16),
 
             // ── Mode de livraison ────────────────────────────
             _Section(
-              titre: '🚚 Mode de livraison',
+              titre: 'Livraison',
               child: RadioGroup<String>(
                 groupValue: _modeLivraison,
                 onChanged: (v) => setState(() => _modeLivraison = v!),
                 child: Column(
                   children: [
                     for (final m in [
-                      ('domicile', '🏠 Livraison à domicile'),
-                      ('retrait',  '🌾 Retrait chez le producteur'),
-                      ('collecte', '📦 Point de collecte'),
+                      ('domicile', 'Livraison à domicile', Icons.home_outlined),
+                      ('retrait',  'Retrait chez le vendeur', Icons.storefront_outlined),
+                      ('collecte', 'Point de collecte', Icons.place_outlined),
                     ])
                       RadioListTile<String>(
                         value: m.$1,
-                        title: Text(m.$2),
-                        activeColor: AppColors.vertVif,
+                        title: Row(
+                          children: [
+                            Icon(m.$3, size: 20),
+                            const SizedBox(width: 10),
+                            Expanded(child: Text(m.$2)),
+                          ],
+                        ),
+                        activeColor: AppColors.noir,
                         contentPadding: EdgeInsets.zero,
                       ),
                   ],
                 ),
               ),
             ),
-            const SizedBox(height: 16),
 
             // ── Adresse de livraison ─────────────────────────
             if (_modeLivraison == 'domicile')
               _Section(
-                titre: '📍 Adresse de livraison',
+                titre: 'Adresse de livraison',
                 child: adressesState.when(
                   loading: () => const CircularProgressIndicator(),
                   error:   (_, __) => const Text('Erreur chargement'),
@@ -321,7 +310,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                           value:    a.id,
                           title:    Text('${a.rue}, ${a.commune}'),
                           subtitle: Text(a.departement),
-                          activeColor: AppColors.vertVif,
+                          activeColor: AppColors.noir,
                           contentPadding: EdgeInsets.zero,
                         )).toList(),
                       ),
@@ -329,11 +318,10 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                   },
                 ),
               ),
-            const SizedBox(height: 16),
 
             // ── Notes ────────────────────────────────────────
             _Section(
-              titre: '📝 Notes (optionnel)',
+              titre: 'Notes (optionnel)',
               child: TextField(
                 controller: _notesCtrl,
                 maxLines:   3,
@@ -343,11 +331,10 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                 onChanged: (v) => _notes = v,
               ),
             ),
-            const SizedBox(height: 16),
 
             // ── Récapitulatif ─────────────────────────────────
             _Section(
-              titre: '🧾 Récapitulatif',
+              titre: 'Récapitulatif',
               child: panierState.whenOrNull(
                 data: (p) => Column(
                   children: [
@@ -376,10 +363,6 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
             // ── Bouton commander ──────────────────────────────
             ElevatedButton(
               onPressed: _isLoading ? null : _commander,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.vertFonce,
-                minimumSize:     const Size(double.infinity, 54),
-              ),
               child: _isLoading
                   ? const SizedBox(
                       height: 22, width: 22,
@@ -420,30 +403,17 @@ class _Section extends StatelessWidget {
   const _Section({required this.titre, required this.child});
 
   @override
-  Widget build(BuildContext context) => Container(
-    padding: const EdgeInsets.all(16),
-    decoration: BoxDecoration(
-      color:        Colors.white,
-      borderRadius: BorderRadius.circular(12),
-      boxShadow: [
-        BoxShadow(
-          color: Colors.black.withValues(alpha: 0.05),
-          blurRadius: 6,
+  Widget build(BuildContext context) => Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Surtitre(titre),
+      SizedBox(
+        width: double.infinity,
+        child: Surface(
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+          child: child,
         ),
-      ],
-    ),
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(titre,
-          style: const TextStyle(
-            fontSize: 14, fontWeight: FontWeight.w700,
-            color: AppColors.vertFonce,
-          ),
-        ),
-        const SizedBox(height: 12),
-        child,
-      ],
-    ),
+      ),
+    ],
   );
 }

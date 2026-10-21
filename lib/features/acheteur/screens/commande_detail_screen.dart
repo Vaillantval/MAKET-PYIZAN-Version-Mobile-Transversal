@@ -3,10 +3,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/utils/format_utils.dart';
+import '../../../shared/ui/ui.dart';
+import '../../../shared/widgets/empty_state.dart';
 import '../providers/commande_provider.dart';
 import '../widgets/commande_statut_badge.dart';
 import '../../../shared/widgets/loading_widget.dart';
-import '../../../shared/widgets/htg_text.dart';
 
 class CommandeDetailScreen extends ConsumerWidget {
   final String numero;
@@ -17,266 +18,128 @@ class CommandeDetailScreen extends ConsumerWidget {
     final commandeAsync = ref.watch(commandeDetailProvider(numero));
 
     return Scaffold(
-      backgroundColor: AppColors.grisClair,
       appBar: AppBar(
-        title: Text('Commande $numero'),
+        title: Text(numero),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_rounded),
+          onPressed: () => context.canPop()
+              ? context.pop()
+              : context.go('/acheteur/commandes'),
+        ),
       ),
       body: commandeAsync.when(
-        loading: () => const LoadingWidget(message: 'Chargement...'),
+        loading: () => const LoadingWidget(message: 'Chargement…'),
         error: (e, _) => Center(child: Text('Erreur : $e')),
         data: (commande) {
           if (commande == null) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Text('Commande non trouvée'),
-                  ElevatedButton(
-                    onPressed: () =>
-                        context.go('/acheteur/commandes'),
-                    child: const Text('Retour'),
-                  ),
-                ],
-              ),
+            return EmptyState(
+              icone: Icons.receipt_long_outlined,
+              titre: 'Commande introuvable',
+              boutonLabel: 'Mes commandes',
+              onBouton: () => context.go('/acheteur/commandes'),
             );
           }
 
-          return CustomScrollView(
-            slivers: [
-              // En-tête commande
-              SliverToBoxAdapter(
-                child: Container(
-                  padding: const EdgeInsets.all(16),
-                  margin: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(12),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.05),
-                        blurRadius: 6,
-                      ),
-                    ],
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
+          return ListView(
+            padding: const EdgeInsets.fromLTRB(16, 4, 16, 32),
+            children: [
+              // ── Résumé ──────────────────────────────────────────
+              Surface(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            FormatUtils.date(commande.createdAt ?? ''),
+                            style: const TextStyle(
+                                fontSize: 13, color: AppColors.grisTexte),
+                          ),
+                        ),
+                        CommandeStatutBadge(commande.statut),
+                      ],
+                    ),
+                    const SizedBox(height: 10),
+                    const Text('Total',
+                        style: TextStyle(
+                            fontSize: 13, color: AppColors.grisTexte)),
+                    Text(FormatUtils.htg(commande.total),
+                        style: const TextStyle(
+                            fontSize: 26,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: -0.6)),
+                    const SizedBox(height: 12),
+                    Row(
+                      children: [
+                        const Icon(Icons.storefront_outlined,
+                            size: 17, color: AppColors.grisTexte),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(commande.producteur,
+                              style: const TextStyle(
+                                  fontSize: 13.5, fontWeight: FontWeight.w600)),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+
+              // ── Articles ────────────────────────────────────────
+              if (commande.details.isNotEmpty) ...[
+                Surtitre('Articles (${commande.details.length})'),
+                GroupeLignes([
+                  for (final item in commande.details)
+                    Padding(
+                      padding: const EdgeInsets.all(14),
+                      child: Row(
                         children: [
-                          Expanded(child: Column(
-                            crossAxisAlignment:
-                                CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Commande #${commande.numeroCommande}',
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
-                                style: const TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w800,
-                                  color: AppColors.vertFonce,
+                          const TuileIcone(Icons.inventory_2_outlined,
+                              couleur: AppColors.grisTexte, taille: 38),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(item['nom']?.toString() ?? 'Produit',
+                                    style: const TextStyle(
+                                        fontSize: 14, fontWeight: FontWeight.w600)),
+                                Text(
+                                  // quantite_choisie/unite_choisie : ce que
+                                  // l'acheteur a sélectionné (ex. « 1 sac 50 kg ») ;
+                                  // quantite est dans l'unité de base du produit.
+                                  '× ${item['quantite_choisie'] ?? item['quantite'] ?? 0}'
+                                  '${item['unite_choisie'] != null ? ' ${item['unite_choisie']}' : ''}',
+                                  style: const TextStyle(
+                                      fontSize: 12, color: AppColors.grisTexte),
                                 ),
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                FormatUtils.date(
-                                  commande.createdAt ?? '',
-                                ),
-                                style: const TextStyle(
-                                  fontSize: 12,
-                                  color: AppColors.grisTexte,
-                                ),
-                              ),
-                            ],
-                          )),
-                          const SizedBox(width: 8),
-                          CommandeStatutBadge(commande.statut),
-                        ],
-                      ),
-                      const SizedBox(height: 12),
-                      const Divider(),
-                      const SizedBox(height: 12),
-                      Row(
-                        mainAxisAlignment:
-                            MainAxisAlignment.spaceBetween,
-                        children: [
-                          const Text(
-                            'Total',
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w700,
-                              color: AppColors.vertFonce,
+                              ],
                             ),
                           ),
-                          HtgText(commande.total, fontSize: 18),
+                          Text(FormatUtils.htg(item['sous_total'] ?? 0),
+                              style: const TextStyle(
+                                  fontSize: 13.5, fontWeight: FontWeight.w700)),
                         ],
                       ),
-                    ],
-                  ),
-                ),
-              ),
+                    ),
+                ]),
+              ],
 
-              // Producteur & Articles
-              SliverToBoxAdapter(
-                child: Container(
-                  margin:
-                      const EdgeInsets.fromLTRB(12, 12, 12, 0),
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Column(
-                    crossAxisAlignment:
-                        CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        '🌾 Producteur',
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w700,
-                          color: AppColors.vertFonce,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        commande.producteur,
-                        style: const TextStyle(
-                          fontSize: 13,
-                          color: AppColors.noir,
-                        ),
-                      ),
-                      if (commande.details.isNotEmpty) ...[
-                        const SizedBox(height: 16),
-                        const Text(
-                          'Articles',
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w700,
-                            color: AppColors.vertFonce,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        ...commande.details.map((item) => Padding(
-                              padding:
-                                  const EdgeInsets.only(bottom: 8),
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment
-                                        .spaceBetween,
-                                children: [
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment
-                                              .start,
-                                      children: [
-                                        Text(
-                                          item['nom']
-                                                  ?.toString() ??
-                                              'Produit',
-                                          style: const TextStyle(
-                                            fontSize: 13,
-                                            fontWeight:
-                                                FontWeight.w600,
-                                            color: AppColors
-                                                .vertFonce,
-                                          ),
-                                        ),
-                                        Text(
-                                          // quantite_choisie/unite_choisie
-                                          // reflètent ce que l'acheteur a
-                                          // réellement sélectionné (ex: "1
-                                          // sac 50 kg") ; quantite/unite_vente
-                                          // sont désormais toujours exprimés
-                                          // dans l'unité de base du produit
-                                          // (ex: "50 kg") — pas ce qu'il faut
-                                          // afficher au client. Repli sur
-                                          // l'ancien champ si absent.
-                                          'x${item['quantite_choisie'] ?? item['quantite'] ?? 0}'
-                                          '${item['unite_choisie'] != null ? ' ${item['unite_choisie']}' : ''}',
-                                          style: const TextStyle(
-                                            fontSize: 12,
-                                            color: AppColors
-                                                .grisTexte,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  Text(
-                                    FormatUtils.htg(
-                                      item['sous_total'] ?? 0,
-                                    ),
-                                    style: const TextStyle(
-                                      fontSize: 13,
-                                      fontWeight:
-                                          FontWeight.w600,
-                                      color:
-                                          AppColors.vertFonce,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            )),
-                      ],
-                    ],
-                  ),
+              // ── Livraison & paiement ────────────────────────────
+              const Surtitre('Livraison et paiement'),
+              Surface(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                child: Column(
+                  children: [
+                    LigneInfo(Icons.place_outlined, 'Adresse',
+                        commande.adresseLivraison ?? 'Non spécifiée'),
+                    LigneInfo(Icons.local_shipping_outlined, 'Mode',
+                        commande.modeLivraison ?? '—'),
+                    LigneInfo(Icons.payments_outlined, 'Paiement',
+                        commande.statutPaiement),
+                  ],
                 ),
-              ),
-
-              // Infos livraison
-              SliverToBoxAdapter(
-                child: Container(
-                  margin: const EdgeInsets.all(12),
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Column(
-                    crossAxisAlignment:
-                        CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        '📍 Livraison',
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w700,
-                          color: AppColors.vertFonce,
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      Text(
-                        'Adresse : ${commande.adresseLivraison ?? "Non spécifiée"}',
-                        style: const TextStyle(
-                          fontSize: 13,
-                          color: AppColors.noir,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        'Mode : ${commande.modeLivraison ?? "-"}',
-                        style: const TextStyle(
-                          fontSize: 13,
-                          color: AppColors.grisTexte,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        'Paiement : ${commande.statutPaiement}',
-                        style: const TextStyle(
-                          fontSize: 13,
-                          color: AppColors.grisTexte,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-
-              const SliverPadding(
-                padding: EdgeInsets.only(bottom: 80),
               ),
             ],
           );

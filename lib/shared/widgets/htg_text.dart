@@ -13,7 +13,7 @@ class HtgText extends StatelessWidget {
     this.montant, {
     this.fontSize   = 16,
     this.fontWeight = FontWeight.w700,
-    this.color      = AppColors.vertFonce,
+    this.color      = AppColors.noir,
     this.suffix,
     super.key,
   });

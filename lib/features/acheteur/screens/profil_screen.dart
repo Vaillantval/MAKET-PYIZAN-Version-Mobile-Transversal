@@ -5,7 +5,10 @@ import 'package:cached_network_image/cached_network_image.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../providers/auth_provider.dart';
 import '../../../core/utils/format_utils.dart';
+import '../../../shared/ui/ui.dart';
+import '../providers/commande_provider.dart';
 import '../providers/wallet_provider.dart';
+import '../widgets/commande_statut_badge.dart';
 import '../../entreprise/widgets/espace_entreprise.dart';
 import '../../../shared/widgets/changer_mot_de_passe_sheet.dart';
 
@@ -14,167 +17,138 @@ class ProfilScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final auth = ref.watch(authProvider);
-    final user = auth.user;
+    final user        = ref.watch(authProvider).user;
     final walletState = ref.watch(walletProvider);
+    final derniere    = ref.watch(commandesProvider).valueOrNull?.firstOrNull;
+    final nom         = '${user?.firstName ?? ''} ${user?.lastName ?? ''}'.trim();
 
     return Scaffold(
-      backgroundColor: AppColors.grisClair,
-      appBar: AppBar(
-        title: const Text('Mon Profil'),
-        actions: [
-          TextButton(
-            onPressed: () => _confirmerDeco(context, ref),
-            child: const Text('Déconnexion',
-              style: TextStyle(color: Colors.white70)),
-          ),
-        ],
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
+      body: SafeArea(
+        child: ListView(
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 32),
           children: [
-            // Photo de profil
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Column(
+            const EnTeteEcran('Profil', padding: EdgeInsets.fromLTRB(4, 12, 0, 8)),
+
+            // ── Identité ────────────────────────────────────────
+            Surface(
+              child: Row(
                 children: [
-                  CircleAvatar(
-                    radius: 44,
-                    backgroundColor: AppColors.vertMenthe,
-                    backgroundImage: user?.photo != null
-                        ? CachedNetworkImageProvider(
-                            user!.photo!,
-                          )
-                        : null,
-                    child: user?.photo == null
-                        ? const Icon(Icons.person,
-                            size: 44,
-                            color: AppColors.vertFonce)
-                        : null,
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    '${user?.firstName ?? ''} ${user?.lastName ?? ''}',
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w800,
-                      color: AppColors.vertFonce,
-                    ),
-                  ),
-                  Text(
-                    user?.email ?? '',
-                    style: const TextStyle(
-                      fontSize: 13,
-                      color: AppColors.grisTexte,
+                  user?.photo != null
+                      ? CircleAvatar(
+                          radius: 26,
+                          backgroundImage: CachedNetworkImageProvider(user!.photo!),
+                        )
+                      : AvatarInitiales(nom.isEmpty ? '?' : nom, taille: 52),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(nom.isEmpty ? '—' : nom,
+                            style: const TextStyle(
+                                fontSize: 16.5, fontWeight: FontWeight.w700)),
+                        Text(user?.email ?? '',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                                fontSize: 13, color: AppColors.grisTexte)),
+                        if ((user?.telephone ?? '').isNotEmpty)
+                          Text(user!.telephone,
+                              style: const TextStyle(
+                                  fontSize: 12.5, color: AppColors.grisLeger)),
+                      ],
                     ),
                   ),
                 ],
               ),
             ),
 
-            const SizedBox(height: 20),
-
-            // Infos utilisateur
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Informations',
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.vertFonce,
+            // ── Dernière commande ───────────────────────────────
+            if (derniere != null) ...[
+              const SizedBox(height: 10),
+              Surface(
+                onTap: () =>
+                    context.go('/acheteur/commande/${derniere.numeroCommande}'),
+                padding: const EdgeInsets.fromLTRB(14, 12, 10, 12),
+                child: Row(
+                  children: [
+                    const Icon(Icons.local_shipping_outlined, size: 21),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text('Dernière commande',
+                              style: TextStyle(
+                                  fontSize: 13.5, fontWeight: FontWeight.w600)),
+                          Text(
+                            '${derniere.numeroCommande} · ${FormatUtils.htg(derniere.total)}',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                                fontSize: 12, color: AppColors.grisTexte),
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 16),
-                  _InfoRow(
-                    label: 'Email',
-                    value: user?.email ?? '-',
-                  ),
-                  const SizedBox(height: 12),
-                  _InfoRow(
-                    label: 'Téléphone',
-                    value: user?.telephone ?? '-',
-                  ),
-                ],
+                    CommandeStatutBadge(derniere.statut),
+                    const Icon(Icons.chevron_right_rounded,
+                        color: AppColors.grisLeger),
+                  ],
+                ),
               ),
-            ),
+            ],
 
-            const SizedBox(height: 20),
+            // ── Compte ──────────────────────────────────────────
+            const Surtitre('Compte'),
+            GroupeLignes([
+              LigneReglage(
+                icone: Icons.receipt_long_outlined,
+                titre: 'Mes commandes',
+                onTap: () => context.go('/acheteur/commandes'),
+              ),
+              LigneReglage(
+                icone: Icons.account_balance_wallet_outlined,
+                titre: 'Portefeuille',
+                valeur: walletState.whenOrNull(data: (w) => FormatUtils.htg(w.solde)),
+                onTap: () => context.push('/acheteur/wallet'),
+              ),
+              LigneReglage(
+                icone: Icons.card_giftcard_outlined,
+                titre: 'Bons cadeaux',
+                onTap: () => context.push('/acheteur/wallet/bons'),
+              ),
+              LigneReglage(
+                icone: Icons.place_outlined,
+                titre: 'Mes adresses',
+                onTap: () => context.push('/acheteur/adresses'),
+              ),
+            ]),
 
-            // Entreprises : accès à l'espace vendeur
+            // ── Entreprises : accès à l'espace vendeur ──────────
+            const Surtitre('Vendre sur MaketLakay'),
             const MesEntreprisesCard(),
 
-            const SizedBox(height: 20),
-
-            // Actions
-            Material(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(12),
-              clipBehavior: Clip.antiAlias,
-              child: Column(
-                children: [
-                  ListTile(
-                    leading: const Icon(Icons.account_balance_wallet,
-                      color: AppColors.vertVif),
-                    title: const Text('Mon Portefeuille'),
-                    subtitle: walletState.when(
-                      data: (w) => Text(FormatUtils.htg(w.solde)),
-                      loading: () => const Text('Chargement...'),
-                      error: (_, __) => const Text('Indisponible'),
-                    ),
-                    trailing: const Icon(Icons.arrow_forward_ios),
-                    onTap: () => context.push('/acheteur/wallet'),
-                  ),
-                  const Divider(height: 1),
-                  ListTile(
-                    leading: const Icon(Icons.location_on,
-                      color: AppColors.vertVif),
-                    title: const Text('Mes adresses'),
-                    trailing: const Icon(Icons.arrow_forward_ios),
-                    onTap: () =>
-                        context.push('/acheteur/adresses'),
-                  ),
-                  const Divider(height: 1),
-                  ListTile(
-                    leading: const Icon(Icons.lock,
-                      color: AppColors.vertVif),
-                    title: const Text('Changer le mot de passe'),
-                    trailing: const Icon(Icons.arrow_forward_ios),
-                    onTap: () => afficherChangementMotDePasse(context),
-                  ),
-                  const Divider(height: 1),
-                  ListTile(
-                    leading: const Icon(Icons.help,
-                      color: AppColors.vertVif),
-                    title: const Text('Aide'),
-                    trailing: const Icon(Icons.arrow_forward_ios),
-                    onTap: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text(
-                              'Aide disponible bientôt'),
-                        ),
-                      );
-                    },
-                  ),
-                ],
+            // ── Sécurité & aide ─────────────────────────────────
+            const Surtitre('Réglages'),
+            GroupeLignes([
+              LigneReglage(
+                icone: Icons.lock_outline_rounded,
+                titre: 'Changer le mot de passe',
+                onTap: () => afficherChangementMotDePasse(context),
               ),
-            ),
-
-            const SizedBox(height: 32),
+              LigneReglage(
+                icone: Icons.help_outline_rounded,
+                titre: 'Aide',
+                onTap: () => afficherMessage(context, 'Aide disponible bientôt'),
+              ),
+              LigneReglage(
+                icone: Icons.logout_rounded,
+                titre: 'Se déconnecter',
+                couleur: AppColors.rouge,
+                onTap: () => _confirmerDeco(context, ref),
+              ),
+            ]),
           ],
         ),
       ),
@@ -185,54 +159,24 @@ class ProfilScreen extends ConsumerWidget {
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
-        title: const Text('Déconnexion'),
-        content: const Text('Êtes-vous sûr ?'),
+        title: const Text('Se déconnecter ?'),
+        content: const Text('Vous devrez saisir à nouveau vos identifiants.'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
             child: const Text('Annuler'),
           ),
-          ElevatedButton(
+          FilledButton(
             onPressed: () {
               Navigator.pop(context);
               ref.read(authProvider.notifier).logout();
               context.go('/login');
             },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.rouge,
-            ),
+            style: FilledButton.styleFrom(backgroundColor: AppColors.rouge),
             child: const Text('Déconnexion'),
           ),
         ],
       ),
     );
   }
-}
-
-class _InfoRow extends StatelessWidget {
-  final String label;
-  final String value;
-  const _InfoRow({required this.label, required this.value});
-
-  @override
-  Widget build(BuildContext context) => Row(
-    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-    children: [
-      Text(
-        label,
-        style: const TextStyle(
-          fontSize: 13,
-          color: AppColors.grisTexte,
-        ),
-      ),
-      Text(
-        value,
-        style: const TextStyle(
-          fontSize: 13,
-          fontWeight: FontWeight.w600,
-          color: AppColors.noir,
-        ),
-      ),
-    ],
-  );
 }

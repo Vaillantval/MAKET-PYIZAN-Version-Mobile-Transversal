@@ -49,8 +49,8 @@ class _PaiementMoncashScreenState
       SnackBar(
         content: Text(
           success
-              ? '✅ Paiement MonCash effectué !'
-              : '❌ Paiement annulé ou échoué.',
+              ? 'Paiement MonCash effectué'
+              : 'Paiement annulé ou échoué',
         ),
         backgroundColor:
             success ? AppColors.vertVif : AppColors.rouge,

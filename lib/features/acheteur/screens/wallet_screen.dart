@@ -12,6 +12,7 @@ import '../../../core/utils/role_utils.dart';
 import '../../../models/wallet.dart';
 import '../../../providers/entreprise_provider.dart';
 import '../providers/wallet_provider.dart';
+import '../../../shared/ui/ui.dart';
 
 class WalletScreen extends ConsumerStatefulWidget {
   const WalletScreen({super.key});
@@ -65,10 +66,7 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
 
     if (!mounted) return;
     if (confirme) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text('✅ Votre recharge a bien été confirmée !'),
-        backgroundColor: AppColors.vertVif,
-      ));
+      afficherMessage(context, 'Votre recharge a bien été confirmée');
     }
   }
 
@@ -86,15 +84,12 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
     final wallet         = walletState.valueOrNull;
 
     return Scaffold(
-      backgroundColor: AppColors.grisClair,
       appBar: AppBar(
-        title: Text(entreprise != null
-            ? 'Portefeuille — ${entreprise.nom}'
-            : 'Mon Portefeuille'),
+        title: Text(entreprise != null ? entreprise.nom : 'Portefeuille'),
         actions: [
           if (isOnline)
             IconButton(
-              icon: const Icon(Icons.refresh),
+              icon: const Icon(Icons.refresh_rounded),
               tooltip: 'Rafraîchir',
               onPressed: () {
                 ref.read(walletProvider.notifier).rafraichir();
@@ -105,7 +100,7 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
       ),
       body: isOnline
           ? RefreshIndicator(
-              color: AppColors.vertVif,
+              color: AppColors.vertFonce,
               onRefresh: () async {
                 await ref.read(walletProvider.notifier).rafraichir();
                 await ref.read(walletTransactionsProvider.notifier).charger();
@@ -121,65 +116,39 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
                   // ── Boutons d'action ─────────────────────────
                   SliverToBoxAdapter(
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16, vertical: 12),
-                      child: enEntreprise
-                          ? _ActionButton(
-                              icon:  Icons.account_balance_wallet_outlined,
-                              label: 'Retirer',
-                              color: AppColors.orange,
-                              onTap: () =>
-                                  context.push('$base/wallet/retrait'),
-                            )
-                          : Column(
+                      padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
+                      child: Row(
+                        mainAxisAlignment: enEntreprise
+                            ? MainAxisAlignment.start
+                            : MainAxisAlignment.spaceBetween,
                         children: [
-                          Row(
-                            children: [
-                              Expanded(
-                                child: _ActionButton(
-                                  icon:  Icons.add_circle_outline,
-                                  label: 'Recharger',
-                                  color: AppColors.vertVif,
-                                  onTap: () =>
-                                      context.push('$base/wallet/recharge'),
-                                ),
-                              ),
-                              const SizedBox(width: 10),
-                              Expanded(
-                                child: _ActionButton(
-                                  icon:  Icons.account_balance_wallet_outlined,
-                                  label: 'Retirer',
-                                  color: AppColors.orange,
-                                  onTap: () =>
-                                      context.push('$base/wallet/retrait'),
-                                ),
-                              ),
-                            ],
+                          for (final action in [
+                          if (!enEntreprise)
+                            _ActionButton(
+                              icon:  Icons.add_rounded,
+                              label: 'Recharger',
+                              principal: true,
+                              onTap: () => context.push('$base/wallet/recharge'),
+                            ),
+                          _ActionButton(
+                            icon:  Icons.arrow_outward_rounded,
+                            label: 'Retirer',
+                            onTap: () => context.push('$base/wallet/retrait'),
                           ),
-                          const SizedBox(height: 10),
-                          Row(
-                            children: [
-                              Expanded(
-                                child: _ActionButton(
-                                  icon:  Icons.card_giftcard,
-                                  label: 'Bons cadeaux',
-                                  color: AppColors.violet,
-                                  onTap: () =>
-                                      context.push('$base/wallet/bons'),
-                                ),
-                              ),
-                              const SizedBox(width: 10),
-                              Expanded(
-                                child: _ActionButton(
-                                  icon:  Icons.point_of_sale,
-                                  label: 'Payer au comptoir',
-                                  color: AppColors.bleu,
-                                  onTap: () =>
-                                      context.push('$base/wallet/code-paiement'),
-                                ),
-                              ),
-                            ],
-                          ),
+                          if (!enEntreprise) ...[
+                            _ActionButton(
+                              icon:  Icons.qr_code_2_rounded,
+                              label: 'Payer',
+                              onTap: () =>
+                                  context.push('$base/wallet/code-paiement'),
+                            ),
+                            _ActionButton(
+                              icon:  Icons.card_giftcard_outlined,
+                              label: 'Bons',
+                              onTap: () => context.push('$base/wallet/bons'),
+                            ),
+                          ],
+                          ]) Flexible(child: action),
                         ],
                       ),
                     ),
@@ -200,15 +169,8 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
                   // ── En-tête transactions ─────────────────────
                   const SliverToBoxAdapter(
                     child: Padding(
-                      padding: EdgeInsets.fromLTRB(16, 8, 16, 4),
-                      child: Text(
-                        'Dernières transactions',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w700,
-                          color: AppColors.vertFonce,
-                        ),
-                      ),
+                      padding: EdgeInsets.symmetric(horizontal: 16),
+                      child: TitreSection('Historique'),
                     ),
                   ),
 
@@ -216,8 +178,7 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
                   transState.when(
                     loading: () => const SliverFillRemaining(
                       child: Center(
-                        child: CircularProgressIndicator(
-                            color: AppColors.vertVif),
+                        child: CircularProgressIndicator(),
                       ),
                     ),
                     error: (e, _) => SliverToBoxAdapter(
@@ -229,12 +190,13 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
                           child: _EtatVide(),
                         );
                       }
-                      return SliverList(
-                        delegate: SliverChildBuilderDelegate(
-                          (ctx, i) => _TransactionTile(
-                            transaction: transactions[i],
-                          ),
-                          childCount: transactions.length,
+                      return SliverPadding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        sliver: SliverToBoxAdapter(
+                          child: GroupeLignes([
+                            for (final t in transactions)
+                              _TransactionTile(transaction: t),
+                          ]),
                         ),
                       );
                     },
@@ -245,15 +207,14 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
                       padding: const EdgeInsets.symmetric(vertical: 16),
                       child: Center(
                         child: ref.read(walletTransactionsProvider.notifier).chargementPlus
-                            ? const CircularProgressIndicator(
-                                color: AppColors.vertVif, strokeWidth: 2)
+                            ? const CircularProgressIndicator(strokeWidth: 2)
                             : const SizedBox.shrink(),
                       ),
                     ),
                   ),
 
                   const SliverPadding(
-                    padding: EdgeInsets.only(bottom: 80),
+                    padding: EdgeInsets.only(bottom: 24),
                   ),
                 ],
               ),
@@ -277,77 +238,81 @@ class _CarteWallet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.all(16),
+      margin: const EdgeInsets.fromLTRB(16, 4, 16, 16),
+      clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [AppColors.vertFonce, AppColors.vertDegrade],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.vertFonce.withValues(alpha: 0.35),
-            blurRadius: 16,
-            offset: const Offset(0, 6),
-          ),
-        ],
+        color: AppColors.noir,
+        borderRadius: BorderRadius.circular(24),
       ),
-      padding: const EdgeInsets.fromLTRB(24, 28, 24, 24),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Stack(
         children: [
-          const Row(
-            children: [
-              Icon(Icons.account_balance_wallet,
-                  color: Colors.white70, size: 18),
-              SizedBox(width: 6),
-              Text(
-                'Solde disponible',
-                style: TextStyle(color: Colors.white70, fontSize: 13),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          walletState.when(
-            loading: () => const SizedBox(
-              height: 38,
-              child: CircularProgressIndicator(
-                  color: Colors.white, strokeWidth: 2),
-            ),
-            error: (_, __) => const Text(
-              '— HTG',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 34,
-                fontWeight: FontWeight.w800,
-              ),
-            ),
-            data: (wallet) => Text(
-              FormatUtils.htg(wallet.solde),
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 34,
-                fontWeight: FontWeight.w800,
-                letterSpacing: -0.5,
+          Positioned(
+            right: -40, top: -50,
+            child: Container(
+              width: 170, height: 170,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: AppColors.vertFonce.withValues(alpha: 0.55),
               ),
             ),
           ),
-          const SizedBox(height: 16),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-            decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.15),
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: const Row(
-              mainAxisSize: MainAxisSize.min,
+          Padding(
+            padding: const EdgeInsets.fromLTRB(22, 22, 22, 22),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Icon(Icons.verified, color: Colors.white, size: 14),
-                SizedBox(width: 4),
-                Text(
-                  'MaketLakay Wallet',
-                  style: TextStyle(color: Colors.white, fontSize: 12),
+                const Text(
+                  'Solde disponible',
+                  style: TextStyle(color: Color(0xB3FFFFFF), fontSize: 13),
+                ),
+                const SizedBox(height: 8),
+                walletState.when(
+                  loading: () => const SizedBox(
+                    height: 40,
+                    child: Align(
+                      alignment: Alignment.centerLeft,
+                      child: CircularProgressIndicator(
+                          color: Colors.white, strokeWidth: 2),
+                    ),
+                  ),
+                  error: (_, __) => const Text(
+                    '— HTG',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 32,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  data: (wallet) => FittedBox(
+                    fit: BoxFit.scaleDown,
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      FormatUtils.htg(wallet.solde),
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 32,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: -0.8,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 22),
+                const Row(
+                  children: [
+                    Text(
+                      'MAKETLAKAY',
+                      style: TextStyle(
+                        color: Color(0x99FFFFFF),
+                        fontSize: 11,
+                        letterSpacing: 1.6,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    Spacer(),
+                    Icon(Icons.contactless_outlined,
+                        color: Color(0x99FFFFFF), size: 20),
+                  ],
                 ),
               ],
             ),
@@ -365,29 +330,28 @@ class _CarteCashback extends StatelessWidget {
   const _CarteCashback({required this.cashback});
 
   @override
-  Widget build(BuildContext context) => Container(
-    margin: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-    padding: const EdgeInsets.all(14),
-    decoration: BoxDecoration(
-      color: AppColors.jauneClair,
-      borderRadius: BorderRadius.circular(14),
-      border: Border.all(color: AppColors.jaune),
-    ),
-    child: Row(
-      children: [
-        const Icon(Icons.savings_outlined, color: AppColors.vertFonce),
-        const SizedBox(width: 10),
-        Expanded(
-          child: Text(
-            cashback.plafond > 0
-                ? 'Cashback actif : ${cashback.taux.toStringAsFixed(0)} % '
-                  '(plafond ${FormatUtils.htg(cashback.plafond)})'
-                : 'Cashback actif : ${cashback.taux.toStringAsFixed(0)} % (sans plafond)',
-            style: const TextStyle(
-              fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.vertFonce),
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+    child: Surface(
+      couleur: AppColors.vertTeinte,
+      bordure: false,
+      padding: const EdgeInsets.all(14),
+      child: Row(
+        children: [
+          const TuileIcone(Icons.savings_outlined,
+              couleur: AppColors.vertVif, taille: 38, plein: true),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              cashback.plafond > 0
+                  ? 'Cashback de ${cashback.taux.toStringAsFixed(0)} % sur vos achats '
+                    '(plafond ${FormatUtils.htg(cashback.plafond)})'
+                  : 'Cashback de ${cashback.taux.toStringAsFixed(0)} % sur vos achats',
+              style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     ),
   );
 }
@@ -410,26 +374,18 @@ class _CarteParrainage extends StatelessWidget {
 
   void _copier(BuildContext context) {
     Clipboard.setData(ClipboardData(text: parrainage.code));
-    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-      content: Text('Code copié dans le presse-papiers'),
-      duration: Duration(seconds: 2),
-    ));
+    afficherMessage(context, 'Code copié');
   }
 
   @override
-  Widget build(BuildContext context) => Container(
-    margin: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-    padding: const EdgeInsets.all(16),
-    decoration: BoxDecoration(
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(14),
-      boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 6)],
-    ),
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.fromLTRB(16, 10, 16, 0),
+    child: Surface(
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text('Parrainez vos proches',
-            style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.vertFonce)),
+            style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700)),
         const SizedBox(height: 4),
         Text(
           parrainage.tauxBonus > 0
@@ -453,23 +409,23 @@ class _CarteParrainage extends StatelessWidget {
               ),
             ),
             IconButton(
-              icon: const Icon(Icons.copy, color: AppColors.vertVif),
+              icon: const Icon(Icons.copy_rounded),
               tooltip: 'Copier le code',
               onPressed: () => _copier(context),
             ),
           ],
         ),
         const SizedBox(height: 8),
-        ElevatedButton.icon(
+        OutlinedButton.icon(
           onPressed: _partager,
-          icon: const Icon(Icons.share),
-          label: const Text('Partager mon lien de parrainage'),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: AppColors.vertFonce,
-            minimumSize: const Size(double.infinity, 44),
+          icon: const Icon(Icons.ios_share_rounded, size: 18),
+          label: const Text('Partager mon lien'),
+          style: OutlinedButton.styleFrom(
+            minimumSize: const Size(double.infinity, 46),
           ),
         ),
       ],
+    ),
     ),
   );
 }
@@ -479,46 +435,31 @@ class _CarteParrainage extends StatelessWidget {
 class _ActionButton extends StatelessWidget {
   final IconData icon;
   final String   label;
-  final Color    color;
+  final bool     principal;
   final VoidCallback onTap;
 
   const _ActionButton({
     required this.icon,
     required this.label,
-    required this.color,
     required this.onTap,
+    this.principal = false,
   });
 
   @override
-  Widget build(BuildContext context) => GestureDetector(
-    onTap: onTap,
-    child: Container(
-      padding: const EdgeInsets.symmetric(vertical: 14),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 6,
-          ),
-        ],
-      ),
-      child: Column(
-        children: [
-          Icon(icon, color: color, size: 26),
-          const SizedBox(height: 6),
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 11,
-              fontWeight: FontWeight.w600,
-              color: color,
-            ),
-            textAlign: TextAlign.center,
-          ),
-        ],
-      ),
+  Widget build(BuildContext context) => SizedBox(
+    width: 80,
+    child: Column(
+      children: [
+        BoutonRond(icon, onTap: onTap, plein: principal, taille: 54),
+        const SizedBox(height: 6),
+        Text(
+          label,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+          textAlign: TextAlign.center,
+        ),
+      ],
     ),
   );
 }
@@ -533,43 +474,44 @@ class _TransactionTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final montant  = (transaction.montant as double);
     final isCredit = montant >= 0;
-    final color    = isCredit ? AppColors.vertVif : AppColors.rouge;
-    final icon     = isCredit
-        ? Icons.arrow_downward_rounded
-        : Icons.arrow_upward_rounded;
-
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: ListTile(
-        leading: CircleAvatar(
-          backgroundColor: color.withValues(alpha: 0.12),
-          child: Icon(icon, color: color, size: 20),
-        ),
-        title: Text(
-          transaction.typeDisplay.isNotEmpty
-              ? transaction.typeDisplay
-              : transaction.type,
-          style: const TextStyle(
-            fontWeight: FontWeight.w600,
-            fontSize: 14,
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      child: Row(
+        children: [
+          TuileIcone(
+            isCredit ? Icons.south_west_rounded : Icons.north_east_rounded,
+            couleur: isCredit ? AppColors.vertVif : AppColors.grisTexte,
+            taille: 38,
           ),
-        ),
-        subtitle: Text(
-          FormatUtils.date(transaction.createdAt),
-          style: const TextStyle(fontSize: 12, color: AppColors.grisTexte),
-        ),
-        trailing: Text(
-          '${isCredit ? '+' : ''}${FormatUtils.htg(montant)}',
-          style: TextStyle(
-            fontWeight: FontWeight.w700,
-            fontSize: 14,
-            color: color,
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  transaction.typeDisplay.isNotEmpty
+                      ? transaction.typeDisplay
+                      : transaction.type,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+                ),
+                Text(
+                  FormatUtils.date(transaction.createdAt),
+                  style: const TextStyle(fontSize: 12, color: AppColors.grisTexte),
+                ),
+              ],
+            ),
           ),
-        ),
+          Text(
+            '${isCredit ? '+' : ''}${FormatUtils.htg(montant)}',
+            style: TextStyle(
+              fontWeight: FontWeight.w700,
+              fontSize: 14,
+              color: isCredit ? AppColors.vertVif : AppColors.noir,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -629,14 +571,14 @@ class EcranWalletHorsLigne extends StatelessWidget {
         children: [
           Container(
             padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              color: AppColors.orange.withValues(alpha: 0.1),
+            decoration: const BoxDecoration(
+              color: AppColors.blanc,
               shape: BoxShape.circle,
             ),
             child: const Icon(
               Icons.cloud_off_outlined,
-              size: 56,
-              color: AppColors.orange,
+              size: 40,
+              color: AppColors.grisTexte,
             ),
           ),
           const SizedBox(height: 20),
@@ -645,7 +587,6 @@ class EcranWalletHorsLigne extends StatelessWidget {
             style: TextStyle(
               fontSize: 17,
               fontWeight: FontWeight.w700,
-              color: AppColors.vertFonce,
             ),
             textAlign: TextAlign.center,
           ),
@@ -661,15 +602,10 @@ class EcranWalletHorsLigne extends StatelessWidget {
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 28),
-          ElevatedButton.icon(
+          FilledButton.icon(
             onPressed: onRetry,
-            icon: const Icon(Icons.refresh),
+            icon: const Icon(Icons.refresh_rounded),
             label: const Text('Réessayer'),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.vertFonce,
-              padding: const EdgeInsets.symmetric(
-                  horizontal: 28, vertical: 12),
-            ),
           ),
         ],
       ),

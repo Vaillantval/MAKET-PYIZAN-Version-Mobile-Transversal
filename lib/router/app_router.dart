@@ -180,15 +180,16 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
 
       // ── Acheteur ──────────────────────────────────────────────
+      // Fiche produit en plein écran (barre d'achat propre, sans onglets)
+      GoRoute(
+        path: '/acheteur/produit/:slug',
+        builder: (_, state) => ProduitDetailScreen(slug: state.pathParameters['slug']!),
+      ),
       ShellRoute(
         builder: (ctx, state, child) => AcheteurShell(child: child),
         routes: [
           GoRoute(path: '/acheteur/accueil',    builder: (_, __) => const AccueilScreen()),
           GoRoute(path: '/acheteur/catalogue',  builder: (_, __) => const CatalogueScreen()),
-          GoRoute(
-            path: '/acheteur/produit/:slug',
-            builder: (_, state) => ProduitDetailScreen(slug: state.pathParameters['slug']!),
-          ),
           GoRoute(path: '/acheteur/panier',     builder: (_, __) => const PanierScreen()),
           GoRoute(path: '/acheteur/checkout',   builder: (_, __) => const CheckoutScreen()),
           GoRoute(
@@ -302,7 +303,7 @@ class AcheteurShell extends ConsumerWidget {
       body: child,
       bottomNavigationBar: _buildBottomNav(context, [
         const _NavItem(icon: Icons.home_outlined, iconActif: Icons.home_rounded, label: 'Accueil', route: '/acheteur/accueil'),
-        const _NavItem(icon: Icons.grid_view_outlined, iconActif: Icons.grid_view_rounded, label: 'Boutique', route: '/acheteur/catalogue', autres: ['/acheteur/produit']),
+        const _NavItem(icon: Icons.grid_view_outlined, iconActif: Icons.grid_view_rounded, label: 'Boutique', route: '/acheteur/catalogue'),
         _NavItem(icon: Icons.shopping_bag_outlined, iconActif: Icons.shopping_bag_rounded, label: 'Panier', route: '/acheteur/panier', badge: nbPanier, autres: const ['/acheteur/checkout', '/acheteur/paiement']),
         const _NavItem(icon: Icons.receipt_long_outlined, iconActif: Icons.receipt_long_rounded, label: 'Commandes', route: '/acheteur/commandes', autres: ['/acheteur/commande']),
         const _NavItem(icon: Icons.person_outline_rounded, iconActif: Icons.person_rounded, label: 'Profil', route: '/acheteur/profil', autres: ['/acheteur/wallet', '/acheteur/adresses', '/acheteur/entreprise']),
