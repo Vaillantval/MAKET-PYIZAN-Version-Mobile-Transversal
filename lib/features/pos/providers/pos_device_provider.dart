@@ -20,12 +20,7 @@ class PosDeviceNotifier extends StateNotifier<String?> {
   }
 
   Future<void> _initialiser() async {
-    var uid = await _secureStorage.getString(AppConstants.keyPosDeviceUid);
-    if (uid == null || uid.isEmpty) {
-      uid = const Uuid().v4();
-      await _secureStorage.setString(AppConstants.keyPosDeviceUid, uid);
-    }
-    state = uid;
+    state = _secureStorage.deviceUidPos(); // même source que l'ApiClient
   }
 
   bool get estGenere => state != null && state!.isNotEmpty;

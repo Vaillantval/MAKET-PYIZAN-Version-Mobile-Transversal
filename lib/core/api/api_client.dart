@@ -56,10 +56,9 @@ class ApiClient {
     // (403 HEADER_MANQUANT sinon), et à tout appel d'un opérateur de caisse
     final role = await _storage.getUserRole();
     if (role == 'pos_operator' || options.uri.path.startsWith('/api/pos/')) {
-      final deviceUid = await _storage.getString(AppConstants.keyPosDeviceUid);
-      if (deviceUid != null && deviceUid.isNotEmpty) {
-        options.headers['X-POS-Device'] = deviceUid;
-      }
+      // Créé au besoin : un premier appel de caisse peut précéder
+      // posDeviceUidProvider (403 HEADER_MANQUANT sinon)
+      options.headers['X-POS-Device'] = _storage.deviceUidPos();
     }
 
     // Espace entreprise : désigner l'entreprise sur laquelle on agit

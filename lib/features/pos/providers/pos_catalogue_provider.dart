@@ -10,7 +10,18 @@ import 'pos_terminal_status_provider.dart';
 
 final posCatalogueProvider =
     StateNotifierProvider<PosCatalogueNotifier, AsyncValue<List<PosProduitCatalogue>>>((ref) {
-  return PosCatalogueNotifier(ref.read(apiClientProvider), ref.read(cacheManagerProvider), ref);
+  final notifier =
+      PosCatalogueNotifier(ref.read(apiClientProvider), ref.read(cacheManagerProvider), ref);
+  // Terminal tout juste validé (push ou « Vérifier à nouveau ») : le
+  // catalogue, refusé jusque-là, est rechargé sans relancer l'app
+  ref.listen<PosTerminalInfo>(posTerminalStatusProvider, (avant, apres) {
+    if (avant != null &&
+        PosTerminalStatusNotifier.posStatutConnu(avant.statut) &&
+        apres.statut == PosTerminalStatut.actif) {
+      notifier.charger();
+    }
+  });
+  return notifier;
 });
 
 class PosCatalogueNotifier extends StateNotifier<AsyncValue<List<PosProduitCatalogue>>> {

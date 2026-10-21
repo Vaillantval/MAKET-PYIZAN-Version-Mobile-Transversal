@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:uuid/uuid.dart';
 import '../constants/app_constants.dart';
 
 final secureStorageProvider = Provider<SecureStorage>(
@@ -81,5 +82,16 @@ class SecureStorage {
     await _prefs.remove(AppConstants.keyUserRole);
     await _prefs.remove(AppConstants.keyUserId);
     await clearEntrepriseActive();
+  }
+
+  /// Identifiant stable du terminal de caisse (header X-POS-Device), créé
+  /// au premier besoin. Synchrone (cache mémoire de SharedPreferences) :
+  /// deux appelants simultanés obtiennent forcément le même identifiant.
+  String deviceUidPos() {
+    final existant = _prefs.getString(AppConstants.keyPosDeviceUid);
+    if (existant != null && existant.isNotEmpty) return existant;
+    final nouveau = const Uuid().v4();
+    _prefs.setString(AppConstants.keyPosDeviceUid, nouveau);
+    return nouveau;
   }
 }

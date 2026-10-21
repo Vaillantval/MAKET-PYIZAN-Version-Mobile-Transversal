@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/utils/api_error.dart';
+import '../../../shared/widgets/empty_state.dart';
+import '../providers/pos_terminal_status_provider.dart';
 import 'package:go_router/go_router.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:shimmer/shimmer.dart';
@@ -39,7 +42,18 @@ class _PosVenteScreenState extends ConsumerState<PosVenteScreen> {
       appBar: AppBar(title: const Text('Vente comptoir')),
       body: catalogueState.when(
         loading: () => const Center(child: CircularProgressIndicator(color: AppColors.vertVif)),
-        error:   (e, _) => Center(child: Text('Erreur catalogue : $e')),
+        // Message lisible (jamais l'exception brute) + nouvelle tentative
+        error:   (e, _) => EmptyState(
+          icone:       Icons.cloud_off_outlined,
+          titre:       'Catalogue indisponible',
+          description: messagePosErreur(e) ??
+              messageErreurApi(e, 'Vérifiez la connexion internet puis réessayez.'),
+          boutonLabel: 'Réessayer',
+          onBouton:    () {
+            ref.read(posTerminalStatusProvider.notifier).verifier();
+            ref.read(posCatalogueProvider.notifier).charger();
+          },
+        ),
         data: (produits) {
           final notifier   = ref.read(posCatalogueProvider.notifier);
           final categories = ['Tous', ...notifier.categories];

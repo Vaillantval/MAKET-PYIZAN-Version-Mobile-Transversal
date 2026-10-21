@@ -47,8 +47,14 @@ class PosTerminalStatusNotifier extends StateNotifier<PosTerminalInfo> {
       final res = await _api.get(AppEndpoints.posTerminalStatut);
       final data = (res.data as Map<String, dynamic>)['data'] as Map<String, dynamic>?;
       final device = data?['device'] as Map<String, dynamic>?;
+      final statut = _parse(data?['statut']?.toString());
+      // « inconnu » (aucun terminal ni demande au moment de la requête) ne
+      // doit pas effacer un refus appris entre-temps d'une 403 : c'est
+      // justement le premier appel /api/pos/* qui crée la demande. Sans
+      // ça, la caisse se débloquait et affichait l'erreur du catalogue.
+      if (statut == PosTerminalStatut.inconnu && PosTerminalStatusNotifier.posStatutConnu(state.statut)) return;
       state = PosTerminalInfo(
-        statut:     _parse(data?['statut']?.toString()),
+        statut:     statut,
         tentatives: data?['tentatives'] as int?,
         nom:        device?['nom']?.toString(),
         commune:    device?['commune']?.toString(),
@@ -95,6 +101,9 @@ class PosTerminalStatusNotifier extends StateNotifier<PosTerminalInfo> {
       definir(s);
     }
   }
+
+  static bool posStatutConnu(PosTerminalStatut s) =>
+      s != PosTerminalStatut.actif && s != PosTerminalStatut.inconnu;
 
   static PosTerminalStatut _parse(String? s) {
     switch (s) {
