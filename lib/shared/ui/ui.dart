@@ -428,11 +428,15 @@ class PuceStatut extends StatelessWidget {
               Icon(icone, size: 12, color: couleur),
               const SizedBox(width: 4),
             ],
-            Text(libelle,
-                style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w600,
-                    color: couleur)),
+            Flexible(
+              child: Text(libelle,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
+                      color: couleur)),
+            ),
           ],
         ),
       );

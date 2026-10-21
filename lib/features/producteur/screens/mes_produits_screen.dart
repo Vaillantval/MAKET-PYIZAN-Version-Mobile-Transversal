@@ -8,6 +8,7 @@ import '../../../core/utils/format_utils.dart';
 import '../providers/mes_produits_provider.dart';
 import '../../../shared/widgets/loading_widget.dart';
 import '../../../shared/widgets/empty_state.dart';
+import '../../../shared/ui/ui.dart';
 
 class MesProduitsScreen extends ConsumerWidget {
   const MesProduitsScreen({super.key});
@@ -17,134 +18,118 @@ class MesProduitsScreen extends ConsumerWidget {
     final state = ref.watch(mesProduitsProvider);
 
     return Scaffold(
-      backgroundColor: AppColors.grisClair,
-      appBar: AppBar(
-        title: const Text('Mes Produits'),
-        actions: [
-          IconButton(
-            icon:      const Icon(Icons.add),
-            tooltip:   'Nouveau produit',
-            onPressed: () =>
-                context.go('/producteur/produit/nouveau'),
-          ),
-        ],
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () => context.go('/producteur/produit/nouveau'),
+        icon: const Icon(Icons.add_rounded),
+        label: const Text('Produit'),
       ),
-      body: state.when(
-        loading: () => const LoadingWidget(),
-        error:   (e, _) => Center(child: Text('Erreur : $e')),
-        data:    (produits) {
-          if (produits.isEmpty) {
-            return EmptyState(
-              icone:       Icons.inventory_2_outlined,
-              titre:       'Aucun produit',
-              description: 'Ajoutez votre premier produit !',
-              boutonLabel: 'Ajouter un produit',
-              onBouton: () =>
-                  context.go('/producteur/produit/nouveau'),
-            );
-          }
+      body: SafeArea(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            EnTeteEcran('Mes produits',
+                surtitre: state.whenOrNull(
+                    data: (l) => '${l.length} produit(s)')),
+            Expanded(
+              child: state.when(
+                loading: () => const LoadingWidget(),
+                error:   (e, _) => Center(child: Text('Erreur : $e')),
+                data:    (produits) {
+                  if (produits.isEmpty) {
+                    return EmptyState(
+                      icone:       Icons.inventory_2_outlined,
+                      titre:       'Aucun produit',
+                      description: 'Ajoutez votre premier produit.',
+                      boutonLabel: 'Ajouter un produit',
+                      onBouton: () =>
+                          context.go('/producteur/produit/nouveau'),
+                    );
+                  }
 
-          return RefreshIndicator(
-            color:     AppColors.vertVif,
-            onRefresh: () =>
-                ref.read(mesProduitsProvider.notifier).charger(),
-            child: ListView.builder(
-              padding:   const EdgeInsets.all(12),
-              itemCount: produits.length,
-              itemBuilder: (_, i) {
-                final p = produits[i];
-                return Container(
-                  margin:  const EdgeInsets.only(bottom: 10),
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color:        Colors.white,
-                    borderRadius: BorderRadius.circular(12),
-                    boxShadow: [
-                      BoxShadow(
-                        color:     Colors.black.withValues(alpha: 0.05),
-                        blurRadius: 6,
-                      ),
-                    ],
-                  ),
-                  child: Row(
-                    children: [
-                      // Image
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(8),
-                        child: p.imagePrincipale != null
-                            ? CachedNetworkImage(
-                                imageUrl: ImageUtils.imageUrl(
-                                    p.imagePrincipale),
-                                width: 70, height: 70,
-                                fit: BoxFit.cover,
-                              )
-                            : Container(
-                                width: 70, height: 70,
-                                color: AppColors.vertMenthe,
-                                child: const Center(
-                                  child: Text('🌿',
-                                    style: TextStyle(fontSize: 30)),
+                  return RefreshIndicator(
+                    color:     AppColors.vertFonce,
+                    onRefresh: () =>
+                        ref.read(mesProduitsProvider.notifier).charger(),
+                    child: ListView.separated(
+                      padding:   const EdgeInsets.fromLTRB(16, 8, 16, 96),
+                      itemCount: produits.length,
+                      separatorBuilder: (_, __) => const SizedBox(height: 10),
+                      itemBuilder: (_, i) {
+                        final p = produits[i];
+                        final vignette = Container(
+                          width: 64, height: 64,
+                          color: AppColors.surface2,
+                          child: const Icon(Icons.image_outlined,
+                              color: AppColors.grisLeger),
+                        );
+                        return Surface(
+                          onTap: () => context.go(
+                            '/producteur/produit/${p.slug}/modifier',
+                          ),
+                          padding: const EdgeInsets.fromLTRB(12, 12, 4, 12),
+                          child: Row(
+                            children: [
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(12),
+                                child: p.imagePrincipale != null
+                                    ? CachedNetworkImage(
+                                        imageUrl: ImageUtils.imageUrl(
+                                            p.imagePrincipale),
+                                        width: 64, height: 64,
+                                        fit: BoxFit.cover,
+                                        errorWidget: (_, __, ___) => vignette,
+                                      )
+                                    : vignette,
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(p.nom,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.w600,
+                                        fontSize:   14.5,
+                                      ),
+                                    ),
+                                    Text(
+                                      '${FormatUtils.htg(p.prixUnitaire)} / ${p.uniteVenteLabel}',
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: const TextStyle(
+                                        fontSize: 12.5,
+                                        color:    AppColors.grisTexte,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 6),
+                                    _StockBadge(stock: p.stockReel),
+                                  ],
                                 ),
                               ),
-                      ),
-                      const SizedBox(width: 12),
-
-                      // Infos
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              p.nom,
-                              style: const TextStyle(
-                                fontWeight: FontWeight.w700,
-                                fontSize:   15,
-                                color:      AppColors.vertFonce,
+                              PopupMenuButton<String>(
+                                icon: const Icon(Icons.more_vert_rounded,
+                                    color: AppColors.grisTexte),
+                                onSelected: (v) => v == 'modifier'
+                                    ? context.go('/producteur/produit/${p.slug}/modifier')
+                                    : _confirmerSuppression(context, ref, p.slug),
+                                itemBuilder: (_) => const [
+                                  PopupMenuItem(value: 'modifier', child: Text('Modifier')),
+                                  PopupMenuItem(value: 'supprimer', child: Text('Supprimer')),
+                                ],
                               ),
-                            ),
-                            Text(
-                              '${FormatUtils.htg(p.prixUnitaire)} / ${p.uniteVenteLabel}',
-                              style: const TextStyle(
-                                fontSize: 13,
-                                color:    AppColors.grisTexte,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            // Stock badge
-                            _StockBadge(stock: p.stockReel),
-                          ],
-                        ),
-                      ),
-
-                      // Actions
-                      Column(
-                        children: [
-                          IconButton(
-                            icon: const Icon(
-                              Icons.edit_outlined,
-                              color: AppColors.vertVif,
-                            ),
-                            onPressed: () => context.go(
-                              '/producteur/produit/${p.slug}/modifier',
-                            ),
+                            ],
                           ),
-                          IconButton(
-                            icon: const Icon(
-                              Icons.delete_outline,
-                              color: AppColors.rouge,
-                            ),
-                            onPressed: () =>
-                                _confirmerSuppression(context, ref, p.slug),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                );
-              },
+                        );
+                      },
+                    ),
+                  );
+                },
+              ),
             ),
-          );
-        },
+          ],
+        ),
       ),
     );
   }
@@ -162,14 +147,14 @@ class MesProduitsScreen extends ConsumerWidget {
             onPressed: () => Navigator.pop(ctx),
             child: const Text('Annuler'),
           ),
-          ElevatedButton(
+          FilledButton(
             onPressed: () async {
               Navigator.pop(ctx);
               await ref
                   .read(mesProduitsProvider.notifier)
                   .supprimer(slug);
             },
-            style: ElevatedButton.styleFrom(
+            style: FilledButton.styleFrom(
                 backgroundColor: AppColors.rouge),
             child: const Text('Supprimer'),
           ),
@@ -185,35 +170,10 @@ class _StockBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Color color;
-    final String label;
-    if (stock == 0) {
-      color = AppColors.rouge;
-      label = '🔴 Épuisé';
-    } else if (stock <= 5) {
-      color = AppColors.orange;
-      label = '⚡ Stock faible : $stock';
-    } else {
-      color = AppColors.vertVif;
-      label = '✅ En stock : $stock';
+    if (stock == 0) return const PuceStatut('Épuisé', couleur: AppColors.rouge);
+    if (stock <= 5) {
+      return PuceStatut('Stock faible · $stock', couleur: AppColors.orange);
     }
-
-    return Container(
-      padding: const EdgeInsets.symmetric(
-          horizontal: 8, vertical: 3),
-      decoration: BoxDecoration(
-        color:        color.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(6),
-        border:       Border.all(color: color.withValues(alpha: 0.3)),
-      ),
-      child: Text(
-        label,
-        style: TextStyle(
-          fontSize:   11,
-          fontWeight: FontWeight.w600,
-          color:      color,
-        ),
-      ),
-    );
+    return PuceStatut('En stock · $stock', couleur: AppColors.vertVif);
   }
 }

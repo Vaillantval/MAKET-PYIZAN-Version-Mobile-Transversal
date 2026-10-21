@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../providers/auth_provider.dart';
 import '../../../providers/entreprise_provider.dart';
+import '../../../shared/ui/ui.dart';
 import '../../entreprise/widgets/espace_entreprise.dart';
 import '../providers/dashboard_provider.dart';
 
@@ -12,247 +13,171 @@ class ProfilProducteurScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final user        = ref.watch(authProvider).user;
-    final stats       = ref.watch(dashboardProvider);
-    final entreprise  = ref.watch(entrepriseActiveProvider);
+    final user          = ref.watch(authProvider).user;
+    final stats         = ref.watch(dashboardProvider).valueOrNull;
+    final entreprise    = ref.watch(entrepriseActiveProvider);
     final nbEntreprises = user?.entreprises.length ?? 0;
-    final proprio     = entreprise?.estProprietaire ?? false;
+    final proprio       = entreprise?.estProprietaire ?? false;
+    final nom           = entreprise?.nom ?? '—';
 
     return Scaffold(
-      backgroundColor: AppColors.grisClair,
-      body: CustomScrollView(
-        slivers: [
-          // ── Header ────────────────────────────────────────
-          SliverAppBar(
-            expandedHeight: 200,
-            pinned:          true,
-            backgroundColor: AppColors.vertFonce,
-            flexibleSpace: FlexibleSpaceBar(
-              background: Container(
-                decoration: const BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [AppColors.vertFonce, AppColors.vertDegrade],
-                  ),
-                ),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const SizedBox(height: 40),
-                    CircleAvatar(
-                      radius:          40,
-                      backgroundColor: AppColors.jaune,
-                      child: Text(
-                        (entreprise?.nom.isNotEmpty == true
-                                ? entreprise!.nom
-                                : '?')[0].toUpperCase(),
-                        style: const TextStyle(
-                          fontSize:   32,
-                          fontWeight: FontWeight.w900,
-                          color:      AppColors.vertFonce,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    Text(
-                      entreprise?.nom ?? '—',
-                      style: const TextStyle(
-                        color:      Colors.white,
-                        fontSize:   20,
-                        fontWeight: FontWeight.w700,
-                        fontFamily: 'PlayfairDisplay',
-                      ),
-                    ),
-                    Text(
-                      [entreprise?.typeLabel, entreprise?.roleLabel,
-                       if (user != null) '${user.firstName} ${user.lastName}']
-                          .where((s) => s != null && s.trim().isNotEmpty)
-                          .join(' · '),
-                      style: const TextStyle(
-                        color:   Color(0xBBFFFFFF),
-                        fontSize: 13,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
+      body: SafeArea(
+        child: ListView(
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 32),
+          children: [
+            const EnTeteEcran('Profil', padding: EdgeInsets.fromLTRB(4, 12, 0, 8)),
 
-          // ── Stats rapides ──────────────────────────────────
-          SliverToBoxAdapter(
-            child: stats.whenOrNull(
-              data: (s) => Container(
-                margin:  const EdgeInsets.all(16),
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color:        Colors.white,
-                  borderRadius: BorderRadius.circular(14),
-                  boxShadow: [
-                    BoxShadow(
-                      color:     Colors.black.withValues(alpha: 0.06),
-                      blurRadius: 8,
-                    ),
-                  ],
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    _QuickStat('${s.commandesTotal}',  'Commandes'),
-                    _Divider(),
-                    _QuickStat('${s.nbProduitsActifs}','Produits'),
-                    _Divider(),
-                    _QuickStat('${s.commandesLivrees}','Livrées'),
-                  ],
-                ),
-              ),
-            ) ?? const SizedBox.shrink(),
-          ),
-
-          // ── Menu ──────────────────────────────────────────
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
+            // ── Carte entreprise ────────────────────────────────
+            Surface(
               child: Column(
                 children: [
-                  _MenuItem(
-                    icon:  Icons.storefront_outlined,
-                    label: 'Fiche de l\'entreprise',
-                    onTap: () => context.push('/producteur/entreprise'),
+                  Row(
+                    children: [
+                      AvatarInitiales(nom,
+                          taille: 54,
+                          fond: AppColors.vertFonce,
+                          texte: AppColors.blanc),
+                      const SizedBox(width: 14),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(nom,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(
+                                    fontSize: 17, fontWeight: FontWeight.w700)),
+                            Text(
+                              [entreprise?.typeLabel, entreprise?.roleLabel]
+                                  .where((s) => s != null && s.trim().isNotEmpty)
+                                  .join(' · '),
+                              style: const TextStyle(
+                                  fontSize: 13, color: AppColors.grisTexte),
+                            ),
+                            if (user != null)
+                              Text('${user.firstName} ${user.lastName}',
+                                  style: const TextStyle(
+                                      fontSize: 12.5, color: AppColors.grisLeger)),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
-                  _MenuItem(
-                    icon:  Icons.group_outlined,
-                    label: 'Membres',
-                    onTap: () => context.push('/producteur/membres'),
-                  ),
-                  _MenuItem(
-                    icon:  Icons.store_outlined,
-                    label: 'Mes produits',
-                    onTap: () =>
-                        context.go('/producteur/catalogue'),
-                  ),
-                  _MenuItem(
-                    icon:  Icons.receipt_outlined,
-                    label: 'Mes commandes',
-                    onTap: () =>
-                        context.go('/producteur/commandes'),
-                  ),
-                  // Portefeuille de l'entreprise : propriétaires seulement
-                  if (proprio)
-                    _MenuItem(
-                      icon:  Icons.account_balance_wallet_outlined,
-                      label: 'Portefeuille de l\'entreprise',
-                      onTap: () =>
-                          context.push('/producteur/wallet'),
+                  if (stats != null) ...[
+                    const SizedBox(height: 16),
+                    Row(
+                      children: [
+                        _Chiffre('${stats.commandesTotal}', 'Commandes'),
+                        _Chiffre('${stats.nbProduitsActifs}', 'Produits'),
+                        _Chiffre('${stats.commandesLivrees}', 'Livrées'),
+                      ],
                     ),
-                  const SizedBox(height: 8),
-                  if (nbEntreprises > 1)
-                    _MenuItem(
-                      icon:  Icons.swap_horiz,
-                      label: 'Changer d\'entreprise',
-                      onTap: () async {
-                        final choix = await choisirEntreprise(
-                            context, user!.entreprises);
-                        if (choix != null && context.mounted) {
-                          await entrerDansEntreprise(context, ref, choix);
-                        }
-                      },
-                    ),
-                  _MenuItem(
-                    icon:  Icons.shopping_basket_outlined,
-                    label: 'Espace acheteur',
-                    color: AppColors.vertFonce,
-                    onTap: () => revenirEspaceAcheteur(context, ref),
-                  ),
-                  _MenuItem(
-                    icon:  Icons.logout,
-                    label: 'Se déconnecter',
-                    color: AppColors.rouge,
-                    onTap: () {
-                      ref.read(authProvider.notifier).logout();
-                      context.go('/login');
-                    },
-                  ),
-                  const SizedBox(height: 80),
+                  ],
                 ],
               ),
             ),
-          ),
-        ],
+
+            const Surtitre('Entreprise'),
+            GroupeLignes([
+              LigneReglage(
+                icone: Icons.storefront_outlined,
+                titre: 'Fiche de l\'entreprise',
+                onTap: () => context.push('/producteur/entreprise'),
+              ),
+              LigneReglage(
+                icone: Icons.group_outlined,
+                titre: 'Membres',
+                onTap: () => context.push('/producteur/membres'),
+              ),
+              // Portefeuille de l'entreprise : propriétaires seulement
+              if (proprio)
+                LigneReglage(
+                  icone: Icons.account_balance_wallet_outlined,
+                  titre: 'Portefeuille',
+                  onTap: () => context.push('/producteur/wallet'),
+                ),
+            ]),
+
+            const Surtitre('Activité'),
+            GroupeLignes([
+              LigneReglage(
+                icone: Icons.inventory_2_outlined,
+                titre: 'Mes produits',
+                onTap: () => context.go('/producteur/catalogue'),
+              ),
+              LigneReglage(
+                icone: Icons.receipt_long_outlined,
+                titre: 'Commandes reçues',
+                onTap: () => context.go('/producteur/commandes'),
+              ),
+              LigneReglage(
+                icone: Icons.local_shipping_outlined,
+                titre: 'Collectes',
+                onTap: () => context.go('/producteur/collectes'),
+              ),
+            ]),
+
+            const Surtitre('Compte'),
+            GroupeLignes([
+              if (nbEntreprises > 1)
+                LigneReglage(
+                  icone: Icons.swap_horiz_rounded,
+                  titre: 'Changer d\'entreprise',
+                  valeur: '$nbEntreprises',
+                  onTap: () async {
+                    final choix = await choisirEntreprise(
+                        context, user!.entreprises);
+                    if (choix != null && context.mounted) {
+                      await entrerDansEntreprise(context, ref, choix);
+                    }
+                  },
+                ),
+              LigneReglage(
+                icone: Icons.shopping_bag_outlined,
+                titre: 'Espace acheteur',
+                onTap: () => revenirEspaceAcheteur(context, ref),
+              ),
+              LigneReglage(
+                icone: Icons.logout_rounded,
+                titre: 'Se déconnecter',
+                couleur: AppColors.rouge,
+                onTap: () {
+                  ref.read(authProvider.notifier).logout();
+                  context.go('/login');
+                },
+              ),
+            ]),
+          ],
+        ),
       ),
     );
   }
 }
 
-class _QuickStat extends StatelessWidget {
+class _Chiffre extends StatelessWidget {
   final String valeur;
-  final String label;
-  const _QuickStat(this.valeur, this.label);
+  final String libelle;
+  const _Chiffre(this.valeur, this.libelle);
 
   @override
-  Widget build(BuildContext context) => Column(
-    children: [
-      Text(valeur,
-        style: const TextStyle(
-          fontSize:   22,
-          fontWeight: FontWeight.w900,
-          color:      AppColors.vertFonce,
-          fontFamily: 'PlayfairDisplay',
+  Widget build(BuildContext context) => Expanded(
+        child: Container(
+          margin: const EdgeInsets.symmetric(horizontal: 4),
+          padding: const EdgeInsets.symmetric(vertical: 10),
+          decoration: BoxDecoration(
+            color: AppColors.grisClair,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Column(
+            children: [
+              Text(valeur,
+                  style: const TextStyle(
+                      fontSize: 18, fontWeight: FontWeight.w700)),
+              Text(libelle,
+                  style: const TextStyle(
+                      fontSize: 11.5, color: AppColors.grisTexte)),
+            ],
+          ),
         ),
-      ),
-      Text(label,
-        style: const TextStyle(
-          fontSize: 12, color: AppColors.grisTexte,
-        ),
-      ),
-    ],
-  );
-}
-
-class _Divider extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) => Container(
-    height: 40, width: 1,
-    color: AppColors.grisBord,
-  );
-}
-
-class _MenuItem extends StatelessWidget {
-  final IconData icon;
-  final String   label;
-  final Color    color;
-  final VoidCallback onTap;
-
-  const _MenuItem({
-    required this.icon,
-    required this.label,
-    required this.onTap,
-    this.color = AppColors.noir,
-  });
-
-  @override
-  Widget build(BuildContext context) => Padding(
-    padding: const EdgeInsets.only(bottom: 8),
-    child: Material(
-    color:        Colors.white,
-    borderRadius: BorderRadius.circular(14),
-    clipBehavior: Clip.antiAlias,
-    child: ListTile(
-      leading:       Icon(icon, color: color),
-      title:         Text(label,
-        style: TextStyle(
-          fontWeight: FontWeight.w600,
-          color:      color,
-        ),
-      ),
-      trailing:      const Icon(
-        Icons.chevron_right,
-        color: AppColors.grisTexte,
-      ),
-      onTap:         onTap,
-      shape:         RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(14),
-      ),
-    ),
-    ),
-  );
+      );
 }

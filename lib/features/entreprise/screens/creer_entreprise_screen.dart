@@ -4,6 +4,7 @@ import '../../../core/constants/app_colors.dart';
 import '../../../providers/auth_provider.dart';
 import '../providers/entreprise_service.dart';
 import '../widgets/entreprise_form_fields.dart';
+import '../../../shared/ui/ui.dart';
 import '../widgets/espace_entreprise.dart';
 
 /// Création d'une entreprise depuis l'espace acheteur. Le compte en devient
@@ -31,7 +32,7 @@ class _CreerEntrepriseScreenState extends ConsumerState<CreerEntrepriseScreen> {
     if (!_formKey.currentState!.validate()) return;
     final erreurGeo = _form.valider();
     if (erreurGeo != null) {
-      _snack(erreurGeo, AppColors.rouge);
+      afficherMessage(context, erreurGeo, succes: false);
       return;
     }
 
@@ -43,30 +44,23 @@ class _CreerEntrepriseScreenState extends ConsumerState<CreerEntrepriseScreen> {
       if (!mounted) return;
       final entreprises = ref.read(authProvider).user?.entreprises ?? const [];
       final creee = entreprises.where((e) => e.id == data['id']).firstOrNull;
-      _snack('Entreprise créée — en attente de validation par notre équipe.',
-          AppColors.vertVif);
+      afficherMessage(context,
+          'Entreprise créée — en attente de validation par notre équipe.');
       if (creee != null) {
         await entrerDansEntreprise(context, ref, creee);
       } else {
         Navigator.of(context).pop();
       }
     } on EntrepriseException catch (e) {
-      _snack(e.message, AppColors.rouge);
+      if (mounted) afficherMessage(context, e.message, succes: false);
     } finally {
       if (mounted) setState(() => _envoi = false);
     }
   }
 
-  void _snack(String message, Color couleur) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message), backgroundColor: couleur),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.grisClair,
       appBar: AppBar(title: const Text('Créer une entreprise')),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -76,17 +70,26 @@ class _CreerEntrepriseScreenState extends ConsumerState<CreerEntrepriseScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color:        AppColors.jauneClair,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: const Text(
-                    'Vous en serez propriétaire. Votre entreprise pourra '
-                    'vendre dès sa validation par notre équipe ; vous '
-                    'pourrez ensuite y ajouter d\'autres membres.',
-                    style: TextStyle(fontSize: 13),
+                const Surface(
+                  couleur: AppColors.surface2,
+                  bordure: false,
+                  padding: EdgeInsets.all(14),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Icon(Icons.info_outline_rounded,
+                          size: 18, color: AppColors.grisTexte),
+                      SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          'Vous en serez propriétaire. Votre entreprise pourra '
+                          'vendre dès sa validation par notre équipe ; vous '
+                          'pourrez ensuite y ajouter d\'autres membres.',
+                          style: TextStyle(
+                              fontSize: 13, color: AppColors.grisTexte, height: 1.4),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
                 const SizedBox(height: 20),

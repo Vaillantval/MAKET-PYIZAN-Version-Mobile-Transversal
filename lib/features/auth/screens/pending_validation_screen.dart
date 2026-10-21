@@ -4,6 +4,7 @@ import '../../../core/constants/app_colors.dart';
 import '../../../providers/auth_provider.dart';
 import '../../../providers/entreprise_provider.dart';
 import '../../entreprise/widgets/espace_entreprise.dart';
+import '../../../shared/ui/ui.dart';
 
 /// Espace entreprise d'une entreprise pas (ou plus) autorisée à vendre :
 /// en attente de validation, suspendue ou inactive.
@@ -18,26 +19,24 @@ class PendingValidationScreen extends ConsumerWidget {
     final nom        = entreprise?.nom ?? '';
 
     return Scaffold(
-      backgroundColor: AppColors.vertMenthe,
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.all(32),
+          padding: const EdgeInsets.all(28),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(
-                enAttente ? Icons.hourglass_top_rounded : Icons.block,
-                size:  80,
-                color: AppColors.vertFonce,
+              TuileIcone(
+                enAttente ? Icons.hourglass_top_rounded : Icons.block_rounded,
+                couleur: enAttente ? AppColors.orange : AppColors.rouge,
+                taille: 84,
               ),
               const SizedBox(height: 24),
               Text(
                 'Bonjour ${user?.firstName ?? ''} !',
                 style: const TextStyle(
-                  fontFamily:  'PlayfairDisplay',
-                  fontSize:    28,
-                  fontWeight:  FontWeight.w900,
-                  color:       AppColors.vertFonce,
+                  fontSize:    26,
+                  fontWeight:  FontWeight.w700,
+                  letterSpacing: -0.6,
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -62,19 +61,17 @@ class PendingValidationScreen extends ConsumerWidget {
               ),
               const SizedBox(height: 40),
               OutlinedButton.icon(
-                icon:     const Icon(Icons.refresh),
+                icon:     const Icon(Icons.refresh_rounded),
                 label:    const Text('Vérifier le statut'),
                 onPressed: () =>
                     ref.read(authProvider.notifier).rafraichirProfil(),
                 style: OutlinedButton.styleFrom(
-                  foregroundColor: AppColors.vertFonce,
-                  side: const BorderSide(color: AppColors.vertFonce),
-                  minimumSize: const Size(double.infinity, 48),
+                  minimumSize: const Size(double.infinity, 50),
                 ),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 12),
               ElevatedButton.icon(
-                icon:  const Icon(Icons.shopping_basket_outlined),
+                icon:  const Icon(Icons.shopping_bag_outlined),
                 label: const Text('Retour à l\'espace acheteur'),
                 onPressed: () => revenirEspaceAcheteur(context, ref),
                 style: ElevatedButton.styleFrom(

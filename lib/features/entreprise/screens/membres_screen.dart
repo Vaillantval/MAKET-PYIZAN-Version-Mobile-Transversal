@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../providers/auth_provider.dart';
 import '../../../providers/entreprise_provider.dart';
+import '../../../shared/ui/ui.dart';
 import '../providers/entreprise_service.dart';
 import '../widgets/espace_entreprise.dart';
 
@@ -26,12 +27,10 @@ class MembresScreen extends ConsumerWidget {
     final proprio = entreprise.estProprietaire;
 
     return Scaffold(
-      backgroundColor: AppColors.grisClair,
-      appBar: AppBar(title: Text('Membres — ${entreprise.nom}')),
+      appBar: AppBar(title: const Text('Membres')),
       floatingActionButton: proprio
           ? FloatingActionButton.extended(
-              backgroundColor: AppColors.vertVif,
-              icon:  const Icon(Icons.person_add_alt_1),
+              icon:  const Icon(Icons.person_add_alt_1_rounded),
               label: const Text('Ajouter'),
               onPressed: () => _ajouter(context, ref, entreprise.id),
             )
@@ -40,7 +39,7 @@ class MembresScreen extends ConsumerWidget {
         onRefresh: () async => ref.invalidate(membresProvider(entreprise.id)),
         child: membres.when(
           loading: () => const Center(
-            child: CircularProgressIndicator(color: AppColors.vertVif)),
+            child: CircularProgressIndicator()),
           error: (e, _) => ListView(children: [
             Padding(
               padding: const EdgeInsets.all(24),
@@ -48,35 +47,65 @@ class MembresScreen extends ConsumerWidget {
             ),
           ]),
           data: (liste) => ListView(
-            padding: const EdgeInsets.only(bottom: 96),
+            padding: const EdgeInsets.fromLTRB(16, 4, 16, 96),
             children: [
-              const Padding(
-                padding: EdgeInsets.fromLTRB(16, 16, 16, 8),
-                child: Text(
-                  'Propriétaire : gère l\'entreprise, ses membres et son '
-                  'portefeuille. Gestionnaire : gère produits, commandes '
-                  'et collectes.',
-                  style: TextStyle(fontSize: 12, color: AppColors.grisTexte),
-                ),
-              ),
-              for (final m in liste)
-                Card(
-                  margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                  child: ListTile(
-                    leading: CircleAvatar(
-                      backgroundColor: m.estProprietaire
-                          ? AppColors.jaune : AppColors.vertMenthe,
+              const Surface(
+                couleur: AppColors.surface2,
+                bordure: false,
+                padding: EdgeInsets.all(14),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Icon(Icons.info_outline_rounded,
+                        size: 18, color: AppColors.grisTexte),
+                    SizedBox(width: 10),
+                    Expanded(
                       child: Text(
-                        m.nom.isNotEmpty ? m.nom[0].toUpperCase() : '?',
-                        style: const TextStyle(
-                          fontWeight: FontWeight.w800,
-                          color: AppColors.vertFonce),
+                        'Propriétaire : gère l\'entreprise, ses membres et son '
+                        'portefeuille. Gestionnaire : gère produits, commandes '
+                        'et collectes.',
+                        style: TextStyle(
+                            fontSize: 12.5, color: AppColors.grisTexte, height: 1.4),
                       ),
                     ),
-                    title: Text(m.userId == moi ? '${m.nom} (vous)' : m.nom),
-                    subtitle: Text('${m.roleLabel} · ${m.email}'),
-                    trailing: (proprio || m.userId == moi)
-                        ? PopupMenuButton<String>(
+                  ],
+                ),
+              ),
+              Surtitre('${liste.length} membre(s)'),
+              GroupeLignes([
+                for (final m in liste)
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(14, 10, 4, 10),
+                    child: Row(
+                      children: [
+                        AvatarInitiales(m.nom, taille: 42),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(m.userId == moi ? '${m.nom} (vous)' : m.nom,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: const TextStyle(
+                                      fontWeight: FontWeight.w600, fontSize: 14.5)),
+                              Text(m.email,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: const TextStyle(
+                                      fontSize: 12.5, color: AppColors.grisTexte)),
+                              const SizedBox(height: 4),
+                              PuceStatut(m.roleLabel,
+                                  couleur: m.estProprietaire
+                                      ? AppColors.violet
+                                      : AppColors.bleu),
+                            ],
+                          ),
+                        ),
+                        if (proprio || m.userId == moi)
+                          PopupMenuButton<String>(
+                            icon: const Icon(Icons.more_vert_rounded,
+                                color: AppColors.grisTexte),
                             onSelected: (action) => _action(
                                 context, ref, entreprise.id, m, action),
                             itemBuilder: (_) => [
@@ -98,10 +127,11 @@ class MembresScreen extends ConsumerWidget {
                                 ),
                               ),
                             ],
-                          )
-                        : null,
+                          ),
+                      ],
+                    ),
                   ),
-                ),
+              ]),
             ],
           ),
         ),
@@ -139,9 +169,7 @@ class MembresScreen extends ConsumerWidget {
       ref.invalidate(membresProvider(entrepriseId));
     } on EntrepriseException catch (e) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(e.message), backgroundColor: AppColors.rouge),
-        );
+        afficherMessage(context, e.message, succes: false);
       }
     }
   }
@@ -155,8 +183,8 @@ class MembresScreen extends ConsumerWidget {
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
             child: const Text('Annuler')),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: AppColors.rouge),
+          FilledButton(
+            style: FilledButton.styleFrom(backgroundColor: AppColors.rouge),
             onPressed: () => Navigator.pop(ctx, true),
             child: const Text('Confirmer')),
         ],
@@ -217,13 +245,13 @@ class _AjoutMembreSheetState extends ConsumerState<_AjoutMembreSheet> {
   Widget build(BuildContext context) {
     return Padding(
       padding: EdgeInsets.fromLTRB(
-          20, 20, 20, MediaQuery.of(context).viewInsets.bottom + 20),
+          20, 0, 20, MediaQuery.of(context).viewInsets.bottom + 20),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           const Text('Ajouter un membre', style: TextStyle(
-            fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.vertFonce)),
+            fontSize: 18, fontWeight: FontWeight.w700)),
           const SizedBox(height: 6),
           const Text(
             'La personne doit déjà avoir un compte MaketLakay.',

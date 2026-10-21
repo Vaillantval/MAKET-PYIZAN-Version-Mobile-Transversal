@@ -7,6 +7,7 @@ import '../providers/commandes_producteur_provider.dart';
 import '../../acheteur/widgets/commande_statut_badge.dart';
 import '../../../shared/widgets/loading_widget.dart';
 import '../../../shared/widgets/empty_state.dart';
+import '../../../shared/ui/ui.dart';
 
 class CommandesRecuesScreen extends ConsumerStatefulWidget {
   final String? statutInitial;
@@ -18,57 +19,44 @@ class CommandesRecuesScreen extends ConsumerStatefulWidget {
 }
 
 class _CommandesRecuesScreenState
-    extends ConsumerState<CommandesRecuesScreen>
-    with SingleTickerProviderStateMixin {
-  late TabController _tabs;
+    extends ConsumerState<CommandesRecuesScreen> {
+  late String _statut;
 
-  final _filtres = [
-    ('',             'Toutes'),
-    ('en_attente',   '⏳ Attente'),
-    ('confirmee',    '✅ Confirmées'),
-    ('en_preparation','🔄 Préparation'),
-    ('livree',       '📦 Livrées'),
-    ('annulee',      '❌ Annulées'),
+  static const _filtres = [
+    ('',               'Toutes'),
+    ('en_attente',     'En attente'),
+    ('confirmee',      'Confirmées'),
+    ('en_preparation', 'En préparation'),
+    ('livree',         'Livrées'),
+    ('annulee',        'Annulées'),
   ];
 
   @override
   void initState() {
     super.initState();
-    _tabs = TabController(length: _filtres.length, vsync: this);
-    if (widget.statutInitial != null) {
-      final idx = _filtres.indexWhere(
-        (f) => f.$1 == widget.statutInitial,
-      );
-      if (idx >= 0) _tabs.index = idx;
-    }
-  }
-
-  @override
-  void dispose() {
-    _tabs.dispose();
-    super.dispose();
+    _statut = _filtres.any((f) => f.$1 == widget.statutInitial)
+        ? widget.statutInitial!
+        : '';
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.grisClair,
-      appBar: AppBar(
-        title: const Text('Commandes reçues'),
-        bottom: TabBar(
-          controller:      _tabs,
-          isScrollable:    true,
-          labelColor:      AppColors.jaune,
-          unselectedLabelColor: Colors.white70,
-          indicatorColor:  AppColors.jaune,
-          tabs: _filtres.map((f) => Tab(text: f.$2)).toList(),
+      body: SafeArea(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const EnTeteEcran('Commandes reçues'),
+            const SizedBox(height: 6),
+            PastillesFiltre(
+              options: _filtres,
+              valeur: _statut,
+              onChanged: (v) => setState(() => _statut = v),
+            ),
+            const SizedBox(height: 6),
+            Expanded(child: _CommandesList(statut: _statut)),
+          ],
         ),
-      ),
-      body: TabBarView(
-        controller: _tabs,
-        children: _filtres.map((f) => _CommandesList(
-          statut: f.$1,
-        )).toList(),
       ),
     );
   }
@@ -95,103 +83,92 @@ class _CommandesList extends ConsumerWidget {
         }
 
         return RefreshIndicator(
-          color:     AppColors.vertVif,
+          color:     AppColors.vertFonce,
           onRefresh: () =>
               ref.read(commandesProducteurProvider(statut).notifier)
                   .charger(),
-          child: ListView.builder(
-            padding:   const EdgeInsets.all(12),
+          child: ListView.separated(
+            padding:   const EdgeInsets.fromLTRB(16, 8, 16, 24),
             itemCount: commandes.length,
+            separatorBuilder: (_, __) => const SizedBox(height: 10),
             itemBuilder: (_, i) {
               final c = commandes[i];
-              return GestureDetector(
+              return Surface(
                 onTap: () => context.go(
                   '/producteur/commande/${c.numeroCommande}',
                 ),
-                child: Container(
-                  margin:  const EdgeInsets.only(bottom: 10),
-                  padding: const EdgeInsets.all(14),
-                  decoration: BoxDecoration(
-                    color:        Colors.white,
-                    borderRadius: BorderRadius.circular(12),
-                    boxShadow: [
-                      BoxShadow(
-                        color:     Colors.black.withValues(alpha: 0.05),
-                        blurRadius: 6,
-                      ),
-                    ],
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        mainAxisAlignment:
-                            MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            c.numeroCommande,
-                            style: const TextStyle(
-                              fontWeight: FontWeight.w800,
-                              fontSize:   15,
-                              color:      AppColors.vertFonce,
-                            ),
-                          ),
-                          CommandeStatutBadge(c.statut),
-                        ],
-                      ),
-                      const SizedBox(height: 8),
-                      Row(
-                        mainAxisAlignment:
-                            MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            FormatUtils.date(c.createdAt),
-                            style: const TextStyle(
-                              fontSize: 12,
-                              color:    AppColors.grisTexte,
-                            ),
-                          ),
-                          Text(
-                            FormatUtils.htg(c.total),
-                            style: const TextStyle(
-                              fontSize:   16,
-                              fontWeight: FontWeight.w800,
-                              color:      AppColors.vertFonce,
-                            ),
-                          ),
-                        ],
-                      ),
-                      // Boutons action rapide si en_attente
-                      if (c.statut == 'en_attente') ...[
-                        const SizedBox(height: 12),
-                        Row(children: [
-                          Expanded(
-                            child: OutlinedButton(
-                              onPressed: () =>
-                                  _annuler(context, ref, c.numeroCommande),
-                              style: OutlinedButton.styleFrom(
-                                foregroundColor: AppColors.rouge,
-                                side: const BorderSide(
-                                    color: AppColors.rouge),
+                padding: const EdgeInsets.all(14),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        TuileIcone(Icons.receipt_long_outlined,
+                            couleur: CommandeStatutBadge.couleur(c.statut),
+                            taille: 42),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(c.numeroCommande,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w700,
+                                  fontSize:   14.5,
+                                ),
                               ),
-                              child: const Text('Refuser'),
-                            ),
-                          ),
-                          const SizedBox(width: 10),
-                          Expanded(
-                            child: ElevatedButton(
-                              onPressed: () =>
-                                  _confirmer(context, ref, c.numeroCommande),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: AppColors.vertVif,
+                              const SizedBox(height: 4),
+                              Row(
+                                children: [
+                                  Flexible(child: CommandeStatutBadge(c.statut)),
+                                  const SizedBox(width: 8),
+                                  Text(FormatUtils.date(c.createdAt),
+                                    style: const TextStyle(
+                                      fontSize: 11.5,
+                                      color:    AppColors.grisLeger,
+                                    ),
+                                  ),
+                                ],
                               ),
-                              child: const Text('Confirmer'),
-                            ),
+                            ],
                           ),
-                        ]),
+                        ),
+                        const SizedBox(width: 8),
+                        Text(FormatUtils.htg(c.total),
+                          style: const TextStyle(
+                            fontSize:   14.5,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
                       ],
+                    ),
+                    // Actions rapides tant que la commande est en attente
+                    if (c.statut == 'en_attente') ...[
+                      const SizedBox(height: 12),
+                      Row(children: [
+                        Expanded(
+                          child: OutlinedButton(
+                            onPressed: () =>
+                                _annuler(context, ref, c.numeroCommande),
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: AppColors.rouge,
+                            ),
+                            child: const Text('Refuser'),
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: FilledButton(
+                            onPressed: () =>
+                                _confirmer(context, ref, c.numeroCommande),
+                            child: const Text('Confirmer'),
+                          ),
+                        ),
+                      ]),
                     ],
-                  ),
+                  ],
                 ),
               );
             },
@@ -208,13 +185,10 @@ class _CommandesList extends ConsumerWidget {
         .read(commandesProducteurProvider('').notifier)
         .changerStatut(numero, 'confirmer');
     if (ctx.mounted) {
-      ScaffoldMessenger.of(ctx).showSnackBar(SnackBar(
-        content: Text(result?['success'] == true
-            ? '✅ Commande confirmée !'
-            : result?['error']?.toString() ?? 'Erreur'),
-        backgroundColor: result?['success'] == true
-            ? AppColors.vertVif : AppColors.rouge,
-      ));
+      final ok = result?['success'] == true;
+      afficherMessage(ctx,
+          ok ? 'Commande confirmée' : result?['error']?.toString() ?? 'Erreur',
+          succes: ok);
     }
   }
 
@@ -237,11 +211,11 @@ class _CommandesList extends ConsumerWidget {
             onPressed: () => Navigator.pop(ctx, false),
             child: const Text('Annuler'),
           ),
-          ElevatedButton(
+          FilledButton(
             onPressed: () => Navigator.pop(ctx, true),
-            style: ElevatedButton.styleFrom(
+            style: FilledButton.styleFrom(
                 backgroundColor: AppColors.rouge),
-            child: const Text('Confirmer le refus'),
+            child: const Text('Refuser'),
           ),
         ],
       ),
@@ -253,12 +227,8 @@ class _CommandesList extends ConsumerWidget {
           .changerStatut(numero, 'annuler',
               motif: motifCtrl.text);
       if (ctx.mounted) {
-        ScaffoldMessenger.of(ctx).showSnackBar(SnackBar(
-          content: Text(result?['success'] == true
-              ? 'Commande refusée.' : 'Erreur'),
-          backgroundColor: result?['success'] == true
-              ? AppColors.orange : AppColors.rouge,
-        ));
+        final ok = result?['success'] == true;
+        afficherMessage(ctx, ok ? 'Commande refusée' : 'Erreur', succes: ok);
       }
     }
   }

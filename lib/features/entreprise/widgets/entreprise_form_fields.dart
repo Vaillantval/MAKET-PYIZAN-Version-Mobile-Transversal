@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../shared/ui/ui.dart';
 import '../../../shared/widgets/geo_selector.dart';
 
 /// Valeurs saisies pour créer une entreprise — même format que
@@ -84,9 +85,9 @@ class EntrepriseFormFields extends StatefulWidget {
 
 class _EntrepriseFormFieldsState extends State<EntrepriseFormFields> {
   static const _types = [
-    ('producteur',  '🌾 Producteur',  'Je cultive / j\'élève'),
-    ('fournisseur', '🚚 Fournisseur', 'Je revends des produits'),
-    ('entreprise',  '🏪 Entreprise',  'Transformation, marque, coopérative…'),
+    ('producteur',  'Producteur',  'Je cultive / j\'élève',                Icons.agriculture_outlined),
+    ('fournisseur', 'Fournisseur', 'Je revends des produits',             Icons.local_shipping_outlined),
+    ('entreprise',  'Entreprise',  'Transformation, marque, coopérative…', Icons.storefront_outlined),
   ];
 
   static const _provenances = [
@@ -121,6 +122,7 @@ class _EntrepriseFormFieldsState extends State<EntrepriseFormFields> {
             child: _TypeTile(
               label:    t.$2,
               aide:     t.$3,
+              icone:    t.$4,
               selected: c.type == t.$1,
               onTap:    () => setState(() => c.type = t.$1),
             ),
@@ -261,12 +263,14 @@ class _EntrepriseFormFieldsState extends State<EntrepriseFormFields> {
 class _TypeTile extends StatelessWidget {
   final String label;
   final String aide;
+  final IconData icone;
   final bool   selected;
   final VoidCallback onTap;
 
   const _TypeTile({
     required this.label,
     required this.aide,
+    required this.icone,
     required this.selected,
     required this.onTap,
   });
@@ -275,20 +279,24 @@ class _TypeTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(12),
+      borderRadius: BorderRadius.circular(16),
       child: Container(
         width:   double.infinity,
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
         decoration: BoxDecoration(
-          color:        selected ? AppColors.vertMenthe : AppColors.blanc,
-          borderRadius: BorderRadius.circular(12),
+          color:        AppColors.blanc,
+          borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: selected ? AppColors.vertFonce : AppColors.grisBord,
-            width: selected ? 2 : 1,
+            color: selected ? AppColors.noir : AppColors.grisBord,
+            width: selected ? 1.6 : 1,
           ),
         ),
         child: Row(
           children: [
+            TuileIcone(icone,
+                couleur: selected ? AppColors.vertFonce : AppColors.grisTexte,
+                taille: 40),
+            const SizedBox(width: 12),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -300,7 +308,7 @@ class _TypeTile extends StatelessWidget {
               ),
             ),
             if (selected)
-              const Icon(Icons.check_circle, color: AppColors.vertFonce),
+              const Icon(Icons.check_circle_rounded, color: AppColors.noir),
           ],
         ),
       ),

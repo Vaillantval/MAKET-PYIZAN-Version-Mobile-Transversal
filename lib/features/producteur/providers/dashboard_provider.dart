@@ -8,6 +8,7 @@ import '../../../providers/entreprise_provider.dart';
 class DashboardStats {
   final int     commandesEnAttente;
   final int     commandesConfirmees;
+  final int     commandesEnCours;
   final int     commandesLivrees;
   final int     commandesTotal;
   final double  revenusTotal;
@@ -20,6 +21,7 @@ class DashboardStats {
   const DashboardStats({
     this.commandesEnAttente  = 0,
     this.commandesConfirmees = 0,
+    this.commandesEnCours    = 0,
     this.commandesLivrees    = 0,
     this.commandesTotal      = 0,
     this.revenusTotal        = 0,
@@ -34,6 +36,7 @@ class DashboardStats {
       DashboardStats(
         commandesEnAttente:  json['commandes_en_attente']  as int? ?? 0,
         commandesConfirmees: json['commandes_confirmees']  as int? ?? 0,
+        commandesEnCours:    json['commandes_en_cours']    as int? ?? 0,
         commandesLivrees:    json['commandes_livrees']     as int? ?? 0,
         commandesTotal:      json['commandes_total']       as int? ?? 0,
         revenusTotal:        double.tryParse(

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../providers/auth_provider.dart';
 import '../../../providers/entreprise_provider.dart';
+import '../../../shared/ui/ui.dart';
 import '../providers/entreprise_service.dart';
 
 final _ficheEntrepriseProvider =
@@ -60,15 +61,11 @@ class _EntrepriseInfosScreenState extends ConsumerState<EntrepriseInfosScreen> {
       // Le nom affiché dans /me (entreprises) a pu changer
       await ref.read(authProvider.notifier).rafraichirProfil();
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text('Modifications enregistrées'),
-        backgroundColor: AppColors.vertVif,
-      ));
+      afficherMessage(context, 'Modifications enregistrées');
       Navigator.of(context).pop();
     } on EntrepriseException catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text(e.message), backgroundColor: AppColors.rouge));
+        afficherMessage(context, e.message, succes: false);
       }
     } finally {
       if (mounted) setState(() => _envoi = false);
@@ -81,11 +78,10 @@ class _EntrepriseInfosScreenState extends ConsumerState<EntrepriseInfosScreen> {
     final proprio = ref.watch(entrepriseActiveProvider)?.estProprietaire ?? false;
 
     return Scaffold(
-      backgroundColor: AppColors.grisClair,
-      appBar: AppBar(title: const Text('Mon entreprise')),
+      appBar: AppBar(title: const Text('Fiche de l\'entreprise')),
       body: fiche.when(
         loading: () => const Center(
-          child: CircularProgressIndicator(color: AppColors.vertVif)),
+          child: CircularProgressIndicator()),
         error: (e, _) => Center(child: Padding(
           padding: const EdgeInsets.all(24),
           child: Text(e.toString(), textAlign: TextAlign.center),
@@ -99,16 +95,27 @@ class _EntrepriseInfosScreenState extends ConsumerState<EntrepriseInfosScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  _Ligne('Code', f['code_producteur']),
-                  _Ligne('Type', f['type_label']),
-                  _Ligne('Statut', f['statut_label']),
-                  _Ligne('Localisation',
-                      [f['commune'], f['departement_label']]
-                          .where((s) => s != null && '$s'.isNotEmpty)
-                          .join(', ')),
-                  if ((f['note_admin'] as String? ?? '').isNotEmpty)
-                    _Ligne('Note de l\'équipe', f['note_admin']),
-                  const SizedBox(height: 16),
+                  Surface(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    child: Column(
+                      children: [
+                        LigneInfo(Icons.tag_rounded, 'Code',
+                            '${f['code_producteur'] ?? '—'}'),
+                        LigneInfo(Icons.category_outlined, 'Type',
+                            '${f['type_label'] ?? '—'}'),
+                        LigneInfo(Icons.verified_outlined, 'Statut',
+                            '${f['statut_label'] ?? '—'}'),
+                        LigneInfo(Icons.place_outlined, 'Localisation',
+                            [f['commune'], f['departement_label']]
+                                .where((s) => s != null && '$s'.isNotEmpty)
+                                .join(', ')),
+                        if ((f['note_admin'] as String? ?? '').isNotEmpty)
+                          LigneInfo(Icons.campaign_outlined, 'Note de l\'équipe',
+                              '${f['note_admin']}'),
+                      ],
+                    ),
+                  ),
+                  const Surtitre('Informations publiques'),
                   if (!proprio)
                     const Padding(
                       padding: EdgeInsets.only(bottom: 12),
@@ -162,24 +169,4 @@ class _EntrepriseInfosScreenState extends ConsumerState<EntrepriseInfosScreen> {
       ),
     );
   }
-}
-
-class _Ligne extends StatelessWidget {
-  final String  label;
-  final dynamic valeur;
-  const _Ligne(this.label, this.valeur);
-
-  @override
-  Widget build(BuildContext context) => Padding(
-    padding: const EdgeInsets.symmetric(vertical: 4),
-    child: Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        SizedBox(width: 120, child: Text(label,
-          style: const TextStyle(fontSize: 13, color: AppColors.grisTexte))),
-        Expanded(child: Text('${valeur ?? '—'}',
-          style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600))),
-      ],
-    ),
-  );
 }
