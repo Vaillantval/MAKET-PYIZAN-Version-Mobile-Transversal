@@ -86,13 +86,15 @@ Future<ProviderContainer> monterApp(
   int? entrepriseActive,
   String roleEntreprise = 'proprietaire',
   Map<String, Object> prefsEnPlus = const {},
+  bool visiteur = false,
 }) async {
   tester.view.physicalSize = taille * 3;
   tester.view.devicePixelRatio = 3;
   addTearDown(tester.view.reset);
 
   final user = utilisateur ?? utilisateurAcheteur;
-  final connecte = !['/login', '/register', '/mot-de-passe-oublie'].contains(chemin);
+  final connecte = !visiteur &&
+      !['/login', '/register', '/mot-de-passe-oublie'].contains(chemin);
   SharedPreferences.setMockInitialValues({
     if (connecte) AppConstants.keyAccessToken: 'jeton',
     if (connecte) AppConstants.keyRefreshToken: 'jeton',

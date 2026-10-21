@@ -9,6 +9,7 @@ import '../../../models/wallet_retrait.dart';
 import '../../../models/bon_cadeau.dart';
 import '../../../models/wallet_code_paiement.dart';
 import '../../../providers/entreprise_provider.dart';
+import '../../../providers/auth_provider.dart';
 
 /// Extrait la liste d'une réponse paginée
 /// ({"results": [...], "count": ..., "next": ..., "previous": ...})
@@ -59,6 +60,7 @@ Future<_PageResult<T>> _chargerPage<T>(
 
 final walletProvider =
     StateNotifierProvider<WalletNotifier, AsyncValue<Wallet>>((ref) {
+  ref.watch(sessionUtilisateurProvider); // recharger au changement de compte
   ref.watch(entrepriseActiveIdProvider); // portefeuille perso ↔ entreprise
   return WalletNotifier(ref.read(apiClientProvider));
 });
@@ -68,6 +70,7 @@ final walletProvider =
 final walletTransactionsProvider =
     StateNotifierProvider<WalletTransactionsNotifier,
         AsyncValue<List<WalletTransaction>>>((ref) {
+  ref.watch(sessionUtilisateurProvider); // recharger au changement de compte
   ref.watch(entrepriseActiveIdProvider); // portefeuille perso ↔ entreprise
   return WalletTransactionsNotifier(ref.read(apiClientProvider));
 });
@@ -75,6 +78,7 @@ final walletTransactionsProvider =
 final walletRetraitsProvider =
     StateNotifierProvider<WalletRetraitsNotifier,
         AsyncValue<List<WalletRetrait>>>((ref) {
+  ref.watch(sessionUtilisateurProvider); // recharger au changement de compte
   ref.watch(entrepriseActiveIdProvider); // portefeuille perso ↔ entreprise
   return WalletRetraitsNotifier(ref.read(apiClientProvider));
 });
@@ -82,12 +86,14 @@ final walletRetraitsProvider =
 final bonsAchetesProvider =
     StateNotifierProvider<BonsAchetesNotifier,
         AsyncValue<List<BonCadeau>>>((ref) {
+  ref.watch(sessionUtilisateurProvider); // recharger au changement de compte
   return BonsAchetesNotifier(ref.read(apiClientProvider));
 });
 
 final bonsRecusProvider =
     StateNotifierProvider<BonsRecusNotifier,
         AsyncValue<List<BonCadeau>>>((ref) {
+  ref.watch(sessionUtilisateurProvider); // recharger au changement de compte
   return BonsRecusNotifier(ref.read(apiClientProvider));
 });
 

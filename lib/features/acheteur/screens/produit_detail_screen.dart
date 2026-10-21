@@ -11,6 +11,7 @@ import '../../../shared/widgets/empty_state.dart';
 import '../providers/catalogue_provider.dart';
 import '../providers/panier_provider.dart';
 import '../widgets/produit_card.dart';
+import '../../../shared/widgets/connexion_requise.dart';
 import '../../../shared/widgets/loading_widget.dart';
 
 class ProduitDetailScreen extends ConsumerWidget {
@@ -66,6 +67,7 @@ class _FicheState extends ConsumerState<_Fiche> {
   bool _envoi = false;
 
   Future<void> _ajouter() async {
+    if (!exigerConnexion(context, ref)) return;
     setState(() => _envoi = true);
     final err = await ref
         .read(panierProvider.notifier)

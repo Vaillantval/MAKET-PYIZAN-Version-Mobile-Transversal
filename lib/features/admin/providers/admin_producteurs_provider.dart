@@ -1,10 +1,12 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/api/api_client.dart';
 import '../../../core/api/api_endpoints.dart';
+import '../../../providers/auth_provider.dart';
 
 final adminProducteursProvider =
     StateNotifierProvider<AdminProducteursNotifier,
         AsyncValue<List<Map<String, dynamic>>>>((ref) {
+  ref.watch(sessionUtilisateurProvider); // recharger au changement de compte
   return AdminProducteursNotifier(ref.read(apiClientProvider));
 });
 

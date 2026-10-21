@@ -37,6 +37,12 @@ class AuthState {
   );
 }
 
+/// Identifiant du compte connecté (null en visiteur). Les données propres
+/// au compte (panier, portefeuille, commandes…) le surveillent pour être
+/// rechargées à la connexion, à la déconnexion et au changement de compte.
+final sessionUtilisateurProvider = Provider<int?>(
+    (ref) => ref.watch(authProvider.select((s) => s.user?.id)));
+
 final authProvider = StateNotifierProvider<AuthNotifier, AuthState>((ref) {
   return AuthNotifier(
     ref.read(apiClientProvider),

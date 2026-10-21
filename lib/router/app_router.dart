@@ -94,9 +94,14 @@ final routerProvider = Provider<GoRouter>((ref) {
         return path == '/splash' ? null : '/splash';
       }
 
+      // Visiteur : comme sur le site, la boutique (accueil, catalogue,
+      // fiches produits) se parcourt sans compte ; le reste (panier,
+      // commandes, profil…) demande de se connecter, puis y ramène.
       if (status == AuthStatus.unauthenticated) {
-        if (path == '/splash') return '/login';
-        return isAuth ? null : '/login';
+        if (path == '/splash') return '/acheteur/accueil';
+        if (isAuth || _estPublique(path)) return null;
+        return Uri(path: '/login', queryParameters: {'from': state.uri.toString()})
+            .toString();
       }
 
       final role = authState.user?.role ?? 'acheteur';
@@ -106,7 +111,13 @@ final routerProvider = Provider<GoRouter>((ref) {
 
       // Connecté
       if (isAuth || path == '/splash') {
-        // Rediriger selon le rôle (ou rouvrir l'entreprise active)
+        // Revenir là où le visiteur s'est connecté (ex. la fiche produit)
+        final from = state.uri.queryParameters['from'];
+        if (from != null && from.startsWith('/acheteur/') &&
+            role == 'acheteur' && entreprise == null) {
+          return from;
+        }
+        // Sinon selon le rôle (ou rouvrir l'entreprise active)
         return _homeRoute(role, entreprise);
       }
 
@@ -289,6 +300,12 @@ String _homeRoute(String role, EntrepriseMembre? entreprise) {
   }
 }
 
+/// Écrans accessibles sans compte.
+bool _estPublique(String path) =>
+    path == '/acheteur/accueil' ||
+    path == '/acheteur/catalogue' ||
+    path.startsWith('/acheteur/produit/');
+
 // ── Shells (BottomNavigation par rôle) ────────────────────────
 
 class AcheteurShell extends ConsumerWidget {
@@ -297,8 +314,10 @@ class AcheteurShell extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    ref.watch(panierProvider); // badge du panier à jour
-    final nbPanier = ref.read(panierProvider.notifier).nbArticles;
+    // Badge du panier à jour (le panier demande un compte)
+    final connecte = ref.watch(sessionUtilisateurProvider) != null;
+    if (connecte) ref.watch(panierProvider);
+    final nbPanier = connecte ? ref.read(panierProvider.notifier).nbArticles : 0;
     return Scaffold(
       body: child,
       bottomNavigationBar: _buildBottomNav(context, [

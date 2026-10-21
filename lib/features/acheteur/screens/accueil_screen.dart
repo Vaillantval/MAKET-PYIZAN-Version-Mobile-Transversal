@@ -13,6 +13,7 @@ import '../providers/catalogue_provider.dart';
 import '../providers/panier_provider.dart';
 import '../providers/wallet_provider.dart';
 import '../widgets/produit_card.dart';
+import '../../../shared/widgets/connexion_requise.dart';
 
 class AccueilScreen extends ConsumerWidget {
   const AccueilScreen({super.key});
@@ -22,9 +23,11 @@ class AccueilScreen extends ConsumerWidget {
     final user        = ref.watch(authProvider).user;
     final catState    = ref.watch(catalogueProvider);
     final categories  = ref.watch(categoriesProvider);
-    final walletState = ref.watch(walletProvider);
-    ref.watch(panierProvider); // pastille du panier à jour
-    final nbPanier    = ref.read(panierProvider.notifier).nbArticles;
+    final connecte    = user != null;
+    // Visiteur : ni portefeuille ni panier (ils demandent un compte)
+    final walletState = connecte ? ref.watch(walletProvider) : null;
+    if (connecte) ref.watch(panierProvider); // pastille du panier à jour
+    final nbPanier    = connecte ? ref.read(panierProvider.notifier).nbArticles : 0;
     final membre      = (user?.entreprises ?? const []).isNotEmpty;
 
     return Scaffold(
@@ -62,10 +65,19 @@ class AccueilScreen extends ConsumerWidget {
                                 onTap: () => ouvrirEspaceEntreprise(context, ref)),
                             const SizedBox(width: 8),
                           ],
-                          BoutonRond(Icons.shopping_bag_outlined,
-                              tooltip: 'Panier',
-                              badge: nbPanier,
-                              onTap: () => context.go('/acheteur/panier')),
+                          if (connecte)
+                            BoutonRond(Icons.shopping_bag_outlined,
+                                tooltip: 'Panier',
+                                badge: nbPanier,
+                                onTap: () => context.go('/acheteur/panier'))
+                          else
+                            FilledButton(
+                              onPressed: () => context.go('/login'),
+                              style: FilledButton.styleFrom(
+                                  minimumSize: const Size(0, 40),
+                                  padding: const EdgeInsets.symmetric(horizontal: 16)),
+                              child: const Text('Se connecter'),
+                            ),
                         ],
                       ),
                     ),
@@ -78,7 +90,7 @@ class AccueilScreen extends ConsumerWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('Bonjour ${user?.firstName ?? ''}',
+                          Text(connecte ? 'Bonjour ${user.firstName}' : 'Bienvenue',
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: const TextStyle(
@@ -134,6 +146,7 @@ class AccueilScreen extends ConsumerWidget {
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
                           _Bandeau(onTap: () => context.go('/acheteur/catalogue')),
+                          if (walletState != null) ...[
                           const SizedBox(height: 10),
                           Surface(
                             onTap: () => context.push('/acheteur/wallet'),
@@ -166,6 +179,7 @@ class AccueilScreen extends ConsumerWidget {
                               ],
                             ),
                           ),
+                          ],
                         ],
                       ),
                     ),
@@ -254,6 +268,7 @@ class AccueilScreen extends ConsumerWidget {
                                 '/acheteur/produit/${p.slug}',
                               ),
                               onAjouter: () async {
+                                if (!exigerConnexion(ctx, ref)) return;
                                 final err = await ref
                                     .read(panierProvider.notifier)
                                     .ajouter(p.slug, 1);

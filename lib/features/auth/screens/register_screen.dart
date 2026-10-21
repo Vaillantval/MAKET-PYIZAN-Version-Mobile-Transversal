@@ -148,7 +148,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
         title: const Text('Inscription'),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.go('/login'),
+          onPressed: () => _versConnexion(context),
         ),
       ),
       body: SafeArea(
@@ -280,7 +280,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 const SizedBox(height: 16),
                 Center(
                   child: TextButton(
-                    onPressed: () => context.go('/login'),
+                    onPressed: () => _versConnexion(context),
                     child: const Text(
                       'Déjà un compte ? Se connecter',
                       style: TextStyle(color: AppColors.vertVif),
@@ -294,4 +294,11 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       ),
     );
   }
+}
+
+/// Retour à la connexion en gardant l'écran où revenir ensuite.
+void _versConnexion(BuildContext context) {
+  final from = GoRouterState.of(context).uri.queryParameters['from'];
+  context.go(Uri(path: '/login',
+      queryParameters: from == null ? null : {'from': from}).toString());
 }

@@ -4,9 +4,11 @@ import '../../../core/api/api_endpoints.dart';
 import '../../../core/offline/offline_manager.dart';
 import '../../../core/offline/sync_queue.dart';
 import '../../../models/panier.dart';
+import '../../../providers/auth_provider.dart';
 
 final panierProvider =
     StateNotifierProvider<PanierNotifier, AsyncValue<Panier>>((ref) {
+  ref.watch(sessionUtilisateurProvider); // recharger au changement de compte
   return PanierNotifier(
     ref.read(apiClientProvider),
     ref.read(offlineManagerProvider),

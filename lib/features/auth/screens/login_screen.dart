@@ -185,13 +185,27 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 const SizedBox(height: 16),
 
                 // Lien inscription
+                // (en gardant l'écran où revenir après connexion)
                 Center(
                   child: TextButton(
-                    onPressed: () => context.go('/register'),
+                    onPressed: () {
+                      final from = GoRouterState.of(context).uri.queryParameters['from'];
+                      context.go(Uri(path: '/register',
+                          queryParameters: from == null ? null : {'from': from}).toString());
+                    },
                     child: const Text(
                       'Pas de compte ? S\'inscrire',
                       style: TextStyle(color: AppColors.vertVif),
                     ),
+                  ),
+                ),
+                // Parcourir la boutique sans compte
+                Center(
+                  child: TextButton(
+                    onPressed: () => context.go('/acheteur/accueil'),
+                    style: TextButton.styleFrom(
+                        foregroundColor: AppColors.grisTexte),
+                    child: const Text('Continuer sans compte'),
                   ),
                 ),
               ],

@@ -3,6 +3,7 @@ import '../../../core/api/api_client.dart';
 import '../../../core/api/api_endpoints.dart';
 import '../../../core/offline/cache_manager.dart';
 import '../../../core/offline/connectivity_service.dart';
+import '../../../providers/auth_provider.dart';
 
 class AdminStats {
   // Utilisateurs
@@ -94,6 +95,7 @@ class AdminStats {
 
 final adminStatsProvider =
     StateNotifierProvider<AdminStatsNotifier, AsyncValue<AdminStats>>((ref) {
+  ref.watch(sessionUtilisateurProvider); // recharger au changement de compte
   return AdminStatsNotifier(
     ref.read(apiClientProvider),
     ref.read(cacheManagerProvider),

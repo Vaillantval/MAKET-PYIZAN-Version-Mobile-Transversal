@@ -2,9 +2,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/api/api_client.dart';
 import '../../../core/api/api_endpoints.dart';
 import '../../../models/commande.dart';
+import '../../../providers/auth_provider.dart';
 
 final commandesProvider =
     StateNotifierProvider<CommandeNotifier, AsyncValue<List<Commande>>>((ref) {
+  ref.watch(sessionUtilisateurProvider); // recharger au changement de compte
   return CommandeNotifier(ref.read(apiClientProvider));
 });
 
@@ -70,6 +72,7 @@ class CommandeNotifier
 // Détail d'une commande
 final commandeDetailProvider =
     FutureProvider.family<Commande?, String>((ref, numero) async {
+  ref.watch(sessionUtilisateurProvider); // recharger au changement de compte
   final api = ref.read(apiClientProvider);
   try {
     final res  = await api.get(AppEndpoints.maCommande(numero));

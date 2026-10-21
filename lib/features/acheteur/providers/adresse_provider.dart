@@ -2,9 +2,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/api/api_client.dart';
 import '../../../core/api/api_endpoints.dart';
 import '../../../models/adresse.dart';
+import '../../../providers/auth_provider.dart';
 
 final adressesProvider =
     StateNotifierProvider<AdresseNotifier, AsyncValue<List<Adresse>>>((ref) {
+  ref.watch(sessionUtilisateurProvider); // recharger au changement de compte
   return AdresseNotifier(ref.read(apiClientProvider));
 });
 

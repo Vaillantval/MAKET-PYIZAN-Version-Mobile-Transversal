@@ -14,13 +14,17 @@ class _Ecran {
   final String chemin;
   final Map<String, dynamic> Function() utilisateur;
   final int? entreprise;
-  const _Ecran(this.nom, this.chemin, this.utilisateur, {this.entreprise});
+  final bool visiteur;
+  const _Ecran(this.nom, this.chemin, this.utilisateur,
+      {this.entreprise, this.visiteur = false});
 }
 
 final _ecrans = [
   _Ecran('connexion',        '/login',                  () => utilisateurAcheteur),
   _Ecran('inscription',      '/register',               () => utilisateurAcheteur),
   _Ecran('mdp_oublie',       '/mot-de-passe-oublie',    () => utilisateurAcheteur),
+  _Ecran('visiteur_accueil', '/acheteur/accueil',       () => utilisateurAcheteur, visiteur: true),
+  _Ecran('visiteur_produit', '/acheteur/produit/produit-1', () => utilisateurAcheteur, visiteur: true),
   _Ecran('accueil',          '/acheteur/accueil',       () => utilisateurMembre),
   _Ecran('catalogue',        '/acheteur/catalogue',     () => utilisateurMembre),
   _Ecran('produit',          '/acheteur/produit/produit-1', () => utilisateurMembre),
@@ -61,20 +65,20 @@ void main() {
   for (final e in _ecrans) {
     testWidgets('${e.nom} (390×844)', (tester) async {
       await monterApp(tester, chemin: e.chemin, utilisateur: e.utilisateur(),
-          entrepriseActive: e.entreprise);
+          entrepriseActive: e.entreprise, visiteur: e.visiteur);
       await capture(tester, e.nom);
     });
 
     testWidgets('${e.nom} (petit écran 320×640)', (tester) async {
       await monterApp(tester, chemin: e.chemin, utilisateur: e.utilisateur(),
-          entrepriseActive: e.entreprise, taille: petitTelephone);
+          entrepriseActive: e.entreprise, visiteur: e.visiteur, taille: petitTelephone);
     });
 
     // Capture pleine hauteur pour la revue visuelle (--update-goldens)
     if (autoUpdateGoldenFiles) {
       testWidgets('${e.nom} (long)', (tester) async {
         await monterApp(tester, chemin: e.chemin, utilisateur: e.utilisateur(),
-            entrepriseActive: e.entreprise, taille: const Size(390, 1900));
+            entrepriseActive: e.entreprise, visiteur: e.visiteur, taille: const Size(390, 1900));
         await capture(tester, '${e.nom}_long');
       });
     }
