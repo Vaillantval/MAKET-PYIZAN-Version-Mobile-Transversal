@@ -40,16 +40,13 @@ class _BonsCadeauxScreenState
     final isOnline = ref.watch(isOnlineProvider);
 
     return Scaffold(
-      backgroundColor: AppColors.grisClair,
       appBar: AppBar(
         title: const Text('Bons cadeaux'),
         bottom: TabBar(
           controller: _tabs,
-          labelColor: Colors.white,
-          indicatorColor: AppColors.jaune,
           tabs: const [
-            Tab(text: '🎁 Mes bons'),
-            Tab(text: '📥 Bons reçus'),
+            Tab(text: 'Mes bons'),
+            Tab(text: 'Bons reçus'),
           ],
         ),
       ),
@@ -60,16 +57,18 @@ class _BonsCadeauxScreenState
                 FloatingActionButton.extended(
                   heroTag: 'encaisser',
                   onPressed: () => _dialogEncaisser(context),
-                  backgroundColor: AppColors.vertVif,
-                  icon: const Icon(Icons.qr_code_scanner),
+                  backgroundColor: AppColors.blanc,
+                  foregroundColor: AppColors.noir,
+                  shape: const StadiumBorder(
+                      side: BorderSide(color: AppColors.grisBord)),
+                  icon: const Icon(Icons.qr_code_scanner_rounded),
                   label: const Text('Encaisser un bon'),
                 ),
                 const SizedBox(height: 10),
                 FloatingActionButton.extended(
                   heroTag: 'offrir',
                   onPressed: () => _dialogOffrir(context),
-                  backgroundColor: AppColors.violet,
-                  icon: const Icon(Icons.card_giftcard),
+                  icon: const Icon(Icons.card_giftcard_rounded),
                   label: const Text('Offrir un bon'),
                 ),
               ],
@@ -109,8 +108,6 @@ class _BonsCadeauxScreenState
             child: const Text('Annuler'),
           ),
           ElevatedButton(
-            style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.vertVif),
             onPressed: () async {
               final code = codeCtrl.text.trim();
               if (code.isEmpty) return;
@@ -121,8 +118,8 @@ class _BonsCadeauxScreenState
               if (!context.mounted) return;
               ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                 content: Text(ok
-                    ? '✅ Bon encaissé — solde mis à jour !'
-                    : '❌ Code invalide ou déjà utilisé'),
+                    ? 'Bon encaissé — solde mis à jour !'
+                    : 'Code invalide ou déjà utilisé'),
                 backgroundColor: ok ? AppColors.vertVif : AppColors.rouge,
               ));
               if (ok) {
@@ -177,8 +174,6 @@ class _BonsCadeauxScreenState
               child: const Text('Annuler'),
             ),
             ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.violet),
               onPressed: loading
                   ? null
                   : () async {
@@ -200,8 +195,8 @@ class _BonsCadeauxScreenState
                       if (!mounted) return;
                       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                         content: Text(ok
-                            ? '✅ Bon cadeau créé et envoyé !'
-                            : '❌ Erreur lors de la création du bon'),
+                            ? 'Bon cadeau créé et envoyé !'
+                            : 'Erreur lors de la création du bon'),
                         backgroundColor:
                             ok ? AppColors.vertVif : AppColors.rouge,
                       ));
@@ -215,7 +210,7 @@ class _BonsCadeauxScreenState
                       width: 18,
                       child: CircularProgressIndicator(
                           strokeWidth: 2, color: Colors.white))
-                  : const Text('🎁 Offrir'),
+                  : const Text('Offrir'),
             ),
           ],
         ),
@@ -387,7 +382,7 @@ class _BonTileState extends State<_BonTile> {
                 style: const TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.w800,
-                  color: AppColors.vertFonce,
+                  color: AppColors.noir,
                 ),
               ),
               Container(

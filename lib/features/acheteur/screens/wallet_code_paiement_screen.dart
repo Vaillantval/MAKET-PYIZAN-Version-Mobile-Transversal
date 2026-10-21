@@ -88,7 +88,6 @@ class _WalletCodePaiementScreenState
     final isOnline = ref.watch(isOnlineProvider);
 
     return Scaffold(
-      backgroundColor: AppColors.grisClair,
       appBar: AppBar(title: const Text('Payer au comptoir')),
       body: !isOnline
           ? _EtatHorsLigne(onRetry: _genererCode)
@@ -141,19 +140,8 @@ class _ContenuCode extends StatelessWidget {
           width: double.infinity,
           padding: const EdgeInsets.symmetric(vertical: 32),
           decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              colors: [AppColors.vertFonce, AppColors.vertDegrade],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-            borderRadius: BorderRadius.circular(20),
-            boxShadow: [
-              BoxShadow(
-                color: AppColors.vertFonce.withValues(alpha: 0.35),
-                blurRadius: 16,
-                offset: const Offset(0, 6),
-              ),
-            ],
+            color: AppColors.noir,
+            borderRadius: BorderRadius.circular(24),
           ),
           child: Opacity(
             opacity: expire ? 0.35 : 1,
@@ -193,7 +181,7 @@ class _ContenuCode extends StatelessWidget {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(Icons.account_balance_wallet, size: 18, color: AppColors.vertFonce),
+              const Icon(Icons.account_balance_wallet, size: 18, color: AppColors.noir),
               const SizedBox(width: 8),
               Text(
                 'Solde : ${FormatUtils.htg(code.solde)}',
@@ -211,7 +199,7 @@ class _ContenuCode extends StatelessWidget {
             backgroundColor: expire ? AppColors.vertFonce : Colors.white,
             foregroundColor: expire ? Colors.white : AppColors.vertFonce,
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
-            side: const BorderSide(color: AppColors.vertFonce),
+            side: const BorderSide(color: AppColors.noir),
           ),
         ),
       ],
@@ -236,7 +224,7 @@ class _EtatHorsLigne extends StatelessWidget {
           const SizedBox(height: 20),
           const Text(
             'Génération du code indisponible hors ligne',
-            style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: AppColors.vertFonce),
+            style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: AppColors.noir),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 10),
@@ -250,7 +238,7 @@ class _EtatHorsLigne extends StatelessWidget {
             onPressed: onRetry,
             icon: const Icon(Icons.refresh),
             label: const Text('Réessayer'),
-            style: ElevatedButton.styleFrom(backgroundColor: AppColors.vertFonce),
+            
           ),
         ],
       ),
@@ -273,7 +261,7 @@ class _EtatErreur extends StatelessWidget {
       const SizedBox(height: 20),
       ElevatedButton(
         onPressed: onRetry,
-        style: ElevatedButton.styleFrom(backgroundColor: AppColors.vertFonce),
+        
         child: const Text('Réessayer'),
       ),
     ],

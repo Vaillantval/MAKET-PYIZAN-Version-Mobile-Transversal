@@ -78,7 +78,8 @@ class _PosVenteScreenState extends ConsumerState<PosVenteScreen> {
                     child: ChoiceChip(
                       label: Text(c),
                       selected: _categorieChoisie == c,
-                      selectedColor: AppColors.vertVif,
+                      selectedColor: AppColors.noir,
+                      showCheckmark: false,
                       labelStyle: TextStyle(
                         color: _categorieChoisie == c ? Colors.white : AppColors.noir,
                         fontWeight: FontWeight.w600,
@@ -114,9 +115,7 @@ class _PosVenteScreenState extends ConsumerState<PosVenteScreen> {
       floatingActionButton: panier.isEmpty
           ? null
           : FloatingActionButton.extended(
-              backgroundColor: AppColors.vertFonce,
-              foregroundColor: Colors.white,
-              icon: const Icon(Icons.shopping_cart),
+              icon: const Icon(Icons.shopping_bag_outlined),
               label: Text(
                 '${panier.length} — ${FormatUtils.htg(ref.read(posPanierProvider.notifier).total)}',
                 style: const TextStyle(fontWeight: FontWeight.w700),
@@ -177,21 +176,21 @@ class _ProduitTile extends ConsumerWidget {
                           width:  double.infinity,
                           fit:    BoxFit.cover,
                           placeholder: (_, __) => Shimmer.fromColors(
-                            baseColor:      Colors.grey[300]!,
-                            highlightColor: Colors.grey[100]!,
+                            baseColor:      AppColors.surface2,
+                            highlightColor: AppColors.grisClair,
                             child: Container(height: 120, color: Colors.white),
                           ),
                           errorWidget: (_, __, ___) => Container(
                             height: 120,
-                            color: AppColors.vertMenthe,
-                            child: const Center(child: Text('🌿', style: TextStyle(fontSize: 32))),
+                            color: AppColors.surface2,
+                            child: const Center(child: Icon(Icons.image_outlined, size: 30, color: AppColors.grisLeger)),
                           ),
                         )
                       : Container(
                           height: 120,
                           width: double.infinity,
-                          color: AppColors.vertMenthe,
-                          child: const Center(child: Text('🌿', style: TextStyle(fontSize: 32))),
+                          color: AppColors.surface2,
+                          child: const Center(child: Icon(Icons.image_outlined, size: 30, color: AppColors.grisLeger)),
                         ),
                 ),
                 Positioned(
@@ -342,7 +341,7 @@ class _AjoutPanierDialogState extends ConsumerState<_AjoutPanierDialog> {
           child: const Text('Annuler'),
         ),
         ElevatedButton(
-          style: ElevatedButton.styleFrom(backgroundColor: AppColors.vertFonce),
+          
           onPressed: () {
             ref.read(posPanierProvider.notifier).ajouter(
               produitId: p.id,
@@ -446,9 +445,7 @@ class _PanierSheet extends ConsumerWidget {
             ElevatedButton(
               onPressed: items.isEmpty ? null : () => _encaisser(context, ref),
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.vertFonce,
                 minimumSize: const Size(double.infinity, 54),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               ),
               child: const Text('Encaisser', style: TextStyle(fontSize: 16)),
             ),

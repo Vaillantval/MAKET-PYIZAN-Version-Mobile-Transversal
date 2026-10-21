@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../shared/ui/ui.dart';
 import '../providers/mes_produits_provider.dart';
 import '../providers/unites_mesure_provider.dart';
 
@@ -93,22 +94,12 @@ class _ProduitFormScreenState extends ConsumerState<ProduitFormScreen> {
 
     if (!mounted) return;
     if (success) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(widget.slug == null
-              ? '✅ Produit créé avec succès !'
-              : '✅ Produit modifié !'),
-          backgroundColor: AppColors.vertVif,
-        ),
-      );
+      afficherMessage(context,
+          widget.slug == null ? 'Produit créé' : 'Produit modifié');
       context.go('/producteur/catalogue');
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('❌ Erreur lors de la sauvegarde.'),
-          backgroundColor: AppColors.rouge,
-        ),
-      );
+      afficherMessage(context, "Le produit n'a pas pu être enregistré",
+          succes: false);
     }
   }
 
@@ -137,15 +128,13 @@ class _ProduitFormScreenState extends ConsumerState<ProduitFormScreen> {
                   height:   180,
                   width:    double.infinity,
                   decoration: BoxDecoration(
-                    color:        AppColors.vertMenthe,
-                    borderRadius: BorderRadius.circular(12),
-                    border:       Border.all(
-                      color: AppColors.vertVif.withValues(alpha: 0.3),
-                    ),
+                    color:        AppColors.blanc,
+                    borderRadius: BorderRadius.circular(18),
+                    border:       Border.all(color: AppColors.grisBord),
                   ),
                   child: _imageFile != null
                       ? ClipRRect(
-                          borderRadius: BorderRadius.circular(12),
+                          borderRadius: BorderRadius.circular(18),
                           child: Image.file(
                             _imageFile!,
                             fit: BoxFit.cover,
@@ -154,15 +143,15 @@ class _ProduitFormScreenState extends ConsumerState<ProduitFormScreen> {
                       : const Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(Icons.add_photo_alternate,
-                              size:  48,
-                              color: AppColors.vertVif,
+                            Icon(Icons.add_photo_alternate_outlined,
+                              size:  40,
+                              color: AppColors.grisTexte,
                             ),
                             SizedBox(height: 8),
                             Text(
                               'Ajouter une photo',
                               style: TextStyle(
-                                color:      AppColors.vertVif,
+                                color:      AppColors.noir,
                                 fontWeight: FontWeight.w600,
                               ),
                             ),
@@ -310,7 +299,6 @@ class _ProduitFormScreenState extends ConsumerState<ProduitFormScreen> {
                 ),
                 onPressed: _isLoading ? null : _sauvegarder,
                 style:     ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.vertFonce,
                   minimumSize:     const Size(double.infinity, 52),
                 ),
               ),

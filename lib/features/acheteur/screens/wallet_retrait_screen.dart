@@ -83,8 +83,8 @@ class _WalletRetraitScreenState
     if (!mounted) return;
     _showSnack(
       ok
-          ? '✅ Demande de retrait soumise avec succès'
-          : '❌ Erreur lors de la demande de retrait',
+          ? 'Demande de retrait soumise avec succès'
+          : 'Erreur lors de la demande de retrait',
       isError: !ok,
     );
     if (ok) {
@@ -107,7 +107,6 @@ class _WalletRetraitScreenState
     final retraitsState = ref.watch(walletRetraitsProvider);
 
     return Scaffold(
-      backgroundColor: AppColors.grisClair,
       appBar: AppBar(title: const Text('Retrait de fonds')),
       body: isOnline
           ? SingleChildScrollView(
@@ -129,7 +128,7 @@ class _WalletRetraitScreenState
                         child: Row(
                           children: [
                             const Icon(Icons.account_balance_wallet,
-                                color: AppColors.vertFonce),
+                                color: AppColors.noir),
                             const SizedBox(width: 10),
                             Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -137,21 +136,21 @@ class _WalletRetraitScreenState
                                 const Text('Solde disponible',
                                     style: TextStyle(
                                         fontSize: 12,
-                                        color: AppColors.vertFonce)),
+                                        color: AppColors.noir)),
                                 wallet.when(
                                   loading: () => const SizedBox(
                                       height: 16,
                                       width: 16,
                                       child: CircularProgressIndicator(
                                           strokeWidth: 2,
-                                          color: AppColors.vertFonce)),
+                                          color: AppColors.noir)),
                                   error: (_, __) => const Text('—'),
                                   data: (w) => Text(
                                     FormatUtils.htg(w.solde),
                                     style: const TextStyle(
                                       fontSize: 18,
                                       fontWeight: FontWeight.w800,
-                                      color: AppColors.vertFonce,
+                                      color: AppColors.noir,
                                     ),
                                   ),
                                 ),
@@ -166,7 +165,7 @@ class _WalletRetraitScreenState
 
                   // ── Formulaire retrait ─────────────────────────
                   _Section(
-                    titre: '💸 Montant à retirer',
+                    titre: 'Montant à retirer',
                     child: TextField(
                       controller: _montantCtrl,
                       keyboardType: const TextInputType.numberWithOptions(
@@ -181,7 +180,7 @@ class _WalletRetraitScreenState
                   const SizedBox(height: 12),
 
                   _Section(
-                    titre: '📱 Canal de réception',
+                    titre: 'Canal de réception',
                     child: RadioGroup<String>(
                       groupValue: _canal,
                       onChanged: (v) => setState(() => _canal = v!),
@@ -210,7 +209,7 @@ class _WalletRetraitScreenState
                   const SizedBox(height: 12),
 
                   _Section(
-                    titre: '📞 Numéro de téléphone',
+                    titre: 'Numéro de téléphone',
                     child: TextField(
                       controller: _telephoneCtrl,
                       keyboardType: TextInputType.phone,
@@ -225,10 +224,7 @@ class _WalletRetraitScreenState
                   ElevatedButton(
                     onPressed: _loading ? null : _demanderRetrait,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.orange,
                       minimumSize: const Size(double.infinity, 54),
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12)),
                     ),
                     child: _loading
                         ? const SizedBox(
@@ -236,7 +232,7 @@ class _WalletRetraitScreenState
                             width: 22,
                             child: CircularProgressIndicator(
                                 color: Colors.white, strokeWidth: 2))
-                        : const Text('💸 Demander un retrait',
+                        : const Text('Demander un retrait',
                             style: TextStyle(fontSize: 16)),
                   ),
 
@@ -247,7 +243,7 @@ class _WalletRetraitScreenState
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w700,
-                      color: AppColors.vertFonce,
+                      color: AppColors.noir,
                     ),
                   ),
                   const SizedBox(height: 12),
@@ -388,7 +384,7 @@ class _Section extends StatelessWidget {
           style: const TextStyle(
             fontSize: 13,
             fontWeight: FontWeight.w700,
-            color: AppColors.vertFonce,
+            color: AppColors.noir,
           ),
         ),
         const SizedBox(height: 10),

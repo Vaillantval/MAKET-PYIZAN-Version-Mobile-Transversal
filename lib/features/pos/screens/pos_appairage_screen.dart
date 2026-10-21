@@ -92,9 +92,7 @@ class PosAppairageScreen extends ConsumerWidget {
             ElevatedButton(
               onPressed: deviceUid == null ? null : () => _continuer(context, ref),
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.vertFonce,
                 minimumSize: const Size(double.infinity, 54),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               ),
               child: const Text('Continuer', style: TextStyle(fontSize: 16)),
             ),

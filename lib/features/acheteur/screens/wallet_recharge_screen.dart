@@ -108,11 +108,11 @@ class _WalletRechargeScreenState
               if (mounted) {
                 _showSnack(
                   confirme
-                      ? '✅ Recharge effectuée avec succès !'
+                      ? 'Recharge effectuée avec succès !'
                       : success
-                          ? '⏳ Paiement reçu — confirmation en cours, '
+                          ? 'Paiement reçu — confirmation en cours, '
                             'vérifiez votre solde dans quelques instants.'
-                          : '❌ Recharge annulée ou échouée.',
+                          : 'Recharge annulée ou échouée.',
                   isError: !success,
                 );
                 if (success) {
@@ -163,8 +163,8 @@ class _WalletRechargeScreenState
     if (!mounted) return;
     _showSnack(
       ok
-          ? '✅ Demande soumise — en attente de validation'
-          : '❌ Erreur lors de la soumission',
+          ? 'Demande soumise — en attente de validation'
+          : 'Erreur lors de la soumission',
       isError: !ok,
     );
     if (ok) {
@@ -190,11 +190,9 @@ class _WalletRechargeScreenState
         title: const Text('Recharger le portefeuille'),
         bottom: TabBar(
           controller: _tabs,
-          labelColor: Colors.white,
-          indicatorColor: AppColors.jaune,
           tabs: const [
-            Tab(text: '💳 En ligne'),
-            Tab(text: '🏦 Hors ligne'),
+            Tab(text: 'En ligne'),
+            Tab(text: 'Hors ligne'),
           ],
         ),
       ),
@@ -255,7 +253,7 @@ class _OnglLigne extends StatelessWidget {
           style: TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w600,
-            color: AppColors.vertFonce,
+            color: AppColors.noir,
           ),
         ),
         const SizedBox(height: 8),
@@ -279,7 +277,7 @@ class _OnglLigne extends StatelessWidget {
           style: TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w600,
-            color: AppColors.vertFonce,
+            color: AppColors.noir,
           ),
         ),
         const SizedBox(height: 8),
@@ -311,10 +309,7 @@ class _OnglLigne extends StatelessWidget {
         ElevatedButton(
           onPressed: loading ? null : onRecharger,
           style: ElevatedButton.styleFrom(
-            backgroundColor: AppColors.vertFonce,
             minimumSize: const Size(double.infinity, 54),
-            shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12)),
           ),
           child: loading
               ? const SizedBox(
@@ -323,7 +318,7 @@ class _OnglLigne extends StatelessWidget {
                   child: CircularProgressIndicator(
                       color: Colors.white, strokeWidth: 2),
                 )
-              : const Text('💳 Recharger maintenant',
+              : const Text('Recharger maintenant',
                   style: TextStyle(fontSize: 16)),
         ),
       ],
@@ -369,7 +364,7 @@ class _OngletHorsLigne extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Text('Numéros de dépôt',
-                    style: TextStyle(fontWeight: FontWeight.w700, color: AppColors.vertFonce)),
+                    style: TextStyle(fontWeight: FontWeight.w700, color: AppColors.noir)),
                 const SizedBox(height: 8),
                 if (depot?.numeroMoncash != null)
                   Padding(
@@ -403,7 +398,7 @@ class _OngletHorsLigne extends StatelessWidget {
             border: Border.all(color: AppColors.jaune),
           ),
           child: const Text(
-            '📋 Effectuez un virement ou dépôt bancaire, puis soumettez '
+            'Effectuez un virement ou dépôt bancaire, puis soumettez '
             'votre preuve ici. L\'équipe validera sous 24–48h.',
             style: TextStyle(fontSize: 13, height: 1.5),
           ),
@@ -414,7 +409,7 @@ class _OngletHorsLigne extends StatelessWidget {
           style: TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w600,
-            color: AppColors.vertFonce,
+            color: AppColors.noir,
           ),
         ),
         const SizedBox(height: 8),
@@ -438,7 +433,7 @@ class _OngletHorsLigne extends StatelessWidget {
           style: TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w600,
-            color: AppColors.vertFonce,
+            color: AppColors.noir,
           ),
         ),
         const SizedBox(height: 8),
@@ -487,10 +482,7 @@ class _OngletHorsLigne extends StatelessWidget {
         ElevatedButton(
           onPressed: loading ? null : onSoumettre,
           style: ElevatedButton.styleFrom(
-            backgroundColor: AppColors.orange,
             minimumSize: const Size(double.infinity, 54),
-            shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12)),
           ),
           child: loading
               ? const SizedBox(
@@ -499,7 +491,7 @@ class _OngletHorsLigne extends StatelessWidget {
                   child: CircularProgressIndicator(
                       color: Colors.white, strokeWidth: 2),
                 )
-              : const Text('📤 Soumettre la demande',
+              : const Text('Soumettre la demande',
                   style: TextStyle(fontSize: 16)),
         ),
       ],

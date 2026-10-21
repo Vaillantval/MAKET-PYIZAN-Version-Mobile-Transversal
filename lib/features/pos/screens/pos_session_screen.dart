@@ -263,9 +263,8 @@ class _PosSessionScreenState extends ConsumerState<PosSessionScreen> {
                 ElevatedButton(
                   onPressed: (!isOnline || _loading) ? null : (ouverte ? _fermer : _ouvrir),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: ouverte ? AppColors.rouge : AppColors.vertFonce,
+                    backgroundColor: ouverte ? AppColors.rouge : AppColors.noir,
                     minimumSize: const Size(double.infinity, 54),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                   ),
                   child: _loading
                       ? const SizedBox(

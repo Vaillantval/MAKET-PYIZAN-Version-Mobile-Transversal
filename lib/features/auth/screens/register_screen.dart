@@ -146,8 +146,6 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       backgroundColor: AppColors.grisClair,
       appBar: AppBar(
         title: const Text('Inscription'),
-        backgroundColor: AppColors.vertFonce,
-        foregroundColor: AppColors.blanc,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => context.go('/login'),

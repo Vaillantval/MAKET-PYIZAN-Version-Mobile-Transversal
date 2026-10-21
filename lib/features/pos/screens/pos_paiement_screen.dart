@@ -138,7 +138,7 @@ class _PosPaiementScreenState extends ConsumerState<PosPaiementScreen> {
             child: const Text('Annuler'),
           ),
           ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: AppColors.vertFonce),
+            
             onPressed: () {
               Navigator.pop(ctx);
               setState(() {
@@ -820,9 +820,7 @@ class _BoutonConfirmer extends StatelessWidget {
   Widget build(BuildContext context) => ElevatedButton(
     onPressed: (!enabled || loading) ? null : onPressed,
     style: ElevatedButton.styleFrom(
-      backgroundColor: AppColors.vertFonce,
       minimumSize: const Size(double.infinity, 54),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
     ),
     child: loading
         ? const SizedBox(
@@ -1043,9 +1041,7 @@ class _EcranConfirmationState extends ConsumerState<_EcranConfirmation> {
               icon: const Icon(Icons.add_shopping_cart),
               label: const Text('Nouvelle vente'),
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.vertFonce,
                 minimumSize: const Size(double.infinity, 54),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               ),
             ),
             if (imprimanteDisponible) ...[
