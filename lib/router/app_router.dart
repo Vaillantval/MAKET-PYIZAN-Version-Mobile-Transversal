@@ -386,7 +386,11 @@ class _PosShellState extends ConsumerState<PosShell> {
       return PosTerminalBloque(info: terminal);
     }
     return Scaffold(
-      body: Column(
+      // SafeArea ici : les bandeaux du haut passaient sous la barre d'état
+      // d'Android (les écrans, en dessous, n'ajoutent alors plus de marge)
+      body: SafeArea(
+        bottom: false,
+        child: Column(
         children: [
           const OfflineBanner(),
           const PosTerminalBanner(),
@@ -395,6 +399,7 @@ class _PosShellState extends ConsumerState<PosShell> {
             const PosSessionBanner(),
           Expanded(child: widget.child),
         ],
+        ),
       ),
       bottomNavigationBar: _buildBottomNav(context, [
         const _NavItem(icon: Icons.point_of_sale_outlined, iconActif: Icons.point_of_sale_rounded, label: 'Vente', route: '/pos/vente', autres: ['/pos/paiement']),
