@@ -390,7 +390,9 @@ class _PosShellState extends ConsumerState<PosShell> {
         children: [
           const OfflineBanner(),
           const PosTerminalBanner(),
-          const PosSessionBanner(),
+          // Écran Session : l'état y est déjà affiché en grand
+          if (!GoRouterState.of(context).matchedLocation.startsWith('/pos/session'))
+            const PosSessionBanner(),
           Expanded(child: widget.child),
         ],
       ),

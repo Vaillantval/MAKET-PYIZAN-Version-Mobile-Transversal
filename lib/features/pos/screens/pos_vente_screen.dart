@@ -39,6 +39,7 @@ class _PosVenteScreenState extends ConsumerState<PosVenteScreen> {
     final panier  = ref.watch(posPanierProvider);
     final session = ref.watch(posSessionProvider).valueOrNull;
     final ouverte = session != null && session.statut == 'ouverte';
+    final terminal = ref.watch(posTerminalStatusProvider);
 
     return Scaffold(
       body: SafeArea(
@@ -47,9 +48,12 @@ class _PosVenteScreenState extends ConsumerState<PosVenteScreen> {
           children: [
             EnTeteEcran(
               'Vente',
+              // (« Aucune session ouverte » : déjà dans le bandeau cliquable)
               surtitre: ouverte
                   ? 'Session ouverte depuis ${FormatUtils.heure(session.ouverteLe)}'
-                  : 'Aucune session ouverte',
+                  : [terminal.nom, terminal.commune]
+                      .where((v) => (v ?? '').isNotEmpty)
+                      .join(' · '),
               actions: [
                 BoutonRond(Icons.refresh_rounded,
                     tooltip: 'Actualiser le catalogue',
@@ -146,7 +150,7 @@ class _PosVenteScreenState extends ConsumerState<PosVenteScreen> {
                   padding: EdgeInsets.fromLTRB(16, 0, 16, panierNonVide ? 24 : 32),
                   gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
                     maxCrossAxisExtent: 200,
-                    mainAxisExtent: 214,
+                    mainAxisExtent: 232,
                     crossAxisSpacing: 10,
                     mainAxisSpacing: 10,
                   ),
@@ -307,12 +311,14 @@ class _ProduitTile extends ConsumerWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    // Deux lignes : les variantes d'un même produit ne se
+                    // distinguent souvent que par la fin du nom (« — 12 (sachet) »)
                     Text(
                       produit.nom,
-                      maxLines: 1,
+                      maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
-                          fontWeight: FontWeight.w600, fontSize: 13.5),
+                          fontWeight: FontWeight.w600, fontSize: 13, height: 1.2),
                     ),
                     const SizedBox(height: 2),
                     HtgLabel(produit.prixDetail, fontSize: 14.5),

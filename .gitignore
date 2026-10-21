@@ -54,3 +54,6 @@ app.*.map.json
 
 # Config Firebase — retiré du dépôt à la demande, garder en local pour builder
 /android/app/google-services.json
+
+# Captures rendues avec de vraies données de compte (test/live)
+test/live/captures/

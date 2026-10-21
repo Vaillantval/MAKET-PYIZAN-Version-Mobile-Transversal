@@ -87,6 +87,9 @@ Future<ProviderContainer> monterApp(
   String roleEntreprise = 'proprietaire',
   Map<String, Object> prefsEnPlus = const {},
   bool visiteur = false,
+  /// Réponses à servir à la place des données factices (ex. réponses
+  /// réelles enregistrées par test/live/enregistrer_reponses.dart)
+  Map<String, dynamic> Function(String path)? repondre,
 }) async {
   tester.view.physicalSize = taille * 3;
   tester.view.devicePixelRatio = 3;
@@ -122,7 +125,8 @@ Future<ProviderContainer> monterApp(
     localStorageProvider.overrideWithValue(LocalStorage(prefs)),
     secureStorageProvider.overrideWithValue(SecureStorage(prefs)),
     posLocalStorageProvider.overrideWithValue(PosLocalStorage(sessionBox, ventesBox)),
-    apiClientProvider.overrideWithValue(FakeApi((p) => reponseFactice(p, user))),
+    apiClientProvider.overrideWithValue(
+        FakeApi(repondre ?? (p) => reponseFactice(p, user))),
     connectivityProvider.overrideWith((ref) => Stream.value(true)),
   ]);
   addTearDown(container.dispose);
