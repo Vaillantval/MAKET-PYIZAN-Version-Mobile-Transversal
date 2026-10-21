@@ -30,13 +30,21 @@ mixin _$LignePanier {
   double get sousTotal => throw _privateConstructorUsedError;
   @JsonKey(name: 'unite_vente')
   String get uniteVente => throw _privateConstructorUsedError;
+  @JsonKey(name: 'unite_vente_id')
+  int? get uniteVenteId => throw _privateConstructorUsedError;
+  @JsonKey(name: 'unite_vente_label')
+  String get uniteVenteLabel => throw _privateConstructorUsedError;
   @JsonKey(name: 'producteur_id')
   int get producteurId => throw _privateConstructorUsedError;
   @JsonKey(name: 'producteur_nom')
   String get producteurNom => throw _privateConstructorUsedError;
   String? get image => throw _privateConstructorUsedError;
   @JsonKey(name: 'stock_reel')
-  int get stockReel => throw _privateConstructorUsedError;
+  int get stockReel =>
+      throw _privateConstructorUsedError; // Unités de base par unité choisie : contrôle du stock du panier local
+// (visiteur) ; absent des réponses du backend → 1
+  @JsonKey(name: 'facteur_conversion', fromJson: jsonToDouble)
+  double get facteur => throw _privateConstructorUsedError;
 
   /// Serializes this LignePanier to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -62,10 +70,14 @@ abstract class $LignePanierCopyWith<$Res> {
       @JsonKey(name: 'prix_unitaire') String prixUnitaire,
       @JsonKey(name: 'sous_total', fromJson: jsonToDouble) double sousTotal,
       @JsonKey(name: 'unite_vente') String uniteVente,
+      @JsonKey(name: 'unite_vente_id') int? uniteVenteId,
+      @JsonKey(name: 'unite_vente_label') String uniteVenteLabel,
       @JsonKey(name: 'producteur_id') int producteurId,
       @JsonKey(name: 'producteur_nom') String producteurNom,
       String? image,
-      @JsonKey(name: 'stock_reel') int stockReel});
+      @JsonKey(name: 'stock_reel') int stockReel,
+      @JsonKey(name: 'facteur_conversion', fromJson: jsonToDouble)
+      double facteur});
 }
 
 /// @nodoc
@@ -90,10 +102,13 @@ class _$LignePanierCopyWithImpl<$Res, $Val extends LignePanier>
     Object? prixUnitaire = null,
     Object? sousTotal = null,
     Object? uniteVente = null,
+    Object? uniteVenteId = freezed,
+    Object? uniteVenteLabel = null,
     Object? producteurId = null,
     Object? producteurNom = null,
     Object? image = freezed,
     Object? stockReel = null,
+    Object? facteur = null,
   }) {
     return _then(_value.copyWith(
       id: null == id
@@ -124,6 +139,14 @@ class _$LignePanierCopyWithImpl<$Res, $Val extends LignePanier>
           ? _value.uniteVente
           : uniteVente // ignore: cast_nullable_to_non_nullable
               as String,
+      uniteVenteId: freezed == uniteVenteId
+          ? _value.uniteVenteId
+          : uniteVenteId // ignore: cast_nullable_to_non_nullable
+              as int?,
+      uniteVenteLabel: null == uniteVenteLabel
+          ? _value.uniteVenteLabel
+          : uniteVenteLabel // ignore: cast_nullable_to_non_nullable
+              as String,
       producteurId: null == producteurId
           ? _value.producteurId
           : producteurId // ignore: cast_nullable_to_non_nullable
@@ -140,6 +163,10 @@ class _$LignePanierCopyWithImpl<$Res, $Val extends LignePanier>
           ? _value.stockReel
           : stockReel // ignore: cast_nullable_to_non_nullable
               as int,
+      facteur: null == facteur
+          ? _value.facteur
+          : facteur // ignore: cast_nullable_to_non_nullable
+              as double,
     ) as $Val);
   }
 }
@@ -160,10 +187,14 @@ abstract class _$$LignePanierImplCopyWith<$Res>
       @JsonKey(name: 'prix_unitaire') String prixUnitaire,
       @JsonKey(name: 'sous_total', fromJson: jsonToDouble) double sousTotal,
       @JsonKey(name: 'unite_vente') String uniteVente,
+      @JsonKey(name: 'unite_vente_id') int? uniteVenteId,
+      @JsonKey(name: 'unite_vente_label') String uniteVenteLabel,
       @JsonKey(name: 'producteur_id') int producteurId,
       @JsonKey(name: 'producteur_nom') String producteurNom,
       String? image,
-      @JsonKey(name: 'stock_reel') int stockReel});
+      @JsonKey(name: 'stock_reel') int stockReel,
+      @JsonKey(name: 'facteur_conversion', fromJson: jsonToDouble)
+      double facteur});
 }
 
 /// @nodoc
@@ -186,10 +217,13 @@ class __$$LignePanierImplCopyWithImpl<$Res>
     Object? prixUnitaire = null,
     Object? sousTotal = null,
     Object? uniteVente = null,
+    Object? uniteVenteId = freezed,
+    Object? uniteVenteLabel = null,
     Object? producteurId = null,
     Object? producteurNom = null,
     Object? image = freezed,
     Object? stockReel = null,
+    Object? facteur = null,
   }) {
     return _then(_$LignePanierImpl(
       id: null == id
@@ -220,6 +254,14 @@ class __$$LignePanierImplCopyWithImpl<$Res>
           ? _value.uniteVente
           : uniteVente // ignore: cast_nullable_to_non_nullable
               as String,
+      uniteVenteId: freezed == uniteVenteId
+          ? _value.uniteVenteId
+          : uniteVenteId // ignore: cast_nullable_to_non_nullable
+              as int?,
+      uniteVenteLabel: null == uniteVenteLabel
+          ? _value.uniteVenteLabel
+          : uniteVenteLabel // ignore: cast_nullable_to_non_nullable
+              as String,
       producteurId: null == producteurId
           ? _value.producteurId
           : producteurId // ignore: cast_nullable_to_non_nullable
@@ -236,6 +278,10 @@ class __$$LignePanierImplCopyWithImpl<$Res>
           ? _value.stockReel
           : stockReel // ignore: cast_nullable_to_non_nullable
               as int,
+      facteur: null == facteur
+          ? _value.facteur
+          : facteur // ignore: cast_nullable_to_non_nullable
+              as double,
     ));
   }
 }
@@ -252,10 +298,14 @@ class _$LignePanierImpl implements _LignePanier {
       @JsonKey(name: 'sous_total', fromJson: jsonToDouble)
       required this.sousTotal,
       @JsonKey(name: 'unite_vente') required this.uniteVente,
+      @JsonKey(name: 'unite_vente_id') this.uniteVenteId,
+      @JsonKey(name: 'unite_vente_label') this.uniteVenteLabel = '',
       @JsonKey(name: 'producteur_id') required this.producteurId,
       @JsonKey(name: 'producteur_nom') required this.producteurNom,
       this.image,
-      @JsonKey(name: 'stock_reel') this.stockReel = 0});
+      @JsonKey(name: 'stock_reel') this.stockReel = 0,
+      @JsonKey(name: 'facteur_conversion', fromJson: jsonToDouble)
+      this.facteur = 1.0});
 
   factory _$LignePanierImpl.fromJson(Map<String, dynamic> json) =>
       _$$LignePanierImplFromJson(json);
@@ -278,6 +328,12 @@ class _$LignePanierImpl implements _LignePanier {
   @JsonKey(name: 'unite_vente')
   final String uniteVente;
   @override
+  @JsonKey(name: 'unite_vente_id')
+  final int? uniteVenteId;
+  @override
+  @JsonKey(name: 'unite_vente_label')
+  final String uniteVenteLabel;
+  @override
   @JsonKey(name: 'producteur_id')
   final int producteurId;
   @override
@@ -288,10 +344,15 @@ class _$LignePanierImpl implements _LignePanier {
   @override
   @JsonKey(name: 'stock_reel')
   final int stockReel;
+// Unités de base par unité choisie : contrôle du stock du panier local
+// (visiteur) ; absent des réponses du backend → 1
+  @override
+  @JsonKey(name: 'facteur_conversion', fromJson: jsonToDouble)
+  final double facteur;
 
   @override
   String toString() {
-    return 'LignePanier(id: $id, slug: $slug, nom: $nom, quantite: $quantite, prixUnitaire: $prixUnitaire, sousTotal: $sousTotal, uniteVente: $uniteVente, producteurId: $producteurId, producteurNom: $producteurNom, image: $image, stockReel: $stockReel)';
+    return 'LignePanier(id: $id, slug: $slug, nom: $nom, quantite: $quantite, prixUnitaire: $prixUnitaire, sousTotal: $sousTotal, uniteVente: $uniteVente, uniteVenteId: $uniteVenteId, uniteVenteLabel: $uniteVenteLabel, producteurId: $producteurId, producteurNom: $producteurNom, image: $image, stockReel: $stockReel, facteur: $facteur)';
   }
 
   @override
@@ -310,13 +371,18 @@ class _$LignePanierImpl implements _LignePanier {
                 other.sousTotal == sousTotal) &&
             (identical(other.uniteVente, uniteVente) ||
                 other.uniteVente == uniteVente) &&
+            (identical(other.uniteVenteId, uniteVenteId) ||
+                other.uniteVenteId == uniteVenteId) &&
+            (identical(other.uniteVenteLabel, uniteVenteLabel) ||
+                other.uniteVenteLabel == uniteVenteLabel) &&
             (identical(other.producteurId, producteurId) ||
                 other.producteurId == producteurId) &&
             (identical(other.producteurNom, producteurNom) ||
                 other.producteurNom == producteurNom) &&
             (identical(other.image, image) || other.image == image) &&
             (identical(other.stockReel, stockReel) ||
-                other.stockReel == stockReel));
+                other.stockReel == stockReel) &&
+            (identical(other.facteur, facteur) || other.facteur == facteur));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -330,10 +396,13 @@ class _$LignePanierImpl implements _LignePanier {
       prixUnitaire,
       sousTotal,
       uniteVente,
+      uniteVenteId,
+      uniteVenteLabel,
       producteurId,
       producteurNom,
       image,
-      stockReel);
+      stockReel,
+      facteur);
 
   /// Create a copy of LignePanier
   /// with the given fields replaced by the non-null parameter values.
@@ -361,10 +430,14 @@ abstract class _LignePanier implements LignePanier {
       @JsonKey(name: 'sous_total', fromJson: jsonToDouble)
       required final double sousTotal,
       @JsonKey(name: 'unite_vente') required final String uniteVente,
+      @JsonKey(name: 'unite_vente_id') final int? uniteVenteId,
+      @JsonKey(name: 'unite_vente_label') final String uniteVenteLabel,
       @JsonKey(name: 'producteur_id') required final int producteurId,
       @JsonKey(name: 'producteur_nom') required final String producteurNom,
       final String? image,
-      @JsonKey(name: 'stock_reel') final int stockReel}) = _$LignePanierImpl;
+      @JsonKey(name: 'stock_reel') final int stockReel,
+      @JsonKey(name: 'facteur_conversion', fromJson: jsonToDouble)
+      final double facteur}) = _$LignePanierImpl;
 
   factory _LignePanier.fromJson(Map<String, dynamic> json) =
       _$LignePanierImpl.fromJson;
@@ -387,6 +460,12 @@ abstract class _LignePanier implements LignePanier {
   @JsonKey(name: 'unite_vente')
   String get uniteVente;
   @override
+  @JsonKey(name: 'unite_vente_id')
+  int? get uniteVenteId;
+  @override
+  @JsonKey(name: 'unite_vente_label')
+  String get uniteVenteLabel;
+  @override
   @JsonKey(name: 'producteur_id')
   int get producteurId;
   @override
@@ -396,7 +475,11 @@ abstract class _LignePanier implements LignePanier {
   String? get image;
   @override
   @JsonKey(name: 'stock_reel')
-  int get stockReel;
+  int get stockReel; // Unités de base par unité choisie : contrôle du stock du panier local
+// (visiteur) ; absent des réponses du backend → 1
+  @override
+  @JsonKey(name: 'facteur_conversion', fromJson: jsonToDouble)
+  double get facteur;
 
   /// Create a copy of LignePanier
   /// with the given fields replaced by the non-null parameter values.

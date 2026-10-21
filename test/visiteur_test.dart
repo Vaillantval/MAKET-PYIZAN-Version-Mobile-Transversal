@@ -17,7 +17,7 @@ void main() {
   testWidgets("au premier lancement, l'accueil s'affiche sans connexion", (tester) async {
     final c = await monterApp(tester, chemin: '/splash', visiteur: true);
     expect(_lieu(c), '/acheteur/accueil');
-    expect(find.text('Se connecter'), findsOneWidget);
+    expect(find.text('Connexion'), findsOneWidget);
   });
 
   testWidgets('la boutique et les fiches produits sont publiques', (tester) async {
@@ -27,14 +27,20 @@ void main() {
     expect(_lieu(c), '/acheteur/produit/produit-1');
   });
 
-  testWidgets('le panier demande de se connecter et retient où revenir', (tester) async {
-    final c = await monterApp(tester, chemin: '/acheteur/panier', visiteur: true);
-    expect(_lieu(c), '/login?from=%2Facheteur%2Fpanier');
+  testWidgets('commander demande de se connecter et retient où revenir', (tester) async {
+    final c = await monterApp(tester, chemin: '/acheteur/checkout', visiteur: true);
+    expect(_lieu(c), '/login?from=%2Facheteur%2Fcheckout');
   });
 
-  testWidgets('ajouter au panier en visiteur propose la connexion', (tester) async {
-    await monterApp(tester, chemin: '/acheteur/produit/produit-1', visiteur: true);
+  testWidgets('le visiteur remplit son panier sans compte', (tester) async {
+    final c = await monterApp(tester, chemin: '/acheteur/produit/produit-1', visiteur: true);
     await tester.tap(find.text('Ajouter au panier'));
+    await laisserCharger(tester);
+    expect(_lieu(c), '/acheteur/panier');
+    expect(find.text('Tomates fraîches'), findsOneWidget);
+
+    // Passer la commande → proposer la connexion
+    await tester.tap(find.text('Passer la commande'));
     await laisserCharger(tester);
     expect(find.text('Connectez-vous'), findsOneWidget);
     expect(find.widgetWithText(OutlinedButton, 'Créer un compte'), findsOneWidget);

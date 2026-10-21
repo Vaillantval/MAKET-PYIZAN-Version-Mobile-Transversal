@@ -15,10 +15,15 @@ _$LignePanierImpl _$$LignePanierImplFromJson(Map<String, dynamic> json) =>
       prixUnitaire: json['prix_unitaire'] as String,
       sousTotal: jsonToDouble(json['sous_total']),
       uniteVente: json['unite_vente'] as String,
+      uniteVenteId: (json['unite_vente_id'] as num?)?.toInt(),
+      uniteVenteLabel: json['unite_vente_label'] as String? ?? '',
       producteurId: (json['producteur_id'] as num).toInt(),
       producteurNom: json['producteur_nom'] as String,
       image: json['image'] as String?,
       stockReel: (json['stock_reel'] as num?)?.toInt() ?? 0,
+      facteur: json['facteur_conversion'] == null
+          ? 1.0
+          : jsonToDouble(json['facteur_conversion']),
     );
 
 Map<String, dynamic> _$$LignePanierImplToJson(_$LignePanierImpl instance) =>
@@ -30,10 +35,13 @@ Map<String, dynamic> _$$LignePanierImplToJson(_$LignePanierImpl instance) =>
       'prix_unitaire': instance.prixUnitaire,
       'sous_total': instance.sousTotal,
       'unite_vente': instance.uniteVente,
+      'unite_vente_id': instance.uniteVenteId,
+      'unite_vente_label': instance.uniteVenteLabel,
       'producteur_id': instance.producteurId,
       'producteur_nom': instance.producteurNom,
       'image': instance.image,
       'stock_reel': instance.stockReel,
+      'facteur_conversion': instance.facteur,
     };
 
 _$PanierImpl _$$PanierImplFromJson(Map<String, dynamic> json) => _$PanierImpl(

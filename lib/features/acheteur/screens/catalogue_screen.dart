@@ -6,7 +6,6 @@ import '../../../core/constants/app_colors.dart';
 import '../providers/catalogue_provider.dart';
 import '../providers/panier_provider.dart';
 import '../widgets/produit_card.dart';
-import '../../../shared/widgets/connexion_requise.dart';
 import '../../../core/offline/offline_banner.dart';
 import '../../../shared/widgets/loading_widget.dart';
 import '../../../shared/widgets/empty_state.dart';
@@ -180,10 +179,9 @@ class _CatalogueScreenState extends ConsumerState<CatalogueScreen> {
                               onTap: () =>
                                   context.go('/acheteur/produit/${p.slug}'),
                               onAjouter: () async {
-                                if (!exigerConnexion(ctx, ref)) return;
                                 final err = await ref
                                     .read(panierProvider.notifier)
-                                    .ajouter(p.slug, 1);
+                                    .ajouter(p, 1);
                                 if (ctx.mounted) {
                                   afficherMessage(
                                       ctx, err ?? '${p.nom} ajouté au panier',

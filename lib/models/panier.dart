@@ -15,10 +15,15 @@ class LignePanier with _$LignePanier {
     @JsonKey(name: 'prix_unitaire')  required String prixUnitaire,
     @JsonKey(name: 'sous_total', fromJson: jsonToDouble) required double sousTotal,
     @JsonKey(name: 'unite_vente')    required String uniteVente,
+    @JsonKey(name: 'unite_vente_id')    int? uniteVenteId,
+    @JsonKey(name: 'unite_vente_label') @Default('') String uniteVenteLabel,
     @JsonKey(name: 'producteur_id')  required int producteurId,
     @JsonKey(name: 'producteur_nom') required String producteurNom,
     String? image,
     @JsonKey(name: 'stock_reel')     @Default(0) int stockReel,
+    // Unités de base par unité choisie : contrôle du stock du panier local
+    // (visiteur) ; absent des réponses du backend → 1
+    @JsonKey(name: 'facteur_conversion', fromJson: jsonToDouble) @Default(1.0) double facteur,
   }) = _LignePanier;
 
   factory LignePanier.fromJson(Map<String, dynamic> json) =>

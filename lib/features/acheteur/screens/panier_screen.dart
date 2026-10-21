@@ -9,6 +9,7 @@ import '../../../shared/ui/ui.dart';
 import '../providers/panier_provider.dart';
 import '../../../shared/widgets/empty_state.dart';
 import '../../../shared/widgets/loading_widget.dart';
+import '../../../shared/widgets/connexion_requise.dart';
 
 class PanierScreen extends ConsumerWidget {
   const PanierScreen({super.key});
@@ -111,7 +112,8 @@ class PanierScreen extends ConsumerWidget {
                                         ),
                                         const SizedBox(height: 4),
                                         Text(
-                                          '${FormatUtils.htg(item.prixUnitaire)} / ${item.uniteVente}',
+                                          '${FormatUtils.htg(item.prixUnitaire)} / '
+                                          '${item.uniteVenteLabel.isNotEmpty ? item.uniteVenteLabel : item.uniteVente}',
                                           maxLines: 1,
                                           overflow: TextOverflow.ellipsis,
                                           style: const TextStyle(
@@ -127,14 +129,14 @@ class PanierScreen extends ConsumerWidget {
                                               stockMax:    item.stockReel,
                                               onIncrement: () => ref
                                                   .read(panierProvider.notifier)
-                                                  .modifier(item.slug, item.quantite + 1),
+                                                  .modifier(item, item.quantite + 1),
                                               onDecrement: () {
                                                 if (item.quantite <= 1) {
                                                   ref.read(panierProvider.notifier)
-                                                      .retirer(item.slug);
+                                                      .retirer(item);
                                                 } else {
                                                   ref.read(panierProvider.notifier)
-                                                      .modifier(item.slug, item.quantite - 1);
+                                                      .modifier(item, item.quantite - 1);
                                                 }
                                               },
                                             ),
@@ -209,7 +211,15 @@ class PanierScreen extends ConsumerWidget {
                             ),
                             const SizedBox(height: 14),
                             ElevatedButton(
-                              onPressed: () => context.go('/acheteur/checkout'),
+                              onPressed: () {
+                                // Comme sur le site : le panier se remplit sans
+                                // compte, la commande demande de se connecter
+                                if (exigerConnexion(context, ref,
+                                    retour: '/acheteur/checkout',
+                                    motif: 'pour passer la commande')) {
+                                  context.go('/acheteur/checkout');
+                                }
+                              },
                               child: const Text('Passer la commande'),
                             ),
                           ],

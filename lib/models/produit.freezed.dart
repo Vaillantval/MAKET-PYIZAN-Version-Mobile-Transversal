@@ -31,6 +31,13 @@ mixin _$Produit {
   String get uniteVente => throw _privateConstructorUsedError;
   @JsonKey(name: 'unite_vente_label')
   String get uniteVenteLabel => throw _privateConstructorUsedError;
+  @JsonKey(name: 'unite_vente_id')
+  int? get uniteVenteId =>
+      throw _privateConstructorUsedError; // Autres unités de vente (caisse, sac…) : unite_id, unite_nom, prix,
+// facteur_conversion (unités de base par unité)
+  @JsonKey(name: 'prix_supplementaires')
+  List<Map<String, dynamic>> get prixSupplementaires =>
+      throw _privateConstructorUsedError;
   @JsonKey(name: 'quantite_min_commande')
   int get quantiteMinCommande => throw _privateConstructorUsedError;
   @JsonKey(name: 'stock_reel')
@@ -69,6 +76,9 @@ abstract class $ProduitCopyWith<$Res> {
       @JsonKey(name: 'prix_unitaire') String prixUnitaire,
       @JsonKey(name: 'unite_vente') String uniteVente,
       @JsonKey(name: 'unite_vente_label') String uniteVenteLabel,
+      @JsonKey(name: 'unite_vente_id') int? uniteVenteId,
+      @JsonKey(name: 'prix_supplementaires')
+      List<Map<String, dynamic>> prixSupplementaires,
       @JsonKey(name: 'quantite_min_commande') int quantiteMinCommande,
       @JsonKey(name: 'stock_reel') int stockReel,
       @JsonKey(name: 'is_featured') bool isFeatured,
@@ -103,6 +113,8 @@ class _$ProduitCopyWithImpl<$Res, $Val extends Produit>
     Object? prixUnitaire = null,
     Object? uniteVente = null,
     Object? uniteVenteLabel = null,
+    Object? uniteVenteId = freezed,
+    Object? prixSupplementaires = null,
     Object? quantiteMinCommande = null,
     Object? stockReel = null,
     Object? isFeatured = null,
@@ -146,6 +158,14 @@ class _$ProduitCopyWithImpl<$Res, $Val extends Produit>
           ? _value.uniteVenteLabel
           : uniteVenteLabel // ignore: cast_nullable_to_non_nullable
               as String,
+      uniteVenteId: freezed == uniteVenteId
+          ? _value.uniteVenteId
+          : uniteVenteId // ignore: cast_nullable_to_non_nullable
+              as int?,
+      prixSupplementaires: null == prixSupplementaires
+          ? _value.prixSupplementaires
+          : prixSupplementaires // ignore: cast_nullable_to_non_nullable
+              as List<Map<String, dynamic>>,
       quantiteMinCommande: null == quantiteMinCommande
           ? _value.quantiteMinCommande
           : quantiteMinCommande // ignore: cast_nullable_to_non_nullable
@@ -202,6 +222,9 @@ abstract class _$$ProduitImplCopyWith<$Res> implements $ProduitCopyWith<$Res> {
       @JsonKey(name: 'prix_unitaire') String prixUnitaire,
       @JsonKey(name: 'unite_vente') String uniteVente,
       @JsonKey(name: 'unite_vente_label') String uniteVenteLabel,
+      @JsonKey(name: 'unite_vente_id') int? uniteVenteId,
+      @JsonKey(name: 'prix_supplementaires')
+      List<Map<String, dynamic>> prixSupplementaires,
       @JsonKey(name: 'quantite_min_commande') int quantiteMinCommande,
       @JsonKey(name: 'stock_reel') int stockReel,
       @JsonKey(name: 'is_featured') bool isFeatured,
@@ -234,6 +257,8 @@ class __$$ProduitImplCopyWithImpl<$Res>
     Object? prixUnitaire = null,
     Object? uniteVente = null,
     Object? uniteVenteLabel = null,
+    Object? uniteVenteId = freezed,
+    Object? prixSupplementaires = null,
     Object? quantiteMinCommande = null,
     Object? stockReel = null,
     Object? isFeatured = null,
@@ -277,6 +302,14 @@ class __$$ProduitImplCopyWithImpl<$Res>
           ? _value.uniteVenteLabel
           : uniteVenteLabel // ignore: cast_nullable_to_non_nullable
               as String,
+      uniteVenteId: freezed == uniteVenteId
+          ? _value.uniteVenteId
+          : uniteVenteId // ignore: cast_nullable_to_non_nullable
+              as int?,
+      prixSupplementaires: null == prixSupplementaires
+          ? _value._prixSupplementaires
+          : prixSupplementaires // ignore: cast_nullable_to_non_nullable
+              as List<Map<String, dynamic>>,
       quantiteMinCommande: null == quantiteMinCommande
           ? _value.quantiteMinCommande
           : quantiteMinCommande // ignore: cast_nullable_to_non_nullable
@@ -329,6 +362,9 @@ class _$ProduitImpl implements _Produit {
       @JsonKey(name: 'prix_unitaire') required this.prixUnitaire,
       @JsonKey(name: 'unite_vente') required this.uniteVente,
       @JsonKey(name: 'unite_vente_label') required this.uniteVenteLabel,
+      @JsonKey(name: 'unite_vente_id') this.uniteVenteId,
+      @JsonKey(name: 'prix_supplementaires')
+      final List<Map<String, dynamic>> prixSupplementaires = const [],
       @JsonKey(name: 'quantite_min_commande') this.quantiteMinCommande = 1,
       @JsonKey(name: 'stock_reel') this.stockReel = 0,
       @JsonKey(name: 'is_featured') this.isFeatured = false,
@@ -338,7 +374,8 @@ class _$ProduitImpl implements _Produit {
       this.origine = '',
       this.saison = '',
       @JsonKey(name: 'created_at') this.createdAt})
-      : _categorie = categorie,
+      : _prixSupplementaires = prixSupplementaires,
+        _categorie = categorie,
         _producteur = producteur;
 
   factory _$ProduitImpl.fromJson(Map<String, dynamic> json) =>
@@ -365,6 +402,23 @@ class _$ProduitImpl implements _Produit {
   @override
   @JsonKey(name: 'unite_vente_label')
   final String uniteVenteLabel;
+  @override
+  @JsonKey(name: 'unite_vente_id')
+  final int? uniteVenteId;
+// Autres unités de vente (caisse, sac…) : unite_id, unite_nom, prix,
+// facteur_conversion (unités de base par unité)
+  final List<Map<String, dynamic>> _prixSupplementaires;
+// Autres unités de vente (caisse, sac…) : unite_id, unite_nom, prix,
+// facteur_conversion (unités de base par unité)
+  @override
+  @JsonKey(name: 'prix_supplementaires')
+  List<Map<String, dynamic>> get prixSupplementaires {
+    if (_prixSupplementaires is EqualUnmodifiableListView)
+      return _prixSupplementaires;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_prixSupplementaires);
+  }
+
   @override
   @JsonKey(name: 'quantite_min_commande')
   final int quantiteMinCommande;
@@ -409,7 +463,7 @@ class _$ProduitImpl implements _Produit {
 
   @override
   String toString() {
-    return 'Produit(id: $id, nom: $nom, slug: $slug, variete: $variete, description: $description, prixUnitaire: $prixUnitaire, uniteVente: $uniteVente, uniteVenteLabel: $uniteVenteLabel, quantiteMinCommande: $quantiteMinCommande, stockReel: $stockReel, isFeatured: $isFeatured, imagePrincipale: $imagePrincipale, categorie: $categorie, producteur: $producteur, origine: $origine, saison: $saison, createdAt: $createdAt)';
+    return 'Produit(id: $id, nom: $nom, slug: $slug, variete: $variete, description: $description, prixUnitaire: $prixUnitaire, uniteVente: $uniteVente, uniteVenteLabel: $uniteVenteLabel, uniteVenteId: $uniteVenteId, prixSupplementaires: $prixSupplementaires, quantiteMinCommande: $quantiteMinCommande, stockReel: $stockReel, isFeatured: $isFeatured, imagePrincipale: $imagePrincipale, categorie: $categorie, producteur: $producteur, origine: $origine, saison: $saison, createdAt: $createdAt)';
   }
 
   @override
@@ -429,6 +483,10 @@ class _$ProduitImpl implements _Produit {
                 other.uniteVente == uniteVente) &&
             (identical(other.uniteVenteLabel, uniteVenteLabel) ||
                 other.uniteVenteLabel == uniteVenteLabel) &&
+            (identical(other.uniteVenteId, uniteVenteId) ||
+                other.uniteVenteId == uniteVenteId) &&
+            const DeepCollectionEquality()
+                .equals(other._prixSupplementaires, _prixSupplementaires) &&
             (identical(other.quantiteMinCommande, quantiteMinCommande) ||
                 other.quantiteMinCommande == quantiteMinCommande) &&
             (identical(other.stockReel, stockReel) ||
@@ -449,25 +507,28 @@ class _$ProduitImpl implements _Produit {
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(
-      runtimeType,
-      id,
-      nom,
-      slug,
-      variete,
-      description,
-      prixUnitaire,
-      uniteVente,
-      uniteVenteLabel,
-      quantiteMinCommande,
-      stockReel,
-      isFeatured,
-      imagePrincipale,
-      const DeepCollectionEquality().hash(_categorie),
-      const DeepCollectionEquality().hash(_producteur),
-      origine,
-      saison,
-      createdAt);
+  int get hashCode => Object.hashAll([
+        runtimeType,
+        id,
+        nom,
+        slug,
+        variete,
+        description,
+        prixUnitaire,
+        uniteVente,
+        uniteVenteLabel,
+        uniteVenteId,
+        const DeepCollectionEquality().hash(_prixSupplementaires),
+        quantiteMinCommande,
+        stockReel,
+        isFeatured,
+        imagePrincipale,
+        const DeepCollectionEquality().hash(_categorie),
+        const DeepCollectionEquality().hash(_producteur),
+        origine,
+        saison,
+        createdAt
+      ]);
 
   /// Create a copy of Produit
   /// with the given fields replaced by the non-null parameter values.
@@ -495,6 +556,9 @@ abstract class _Produit implements Produit {
       @JsonKey(name: 'prix_unitaire') required final String prixUnitaire,
       @JsonKey(name: 'unite_vente') required final String uniteVente,
       @JsonKey(name: 'unite_vente_label') required final String uniteVenteLabel,
+      @JsonKey(name: 'unite_vente_id') final int? uniteVenteId,
+      @JsonKey(name: 'prix_supplementaires')
+      final List<Map<String, dynamic>> prixSupplementaires,
       @JsonKey(name: 'quantite_min_commande') final int quantiteMinCommande,
       @JsonKey(name: 'stock_reel') final int stockReel,
       @JsonKey(name: 'is_featured') final bool isFeatured,
@@ -526,6 +590,14 @@ abstract class _Produit implements Produit {
   @override
   @JsonKey(name: 'unite_vente_label')
   String get uniteVenteLabel;
+  @override
+  @JsonKey(name: 'unite_vente_id')
+  int?
+      get uniteVenteId; // Autres unités de vente (caisse, sac…) : unite_id, unite_nom, prix,
+// facteur_conversion (unités de base par unité)
+  @override
+  @JsonKey(name: 'prix_supplementaires')
+  List<Map<String, dynamic>> get prixSupplementaires;
   @override
   @JsonKey(name: 'quantite_min_commande')
   int get quantiteMinCommande;

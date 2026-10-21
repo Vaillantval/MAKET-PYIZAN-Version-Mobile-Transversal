@@ -16,6 +16,11 @@ _$ProduitImpl _$$ProduitImplFromJson(Map<String, dynamic> json) =>
       prixUnitaire: json['prix_unitaire'] as String,
       uniteVente: json['unite_vente'] as String,
       uniteVenteLabel: json['unite_vente_label'] as String,
+      uniteVenteId: (json['unite_vente_id'] as num?)?.toInt(),
+      prixSupplementaires: (json['prix_supplementaires'] as List<dynamic>?)
+              ?.map((e) => e as Map<String, dynamic>)
+              .toList() ??
+          const [],
       quantiteMinCommande:
           (json['quantite_min_commande'] as num?)?.toInt() ?? 1,
       stockReel: (json['stock_reel'] as num?)?.toInt() ?? 0,
@@ -38,6 +43,8 @@ Map<String, dynamic> _$$ProduitImplToJson(_$ProduitImpl instance) =>
       'prix_unitaire': instance.prixUnitaire,
       'unite_vente': instance.uniteVente,
       'unite_vente_label': instance.uniteVenteLabel,
+      'unite_vente_id': instance.uniteVenteId,
+      'prix_supplementaires': instance.prixSupplementaires,
       'quantite_min_commande': instance.quantiteMinCommande,
       'stock_reel': instance.stockReel,
       'is_featured': instance.isFeatured,

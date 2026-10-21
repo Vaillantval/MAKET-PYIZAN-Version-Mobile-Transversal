@@ -11,7 +11,7 @@ import '../../../shared/widgets/empty_state.dart';
 import '../providers/catalogue_provider.dart';
 import '../providers/panier_provider.dart';
 import '../widgets/produit_card.dart';
-import '../../../shared/widgets/connexion_requise.dart';
+import '../widgets/choix_unite.dart';
 import '../../../shared/widgets/loading_widget.dart';
 
 class ProduitDetailScreen extends ConsumerWidget {
@@ -63,32 +63,51 @@ class _Fiche extends ConsumerStatefulWidget {
 }
 
 class _FicheState extends ConsumerState<_Fiche> {
-  late int _quantite = widget.produit.quantiteMinCommande.clamp(1, 1 << 30);
+  // Unités de vente du produit (base + prix_supplementaires), comme le
+  // sélecteur d'unité de la fiche produit du site
+  late final List<OptionUnite> _options = OptionUnite.pour(widget.produit);
+  late OptionUnite _unite = _options.first;
+  late int _quantite = _minimum.clamp(1, _maximum < 1 ? 1 : _maximum);
   bool _envoi = false;
 
+  /// Le minimum de commande s'exprime dans l'unité de base.
+  int get _minimum => identical(_unite, _options.first)
+      ? widget.produit.quantiteMinCommande.clamp(1, 1 << 30)
+      : 1;
+  int get _maximum => _unite.maxPour(widget.produit.stockReel);
+
+  void _choisirUnite(OptionUnite u) => setState(() {
+        _unite = u;
+        _quantite = _minimum.clamp(1, _maximum < 1 ? 1 : _maximum);
+      });
+
   Future<void> _ajouter() async {
-    if (!exigerConnexion(context, ref)) return;
     setState(() => _envoi = true);
     final err = await ref
         .read(panierProvider.notifier)
-        .ajouter(widget.produit.slug, _quantite);
+        .ajouter(widget.produit, _quantite, unite: _unite);
     if (!mounted) return;
     setState(() => _envoi = false);
-    afficherMessage(context, err ?? 'Ajouté au panier', succes: err == null);
-    if (err == null) context.go('/acheteur/panier');
+    // Succès : le panier s'ouvre (pas de message qui masquerait sa
+    // barre de commande)
+    if (err != null) {
+      afficherMessage(context, err, succes: false);
+    } else {
+      context.go('/acheteur/panier');
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final produit   = widget.produit;
     final imageUrl  = ImageUtils.imageUrl(produit.imagePrincipale);
-    final enStock   = produit.stockReel > 0;
+    final enStock   = _maximum > 0;
     final vendeur   = (produit.producteur?['nom'] ?? '').toString();
     final lieu      = [produit.producteur?['commune'], produit.origine]
         .where((v) => (v ?? '').toString().isNotEmpty)
         .toSet()
         .join(' · ');
-    final minimum   = produit.quantiteMinCommande.clamp(1, 1 << 30);
+    final minimum   = _minimum;
 
     return Scaffold(
       backgroundColor: AppColors.blanc,
@@ -163,10 +182,10 @@ class _FicheState extends ConsumerState<_Fiche> {
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
-                          Text(FormatUtils.htg(produit.prixUnitaire),
+                          Text(FormatUtils.htg(_unite.prix),
                               style: const TextStyle(
                                   fontSize: 19, fontWeight: FontWeight.w700)),
-                          Text(produit.uniteVenteLabel,
+                          Text(_unite.libelle,
                               style: const TextStyle(
                                   fontSize: 12, color: AppColors.grisTexte)),
                         ],
@@ -182,6 +201,19 @@ class _FicheState extends ConsumerState<_Fiche> {
                             fontWeight: FontWeight.w700,
                             color: AppColors.grisLeger)),
                   ],
+                  if (_options.length > 1) ...[
+                    const SizedBox(height: 18),
+                    const Text('Unité',
+                        style: TextStyle(
+                            fontSize: 14, fontWeight: FontWeight.w700)),
+                    const SizedBox(height: 8),
+                    ChoixUnite(
+                      options: _options,
+                      valeur: _unite,
+                      stockBase: produit.stockReel,
+                      onChanged: _choisirUnite,
+                    ),
+                  ],
                   if (produit.description.isNotEmpty) ...[
                     const SizedBox(height: 14),
                     Text(produit.description,
@@ -195,10 +227,10 @@ class _FicheState extends ConsumerState<_Fiche> {
                   const SizedBox(height: 8),
                   _Info(
                     enStock ? Icons.inventory_2_outlined : Icons.remove_shopping_cart_outlined,
-                    enStock
-                        ? '${produit.stockReel} disponible(s)'
+                    produit.stockReel > 0
+                        ? '${produit.stockReel} ${produit.uniteVenteLabel} disponible(s)'
                         : 'Rupture de stock',
-                    couleur: enStock ? null : AppColors.rouge,
+                    couleur: produit.stockReel > 0 ? null : AppColors.rouge,
                   ),
                   if (lieu.isNotEmpty) _Info(Icons.place_outlined, lieu),
                   if (produit.saison.isNotEmpty)
@@ -270,7 +302,7 @@ class _FicheState extends ConsumerState<_Fiche> {
                     IconButton(
                       tooltip: 'Plus',
                       icon: const Icon(Icons.add_rounded, size: 20),
-                      onPressed: enStock && _quantite < produit.stockReel
+                      onPressed: enStock && _quantite < _maximum
                           ? () => setState(() => _quantite++)
                           : null,
                     ),

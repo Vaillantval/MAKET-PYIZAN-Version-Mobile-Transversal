@@ -15,6 +15,10 @@ class Produit with _$Produit {
     @JsonKey(name: 'prix_unitaire')     required String prixUnitaire,
     @JsonKey(name: 'unite_vente')       required String uniteVente,
     @JsonKey(name: 'unite_vente_label') required String uniteVenteLabel,
+    @JsonKey(name: 'unite_vente_id')    int? uniteVenteId,
+    // Autres unités de vente (caisse, sac…) : unite_id, unite_nom, prix,
+    // facteur_conversion (unités de base par unité)
+    @JsonKey(name: 'prix_supplementaires') @Default([]) List<Map<String, dynamic>> prixSupplementaires,
     @JsonKey(name: 'quantite_min_commande') @Default(1) int quantiteMinCommande,
     @JsonKey(name: 'stock_reel')        @Default(0) int stockReel,
     @JsonKey(name: 'is_featured')       @Default(false) bool isFeatured,

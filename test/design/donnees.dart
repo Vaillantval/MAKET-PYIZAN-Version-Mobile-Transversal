@@ -35,21 +35,28 @@ final utilisateurAdmin = {
 };
 
 Map<String, dynamic> _produit(int id, String nom, String prix, String unite, int stock,
-        {String categorie = 'Légumes', bool vedette = false, String commune = 'Kenscoff'}) => {
+        {String categorie = 'Légumes', bool vedette = false, String commune = 'Kenscoff',
+        List<Map<String, dynamic>> autresUnites = const []}) => {
   'id': id, 'nom': nom, 'slug': 'produit-$id', 'variete': '', 'description':
       'Produit frais récolté le matin, cultivé sans pesticides dans les mornes.',
   'prix_unitaire': prix, 'unite_vente': unite, 'unite_vente_label': unite,
+  'unite_vente_id': 100 + id,
   'quantite_min_commande': 1, 'stock_reel': stock, 'stock_disponible': stock,
   'is_featured': vedette, 'image_principale': null, 'origine': 'Kenscoff',
   'saison': '', 'created_at': '2026-10-18T10:00:00Z',
   'categorie': {'id': 1, 'nom': categorie, 'slug': 'cat'},
   'producteur': {'id': 7, 'nom': 'Jaden Kenscoff', 'code_producteur': 'PROD-2026-0007',
                  'commune': commune, 'departement': 'ouest'},
-  'prix_supplementaires': <dynamic>[],
+  'prix_supplementaires': autresUnites,
 };
 
 final produits = [
-  _produit(1, 'Tomates fraîches', '125.00', 'kg', 40, vedette: true),
+  _produit(1, 'Tomates fraîches', '125.00', 'kg', 40, vedette: true, autresUnites: [
+    {'id': 1, 'unite_id': 12, 'unite_code': 'sac_10kg', 'unite_nom': 'Sac de 10 kg',
+     'prix': '1100.00', 'facteur_conversion': '10.000'},
+    {'id': 2, 'unite_id': 13, 'unite_code': 'caisse', 'unite_nom': 'Caisse de 50 kg',
+     'prix': '5200.00', 'facteur_conversion': '50.000'},
+  ]),
   _produit(2, 'Bananes plantain', '60.00', 'pièce', 3, categorie: 'Fruits'),
   _produit(3, 'Café moulu des Thiotte (500 g)', '450.00', 'pièce', 18,
       categorie: 'Café', commune: 'Thiotte'),

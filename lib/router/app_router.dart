@@ -304,6 +304,7 @@ String _homeRoute(String role, EntrepriseMembre? entreprise) {
 bool _estPublique(String path) =>
     path == '/acheteur/accueil' ||
     path == '/acheteur/catalogue' ||
+    path == '/acheteur/panier' ||       // panier local du visiteur
     path.startsWith('/acheteur/produit/');
 
 // ── Shells (BottomNavigation par rôle) ────────────────────────
@@ -314,10 +315,8 @@ class AcheteurShell extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // Badge du panier à jour (le panier demande un compte)
-    final connecte = ref.watch(sessionUtilisateurProvider) != null;
-    if (connecte) ref.watch(panierProvider);
-    final nbPanier = connecte ? ref.read(panierProvider.notifier).nbArticles : 0;
+    ref.watch(panierProvider); // badge du panier à jour (visiteur compris)
+    final nbPanier = ref.read(panierProvider.notifier).nbArticles;
     return Scaffold(
       body: child,
       bottomNavigationBar: _buildBottomNav(context, [
