@@ -52,8 +52,12 @@ app.*.map.json
 **/*.jks
 **/*.keystore
 
-# Config Firebase — retiré du dépôt à la demande, garder en local pour builder
+# Config Firebase — jamais dans le dépôt, garder en local pour builder
+# (récupérer : firebase apps:sdkconfig ANDROID <app_id> --project ackapizza2)
 /android/app/google-services.json
+**/google-services.json
+**/google-services*.json
+**/GoogleService-Info.plist
 
 # Captures rendues avec de vraies données de compte (test/live)
 test/live/captures/
