@@ -551,16 +551,16 @@ class _PlopplopWebViewState extends State<_PlopplopWebView> {
         icon: const Icon(Icons.close),
         onPressed: () => showDialog(
           context: context,
-          builder: (_) => AlertDialog(
+          builder: (dc) => AlertDialog(
             title: const Text('Annuler la recharge ?'),
             actions: [
               TextButton(
-                onPressed: () => Navigator.pop(context),
+                onPressed: () => Navigator.pop(dc),
                 child: const Text('Continuer'),
               ),
               TextButton(
                 onPressed: () {
-                  Navigator.pop(context);
+                  Navigator.pop(dc);
                   Navigator.pop(context);
                   widget.onRetour(false);
                 },

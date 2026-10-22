@@ -11,7 +11,7 @@ Future<String?> showStatutSelector(
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
     ),
-    builder: (_) => Padding(
+    builder: (sc) => Padding(
       padding: const EdgeInsets.fromLTRB(20, 20, 20, 32),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -29,7 +29,7 @@ Future<String?> showStatutSelector(
           ],
           ...options.map((o) => ListTile(
             title: Text(o.$2),
-            onTap: () => Navigator.pop(context, o.$1),
+            onTap: () => Navigator.pop(sc, o.$1),
           )),
         ],
       ),

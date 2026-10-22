@@ -160,17 +160,17 @@ class ProfilScreen extends ConsumerWidget {
   void _confirmerDeco(BuildContext context, WidgetRef ref) {
     showDialog(
       context: context,
-      builder: (_) => AlertDialog(
+      builder: (dc) => AlertDialog(
         title: const Text('Se déconnecter ?'),
         content: const Text('Vous devrez saisir à nouveau vos identifiants.'),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () => Navigator.pop(dc),
             child: const Text('Annuler'),
           ),
           FilledButton(
             onPressed: () {
-              Navigator.pop(context);
+              Navigator.pop(dc);
               ref.read(authProvider.notifier).logout();
               context.go('/login');
             },

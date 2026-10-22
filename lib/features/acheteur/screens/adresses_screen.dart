@@ -109,16 +109,16 @@ class AdressesScreen extends ConsumerWidget {
   void _confirmerSuppression(BuildContext context, WidgetRef ref, int id) {
     showDialog(
       context: context,
-      builder: (_) => AlertDialog(
+      builder: (dc) => AlertDialog(
         title: const Text('Supprimer cette adresse ?'),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () => Navigator.pop(dc),
             child: const Text('Annuler'),
           ),
           FilledButton(
             onPressed: () {
-              Navigator.pop(context);
+              Navigator.pop(dc);
               ref.read(adressesProvider.notifier).supprimer(id);
             },
             style: FilledButton.styleFrom(backgroundColor: AppColors.rouge),

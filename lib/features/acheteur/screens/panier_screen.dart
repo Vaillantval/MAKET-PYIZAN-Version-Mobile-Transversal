@@ -245,17 +245,18 @@ class PanierScreen extends ConsumerWidget {
   void _confirmerVider(BuildContext context, WidgetRef ref) {
     showDialog(
       context: context,
-      builder: (_) => AlertDialog(
+      builder: (dc) => AlertDialog(
         title: const Text('Vider le panier ?'),
         content: const Text('Tous les articles seront supprimés.'),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () => Navigator.pop(dc),
             child: const Text('Annuler'),
           ),
           FilledButton(
             onPressed: () {
-              Navigator.pop(context);
+              Navigator.pop(dc);
+              SonsApp.jouer(SonApp.retrait);
               ref.read(panierProvider.notifier).vider();
             },
             style: FilledButton.styleFrom(backgroundColor: AppColors.rouge),

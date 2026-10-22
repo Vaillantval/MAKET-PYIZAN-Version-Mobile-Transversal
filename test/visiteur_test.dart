@@ -46,6 +46,23 @@ void main() {
     expect(find.widgetWithText(OutlinedButton, 'Créer un compte'), findsOneWidget);
   });
 
+  testWidgets('vider le panier ferme le dialogue et garde l\'écran Panier', (tester) async {
+    final c = await monterApp(tester, chemin: '/acheteur/produit/produit-1', visiteur: true);
+    await tester.tap(find.text('Ajouter au panier'));
+    await laisserCharger(tester);
+
+    await tester.tap(find.text('Vider'));
+    await laisserCharger(tester);
+    await tester.tap(find.widgetWithText(FilledButton, 'Vider'));
+    await laisserCharger(tester);
+
+    // Régression : le dialogue fermait la page du panier (écran noir)
+    expect(find.byType(AlertDialog), findsNothing);
+    expect(_lieu(c), '/acheteur/panier');
+    expect(find.text('Tomates fraîches'), findsNothing);
+    expect(find.text('Panier'), findsWidgets);
+  });
+
   testWidgets("une fois connecté, on revient sur l'écran demandé", (tester) async {
     final c = await monterApp(tester,
         chemin: '/login?from=%2Facheteur%2Fproduit%2Fproduit-1',

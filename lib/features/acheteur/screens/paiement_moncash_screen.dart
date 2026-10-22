@@ -68,19 +68,19 @@ class _PaiementMoncashScreenState
         icon: const Icon(Icons.close),
         onPressed: () => showDialog(
           context: context,
-          builder: (_) => AlertDialog(
+          builder: (dc) => AlertDialog(
             title: const Text('Annuler le paiement ?'),
             content: const Text(
               'Votre commande a été créée. Vous pouvez la payer plus tard.'
             ),
             actions: [
               TextButton(
-                onPressed: () => Navigator.pop(context),
+                onPressed: () => Navigator.pop(dc),
                 child: const Text('Continuer le paiement'),
               ),
               TextButton(
                 onPressed: () {
-                  Navigator.pop(context);
+                  Navigator.pop(dc);
                   context.go('/acheteur/commandes');
                 },
                 child: const Text('Quitter',

@@ -10,7 +10,7 @@ Future<String?> showPaiementActionSheet(
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
     ),
-    builder: (_) => Padding(
+    builder: (sc) => Padding(
       padding: const EdgeInsets.fromLTRB(20, 20, 20, 32),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -28,13 +28,13 @@ Future<String?> showPaiementActionSheet(
             leading: const Icon(Icons.check_circle,
                 color: AppColors.vertVif),
             title: const Text('Confirmer'),
-            onTap: () => Navigator.pop(context, 'confirmer'),
+            onTap: () => Navigator.pop(sc, 'confirmer'),
           ),
           ListTile(
             leading: const Icon(Icons.cancel,
                 color: AppColors.rouge),
             title: const Text('Rejeter'),
-            onTap: () => Navigator.pop(context, 'rejeter'),
+            onTap: () => Navigator.pop(sc, 'rejeter'),
           ),
         ],
       ),
