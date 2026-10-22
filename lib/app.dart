@@ -53,11 +53,22 @@ class _MaketLakayAppState
     });
 
     // Arrière-plan : toucher de la notification système
-    FirebaseMessaging.onMessageOpenedApp.listen((m) => _ouvrir(m.data));
+    FirebaseMessaging.onMessageOpenedApp.listen(_ouvrirMessage);
 
     // App fermée, lancée par le toucher d'une notification
     final initiale = await FirebaseMessaging.instance.getInitialMessage();
-    if (initiale != null) _ouvrir(initiale.data);
+    if (initiale != null) _ouvrirMessage(initiale);
+  }
+
+  // Au démarrage à froid, le même toucher arrive par onMessageOpenedApp
+  // et par getInitialMessage : ne l'ouvrir qu'une fois
+  String? _dernierMessageOuvert;
+
+  void _ouvrirMessage(RemoteMessage message) {
+    final id = message.messageId;
+    if (id != null && id == _dernierMessageOuvert) return;
+    _dernierMessageOuvert = id;
+    _ouvrir(message.data);
   }
 
   /// Ouvre l'écran d'un push, une fois la session résolue (sinon la

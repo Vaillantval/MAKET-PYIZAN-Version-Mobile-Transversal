@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 import '../constants/app_constants.dart';
@@ -31,14 +32,16 @@ class ApiClient {
         onRequest: _onRequest,
         onError:   _onError,
       ),
-      // Logger (debug uniquement)
-      PrettyDioLogger(
-        requestHeader: true,
-        requestBody:   true,
-        responseBody:  true,
-        error:         true,
-        compact:       true,
-      ),
+      // Logger (debug uniquement : en release il écrirait jetons et
+      // données personnelles dans le logcat)
+      if (kDebugMode)
+        PrettyDioLogger(
+          requestHeader: true,
+          requestBody:   true,
+          responseBody:  true,
+          error:         true,
+          compact:       true,
+        ),
     ]);
   }
 
@@ -100,9 +103,19 @@ class ApiClient {
     DioException error,
     ErrorInterceptorHandler handler,
   ) async {
-    if (error.response?.statusCode == 401) {
-      final refreshed = await _refreshToken();
-      if (refreshed) {
+    final path = error.requestOptions.uri.path;
+    if (error.response?.statusCode == 401 &&
+        !path.endsWith('/api/auth/token/refresh/') &&
+        !path.endsWith('/api/auth/login/')) {
+      // Jeton déjà renouvelé par une autre requête depuis l'envoi de
+      // celle-ci : simplement la relancer avec le nouveau
+      final envoye = (error.requestOptions.headers['Authorization'] as String?)
+          ?.replaceFirst('Bearer ', '');
+      final actuel = await _storage.getAccessToken();
+      final bool? refreshed = (actuel != null && actuel != envoye)
+          ? true
+          : await _rafraichirUneFois();
+      if (refreshed == true) {
         // Relancer la requête originale
         final token = await _storage.getAccessToken();
         error.requestOptions.headers['Authorization'] = 'Bearer $token';
@@ -112,13 +125,25 @@ class ApiClient {
           return;
         } catch (_) {}
       }
-      // Refresh échoué → déconnexion
-      await _storage.clearTokens();
+      // Jeton refusé par le serveur → déconnexion. Échec réseau (null) :
+      // garder la session, la requête échoue simplement (mode hors ligne)
+      if (refreshed == false) await _storage.clearTokens();
     }
     handler.next(error);
   }
 
-  Future<bool> _refreshToken() async {
+  /// Un seul renouvellement à la fois. Le backend fait tourner le jeton de
+  /// rafraîchissement et invalide l'ancien (ROTATE + BLACKLIST) : quand
+  /// plusieurs requêtes expirent ensemble (ouverture de l'app le lendemain),
+  /// des renouvellements parallèles présentaient tous le même jeton, les
+  /// suivants étaient refusés et l'app déconnectait l'utilisateur.
+  Future<bool?>? _refreshEnCours;
+
+  /// true : renouvelé ; false : refusé par le serveur ; null : réseau.
+  Future<bool?> _rafraichirUneFois() =>
+      _refreshEnCours ??= _refreshToken().whenComplete(() => _refreshEnCours = null);
+
+  Future<bool?> _refreshToken() async {
     final refresh = await _storage.getRefreshToken();
     if (refresh == null) return false;
 
@@ -138,6 +163,10 @@ class ApiClient {
         }
         return true;
       }
+    } on DioException catch (e) {
+      // Réponse du serveur (401/400 : jeton expiré ou révoqué) → refus ;
+      // pas de réponse (hors ligne, délai dépassé) → indéterminé
+      return e.response == null ? null : false;
     } catch (_) {}
     return false;
   }
