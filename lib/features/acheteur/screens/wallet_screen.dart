@@ -286,8 +286,11 @@ class _CarteWallet extends StatelessWidget {
                   data: (wallet) => FittedBox(
                     fit: BoxFit.scaleDown,
                     alignment: Alignment.centerLeft,
-                    child: Text(
-                      FormatUtils.htg(wallet.solde),
+                    // Le solde défile quand il change (push « argent
+                    // reçu », recharge confirmée)
+                    child: CompteurAnime(
+                      valeur: wallet.solde,
+                      format: FormatUtils.htg,
                       style: const TextStyle(
                         color: Colors.white,
                         fontSize: 32,

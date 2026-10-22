@@ -1,3 +1,4 @@
+import '../../../core/sons/sons_app.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -71,7 +72,18 @@ class PosHistoriqueNotifier extends StateNotifier<AsyncValue<List<PosSale>>> {
   /// Ne touche jamais aux autres types d'action de la SyncQueue
   /// partagée (OfflineManager.syncAll() s'en charge, et ignore lui-même
   /// les ventes POS pour éviter toute course entre les deux).
-  Future<void> synchroniserVentesPos() async {
+  Future<void> synchroniserVentesPos() =>
+      _signalerSynchro(_synchroniserVentesPos);
+
+  /// Joue le son de synchronisation si des ventes en attente sont
+  /// effectivement parties (réseau revenu, synchro manuelle).
+  Future<void> _signalerSynchro(Future<void> Function() synchro) async {
+    final avant = nbEnAttente;
+    await synchro();
+    if (avant > 0 && nbEnAttente < avant) SonsApp.jouer(SonApp.synchro);
+  }
+
+  Future<void> _synchroniserVentesPos() async {
     if (!ConnectivityService().isOnline) return;
 
     final actions = _queue.getAll()
@@ -196,10 +208,10 @@ class PosHistoriqueNotifier extends StateNotifier<AsyncValue<List<PosSale>>> {
   }
 
   /// Force une synchronisation complète de la SyncQueue puis réconcilie.
-  Future<void> synchroniserMaintenant() async {
-    await _offline.syncAll();
-    await charger();
-  }
+  Future<void> synchroniserMaintenant() => _signalerSynchro(() async {
+        await _offline.syncAll();
+        await charger();
+      });
 
   int get nbEnAttente => _local.countBySyncStatus('enAttente');
 

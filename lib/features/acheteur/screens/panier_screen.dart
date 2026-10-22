@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../core/sons/sons_app.dart';
 import '../../../core/utils/format_utils.dart';
 import '../../../core/utils/image_utils.dart';
 import '../../../shared/ui/ui.dart';
@@ -70,7 +71,9 @@ class PanierScreen extends ConsumerWidget {
                               child: const Icon(Icons.image_outlined,
                                   color: AppColors.grisLeger),
                             );
-                            return Surface(
+                            return SortieAnimee(
+                              key: ValueKey('${item.id}-${item.uniteVenteId}'),
+                              builder: (_, sortir) => Surface(
                               padding: const EdgeInsets.all(8),
                               child: Row(
                                 children: [
@@ -132,8 +135,10 @@ class PanierScreen extends ConsumerWidget {
                                                   .modifier(item, item.quantite + 1),
                                               onDecrement: () {
                                                 if (item.quantite <= 1) {
-                                                  ref.read(panierProvider.notifier)
-                                                      .retirer(item);
+                                                  SonsApp.jouer(SonApp.retrait);
+                                                  sortir(() => ref
+                                                      .read(panierProvider.notifier)
+                                                      .retirer(item));
                                                 } else {
                                                   ref.read(panierProvider.notifier)
                                                       .modifier(item, item.quantite - 1);
@@ -161,6 +166,7 @@ class PanierScreen extends ConsumerWidget {
                                   ),
                                 ],
                               ),
+                            ),
                             );
                           },
                         ),

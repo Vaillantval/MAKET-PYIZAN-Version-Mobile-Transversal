@@ -1,3 +1,4 @@
+import '../../../shared/ui/ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -71,10 +72,8 @@ class _MotDePasseOublieScreenState extends ConsumerState<MotDePasseOublieScreen>
         },
       );
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text('Mot de passe modifié. Connectez-vous avec le nouveau.'),
-        backgroundColor: AppColors.vertVif,
-      ));
+      afficherMessage(
+          context, 'Mot de passe modifié. Connectez-vous avec le nouveau.');
       context.go('/login');
     } catch (e) {
       _erreur(messageErreurApi(e, 'Code invalide ou expiré.'));
@@ -85,9 +84,7 @@ class _MotDePasseOublieScreenState extends ConsumerState<MotDePasseOublieScreen>
 
   void _erreur(String message) {
     if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message), backgroundColor: AppColors.rouge),
-    );
+    afficherMessage(context, message, succes: false);
   }
 
   @override

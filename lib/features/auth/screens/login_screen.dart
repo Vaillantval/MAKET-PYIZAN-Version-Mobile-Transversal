@@ -1,3 +1,4 @@
+import '../../../shared/ui/ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -31,14 +32,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       _passwordCtrl.text,
     );
     if (!success && mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            ref.read(authProvider).error ?? 'Erreur de connexion'
-          ),
-          backgroundColor: AppColors.rouge,
-        ),
-      );
+      afficherMessage(
+          context, ref.read(authProvider).error ?? 'Erreur de connexion',
+          succes: false);
     }
     // La redirection est gérée par go_router
   }

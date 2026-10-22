@@ -1,3 +1,4 @@
+import '../ui/ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/api/api_client.dart';
@@ -48,10 +49,7 @@ class _ChangerMotDePasseSheetState extends ConsumerState<_ChangerMotDePasseSheet
         },
       );
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text('Mot de passe modifié'),
-        backgroundColor: AppColors.vertVif,
-      ));
+      afficherMessage(context, 'Mot de passe modifié');
       Navigator.pop(context);
     } catch (e) {
       setState(() => _erreur =

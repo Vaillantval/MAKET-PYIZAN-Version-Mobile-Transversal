@@ -1,7 +1,9 @@
+import '../../../shared/ui/ui.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../core/sons/sons_app.dart';
 import '../../../shared/widgets/logo_paiement.dart';
 
 class PaiementMoncashScreen extends StatefulWidget {
@@ -44,18 +46,11 @@ class _PaiementMoncashScreenState
 
   void _onPaiementTermine(String url) {
     final success = url.contains('success');
+    if (success) SonsApp.jouer(SonApp.commande);
     context.go('/acheteur/commandes');
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          success
-              ? 'Paiement MonCash effectué'
-              : 'Paiement annulé ou échoué',
-        ),
-        backgroundColor:
-            success ? AppColors.vertVif : AppColors.rouge,
-      ),
-    );
+    afficherMessage(context,
+        success ? 'Paiement MonCash effectué' : 'Paiement annulé ou échoué',
+        succes: success);
   }
 
   @override

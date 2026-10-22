@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Sons des canaux de notification : référencés seulement par leur nom
+     (depuis Dart et le serveur), à protéger de la réduction des ressources -->
+<resources xmlns:tools="http://schemas.android.com/tools"
+    tools:keep="@raw/son_*" />

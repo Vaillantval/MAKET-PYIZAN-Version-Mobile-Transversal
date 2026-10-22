@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'core/firebase_init.dart';
 import 'core/offline/connectivity_service.dart';
+import 'core/sons/sons_app.dart';
 import 'core/storage/local_storage.dart';
 import 'core/storage/secure_storage.dart';
 import 'core/storage/pos_local_storage.dart';
@@ -41,6 +42,9 @@ void main() async {
   // temps indéterminé. L'état est consommé de façon réactive par
   // isOnlineProvider une fois l'app affichée, pas au boot.
   unawaited(ConnectivityService().initialize());
+
+  // Sons des actions : préchargés en tâche de fond
+  unawaited(SonsApp.initialiser());
 
   runApp(
     ProviderScope(

@@ -1,3 +1,5 @@
+import '../../../core/sons/sons_app.dart';
+import '../../../shared/ui/ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/constants/app_colors.dart';
@@ -88,6 +90,7 @@ class _WalletRetraitScreenState
       isError: !ok,
     );
     if (ok) {
+      SonsApp.jouer(SonApp.demande);
       _montantCtrl.clear();
       _telephoneCtrl.clear();
       ref.read(walletRetraitsProvider.notifier).charger();
@@ -95,10 +98,7 @@ class _WalletRetraitScreenState
   }
 
   void _showSnack(String msg, {bool isError = false}) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      content: Text(msg),
-      backgroundColor: isError ? AppColors.rouge : AppColors.vertVif,
-    ));
+    afficherMessage(context, msg, succes: !isError);
   }
 
   @override

@@ -1,3 +1,5 @@
+import '../../../core/sons/sons_app.dart';
+import '../../../shared/ui/ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -116,12 +118,10 @@ class _BonsCadeauxScreenState
                   .read(walletProvider.notifier)
                   .encaisserBon(code);
               if (!context.mounted) return;
-              ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                content: Text(ok
-                    ? 'Bon encaissé — solde mis à jour !'
-                    : 'Code invalide ou déjà utilisé'),
-                backgroundColor: ok ? AppColors.vertVif : AppColors.rouge,
-              ));
+              if (ok) SonsApp.jouer(SonApp.argent);
+              afficherMessage(context,
+                  ok ? 'Bon encaissé, solde mis à jour' : 'Code invalide ou déjà utilisé',
+                  succes: ok);
               if (ok) {
                 ref.read(bonsRecusProvider.notifier).charger();
               }
@@ -193,13 +193,9 @@ class _BonsCadeauxScreenState
                       if (!ctx2.mounted) return;
                       Navigator.pop(ctx2);
                       if (!mounted) return;
-                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                        content: Text(ok
-                            ? 'Bon cadeau créé et envoyé !'
-                            : 'Erreur lors de la création du bon'),
-                        backgroundColor:
-                            ok ? AppColors.vertVif : AppColors.rouge,
-                      ));
+                      afficherMessage(context,
+                          ok ? 'Bon cadeau créé et envoyé' : 'Erreur lors de la création du bon',
+                          succes: ok);
                       if (ok) {
                         ref.read(bonsAchetesProvider.notifier).charger();
                       }
@@ -445,12 +441,7 @@ class _BonTileState extends State<_BonTile> {
                 onPressed: () {
                   Clipboard.setData(
                       ClipboardData(text: widget.bon.code as String));
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Code copié dans le presse-papiers'),
-                      duration: Duration(seconds: 2),
-                    ),
-                  );
+                  afficherMessage(context, 'Code copié dans le presse-papiers');
                 },
               ),
             ],

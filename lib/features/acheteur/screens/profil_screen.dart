@@ -1,3 +1,4 @@
+import '../../../shared/widgets/ligne_sons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -142,6 +143,7 @@ class ProfilScreen extends ConsumerWidget {
                 titre: 'Aide',
                 onTap: () => afficherMessage(context, 'Aide disponible bientôt'),
               ),
+              const LigneSons(),
               LigneReglage(
                 icone: Icons.logout_rounded,
                 titre: 'Se déconnecter',

@@ -22,10 +22,7 @@ class PosAppairageScreen extends ConsumerWidget {
 
   void _copier(BuildContext context, String uid) {
     Clipboard.setData(ClipboardData(text: uid));
-    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-      content: Text('Identifiant copié'),
-      duration: Duration(seconds: 2),
-    ));
+    afficherMessage(context, 'Identifiant copié');
   }
 
   @override

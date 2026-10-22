@@ -14,7 +14,9 @@ import '../../../core/utils/format_utils.dart';
 class ProduitCard extends StatelessWidget {
   final Produit      produit;
   final VoidCallback onTap;
-  final VoidCallback? onAjouter;
+  /// Reçoit le contexte du bouton « + » (point de départ de l'animation
+  /// vers le panier).
+  final void Function(BuildContext bouton)? onAjouter;
 
   const ProduitCard({
     required this.produit,
@@ -87,12 +89,13 @@ class ProduitCard extends StatelessWidget {
                       if (onAjouter != null && !enRupture)
                         Positioned(
                           right: 6, bottom: 6,
-                          child: Material(
+                          child: Builder(
+                            builder: (bouton) => Material(
                             color: AppColors.noir,
                             shape: const CircleBorder(),
                             child: InkWell(
                               customBorder: const CircleBorder(),
-                              onTap: onAjouter,
+                              onTap: () => onAjouter!(bouton),
                               child: const Tooltip(
                                 message: 'Ajouter au panier',
                                 child: SizedBox(
@@ -102,6 +105,7 @@ class ProduitCard extends StatelessWidget {
                                 ),
                               ),
                             ),
+                          ),
                           ),
                         ),
                     ],

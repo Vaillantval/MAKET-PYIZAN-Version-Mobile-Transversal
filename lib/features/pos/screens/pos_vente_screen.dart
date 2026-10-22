@@ -1,3 +1,4 @@
+import '../../../core/sons/sons_app.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -193,12 +194,17 @@ class _BarrePanier extends StatelessWidget {
                 padding: const EdgeInsets.fromLTRB(8, 8, 18, 8),
                 child: Row(
                   children: [
-                    CircleAvatar(
-                      radius: 18,
-                      backgroundColor: AppColors.blanc,
-                      child: Text('$nbArticles',
-                          style: const TextStyle(
-                              fontWeight: FontWeight.w700, color: AppColors.noir)),
+                    // Le nombre d'articles rebondit et le total pulse à
+                    // chaque ajout
+                    Rebond(
+                      valeur: nbArticles,
+                      child: CircleAvatar(
+                        radius: 18,
+                        backgroundColor: AppColors.blanc,
+                        child: Text('$nbArticles',
+                            style: const TextStyle(
+                                fontWeight: FontWeight.w700, color: AppColors.noir)),
+                      ),
                     ),
                     const SizedBox(width: 12),
                     const Expanded(
@@ -208,11 +214,15 @@ class _BarrePanier extends StatelessWidget {
                               fontSize: 15,
                               fontWeight: FontWeight.w600)),
                     ),
-                    Text(FormatUtils.htg(total),
-                        style: const TextStyle(
-                            color: AppColors.blanc,
-                            fontSize: 15,
-                            fontWeight: FontWeight.w700)),
+                    Rebond(
+                      valeur: total,
+                      amplitude: 0.12,
+                      child: Text(FormatUtils.htg(total),
+                          style: const TextStyle(
+                              color: AppColors.blanc,
+                              fontSize: 15,
+                              fontWeight: FontWeight.w700)),
+                    ),
                     const SizedBox(width: 6),
                     const Icon(Icons.chevron_right_rounded, color: AppColors.blanc),
                   ],
@@ -479,6 +489,7 @@ class _AjoutPanierSheetState extends ConsumerState<_AjoutPanierSheet> {
                   quantite: _quantite.toDouble(),
                   prixUnitaire: prixUnitaire,
                 );
+                SonsApp.jouer(SonApp.caisse);
                 Navigator.pop(context);
               },
               child: const Text('Ajouter au panier'),
@@ -559,6 +570,7 @@ class _PanierSheet extends ConsumerWidget {
                 ),
                 TextButton(
                   onPressed: () {
+                    SonsApp.jouer(SonApp.retrait);
                     notifier.vider();
                     Navigator.pop(context);
                   },
@@ -577,7 +589,9 @@ class _PanierSheet extends ConsumerWidget {
                       separatorBuilder: (_, __) => const Divider(),
                       itemBuilder: (_, i) {
                         final item = items[i];
-                        return Padding(
+                        return SortieAnimee(
+                          key: ValueKey('${item.produitId}-${item.uniteId}-${item.lotId}'),
+                          builder: (_, sortir) => Padding(
                           padding: const EdgeInsets.symmetric(vertical: 8),
                           child: Row(
                             children: [
@@ -619,23 +633,36 @@ class _PanierSheet extends ConsumerWidget {
                                               ? Icons.delete_outline_rounded
                                               : Icons.remove_rounded,
                                           size: 18),
-                                      onPressed: () => item.quantite <= 1
-                                          ? notifier.retirer(i)
-                                          : notifier.modifierQuantite(i, item.quantite - 1),
+                                      onPressed: () {
+                                        if (item.quantite <= 1) {
+                                          SonsApp.jouer(SonApp.retrait);
+                                          // Index relu après l'animation : la liste
+                                          // a pu changer entre-temps
+                                          sortir(() {
+                                            final j = ref.read(posPanierProvider).indexOf(item);
+                                            if (j >= 0) notifier.retirer(j);
+                                          });
+                                        } else {
+                                          notifier.modifierQuantite(i, item.quantite - 1);
+                                        }
+                                      },
                                     ),
                                     Text(item.quantite.toStringAsFixed(0),
                                         style: const TextStyle(fontWeight: FontWeight.w700)),
                                     IconButton(
                                       visualDensity: VisualDensity.compact,
                                       icon: const Icon(Icons.add_rounded, size: 18),
-                                      onPressed: () =>
-                                          notifier.modifierQuantite(i, item.quantite + 1),
+                                      onPressed: () {
+                                        SonsApp.jouer(SonApp.caisse);
+                                        notifier.modifierQuantite(i, item.quantite + 1);
+                                      },
                                     ),
                                   ],
                                 ),
                               ),
                             ],
                           ),
+                        ),
                         );
                       },
                     ),

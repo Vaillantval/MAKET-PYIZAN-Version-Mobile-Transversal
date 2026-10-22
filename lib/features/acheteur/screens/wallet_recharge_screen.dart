@@ -1,3 +1,5 @@
+import '../../../core/sons/sons_app.dart';
+import '../../../shared/ui/ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -106,6 +108,7 @@ class _WalletRechargeScreenState
               await ref.read(localStorageProvider)
                   .remove(AppConstants.keyWalletRechargeEnCours);
               if (mounted) {
+                if (confirme) SonsApp.jouer(SonApp.argent);
                 _showSnack(
                   confirme
                       ? 'Recharge effectuée avec succès !'
@@ -168,16 +171,13 @@ class _WalletRechargeScreenState
       isError: !ok,
     );
     if (ok) {
+      SonsApp.jouer(SonApp.demande);
       context.go('/acheteur/wallet');
     }
   }
 
   void _showSnack(String msg, {bool isError = false}) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      content: Text(msg),
-      backgroundColor:
-          isError ? AppColors.rouge : AppColors.vertVif,
-    ));
+    afficherMessage(context, msg, succes: !isError);
   }
 
   @override

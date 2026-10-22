@@ -59,12 +59,7 @@ class _ProduitFormScreenState extends ConsumerState<ProduitFormScreen> {
   Future<void> _sauvegarder() async {
     if (!_formKey.currentState!.validate()) return;
     if (_uniteVenteId == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Sélectionnez une unité de vente.'),
-          backgroundColor: AppColors.rouge,
-        ),
-      );
+      afficherMessage(context, 'Sélectionnez une unité de vente.', succes: false);
       return;
     }
     setState(() => _isLoading = true);

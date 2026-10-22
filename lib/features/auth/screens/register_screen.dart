@@ -1,3 +1,4 @@
+import '../../../shared/ui/ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -63,9 +64,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     // évite l'aller-retour réseau en le signalant tout de suite.
     final erreurGeo = _vend ? _entreprise.valider() : null;
     if (erreurGeo != null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(erreurGeo), backgroundColor: AppColors.rouge),
-      );
+      afficherMessage(context, erreurGeo, succes: false);
       return;
     }
 
@@ -85,14 +84,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
           ? _nomOrgCtrl.text.trim() : null,
     );
     if (!success && mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            ref.read(authProvider).error ?? 'Erreur d\'inscription'
-          ),
-          backgroundColor: AppColors.rouge,
-        ),
-      );
+      afficherMessage(
+          context, ref.read(authProvider).error ?? 'Erreur d\'inscription',
+          succes: false);
     }
   }
 

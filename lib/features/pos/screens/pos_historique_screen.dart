@@ -1,3 +1,4 @@
+import '../../../core/sons/sons_app.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/constants/app_colors.dart';
@@ -19,12 +20,25 @@ class PosHistoriqueScreen extends ConsumerStatefulWidget {
 
 class _PosHistoriqueScreenState extends ConsumerState<PosHistoriqueScreen> {
   bool _syncing = false;
+  bool _synchroOk = false;
   String _filtre = 'toutes';
 
   Future<void> _synchroniser() async {
+    final notifier = ref.read(posHistoriqueProvider.notifier);
+    final avant = notifier.nbEnAttente;
     setState(() => _syncing = true);
-    await ref.read(posHistoriqueProvider.notifier).synchroniserMaintenant();
-    if (mounted) setState(() => _syncing = false);
+    await notifier.synchroniserMaintenant();
+    if (!mounted) return;
+    // Coche brève quand des ventes en attente sont parties
+    final envoye = avant > 0 && notifier.nbEnAttente < avant;
+    setState(() {
+      _syncing = false;
+      _synchroOk = envoye;
+    });
+    if (envoye) {
+      await Future<void>.delayed(const Duration(milliseconds: 1500));
+      if (mounted) setState(() => _synchroOk = false);
+    }
   }
 
   @override
@@ -58,7 +72,9 @@ class _PosHistoriqueScreenState extends ConsumerState<PosHistoriqueScreen> {
                     padding: const EdgeInsets.fromLTRB(4, 12, 0, 12),
                     actions: [
                       BoutonRond(
-                        _syncing ? Icons.hourglass_top_rounded : Icons.sync_rounded,
+                        _syncing
+                            ? Icons.hourglass_top_rounded
+                            : _synchroOk ? Icons.check_rounded : Icons.sync_rounded,
                         tooltip: 'Synchroniser maintenant',
                         badge: nbEnAttente,
                         onTap: _syncing ? null : _synchroniser,
@@ -160,6 +176,7 @@ class _VenteTileState extends ConsumerState<_VenteTile> {
     if (resultat.succes) {
       afficherMessage(context, 'Reçu réimprimé');
     } else {
+      SonsApp.jouer(SonApp.erreur);
       messenger.showSnackBar(SnackBar(
         content: Text(resultat.erreur ?? 'Erreur d\'impression du reçu.'),
         backgroundColor: AppColors.rouge,

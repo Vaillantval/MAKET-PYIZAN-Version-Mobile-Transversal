@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../core/sons/sons_app.dart';
 import '../../../core/offline/connectivity_service.dart';
 import '../../../core/utils/format_utils.dart';
 import '../providers/commande_provider.dart';
@@ -72,8 +73,8 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
       if (!mounted) return;
 
       if (payRes['success'] == true) {
-        afficherMessage(context, 'Commande payée avec votre portefeuille');
-        context.go('/acheteur/commandes');
+        await _confirmer('Commande payée', 'Réglée avec votre portefeuille');
+        if (mounted) context.go('/acheteur/commandes');
       } else {
         _gererEchecPaiementWallet(payRes['error']?.toString(), numero);
       }
@@ -108,9 +109,15 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
     }
 
     // Succès → aller aux commandes
-    afficherMessage(context,
-        data['message']?.toString() ?? 'Commande passée avec succès');
-    context.go('/acheteur/commandes');
+    await _confirmer('Commande passée',
+        numero != null ? 'Commande $numero' : null);
+    if (mounted) context.go('/acheteur/commandes');
+  }
+
+  /// Son et coche animée de la commande réussie.
+  Future<void> _confirmer(String titre, String? detail) {
+    SonsApp.jouer(SonApp.commande);
+    return afficherReussite(context, titre: titre, detail: detail);
   }
 
   void _gererEchecPaiementWallet(String? error, String numero) {

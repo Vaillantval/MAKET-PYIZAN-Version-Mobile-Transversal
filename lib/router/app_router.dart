@@ -5,6 +5,7 @@ import '../core/constants/app_colors.dart';
 import '../providers/auth_provider.dart';
 import '../providers/entreprise_provider.dart';
 import '../core/constants/app_constants.dart';
+import '../shared/ui/animations.dart';
 import '../core/storage/local_storage.dart';
 import '../models/entreprise.dart';
 import '../core/offline/offline_banner.dart';
@@ -448,22 +449,32 @@ Widget _buildBottomNav(BuildContext context, List<_NavItem> items) {
       selectedIndex: currentIndex,
       onDestinationSelected: (i) => context.go(items[i].route),
       destinations: items.map((i) => NavigationDestination(
-        icon:         _iconeNav(i.icon, i.badge),
-        selectedIcon: _iconeNav(i.iconActif ?? i.icon, i.badge),
+        icon:         _iconeNav(i, i.icon),
+        selectedIcon: _iconeNav(i, i.iconActif ?? i.icon),
         label:        i.label,
       )).toList(),
     ),
   );
 }
 
-Widget _iconeNav(IconData icone, int badge) => badge > 0
-    ? Badge(
-        label: Text('$badge'),
-        backgroundColor: AppColors.jaune,
-        textColor: AppColors.blanc,
-        child: Icon(icone),
-      )
-    : Icon(icone);
+Widget _iconeNav(_NavItem item, IconData icone) {
+  final badge = item.badge;
+  // Le badge rebondit quand son nombre change (article ajouté, paiement
+  // à vérifier arrivé)
+  final Widget w = Rebond(
+    valeur: badge,
+    child: badge > 0
+        ? Badge(
+            label: Text('$badge'),
+            backgroundColor: AppColors.jaune,
+            textColor: AppColors.blanc,
+            child: Icon(icone),
+          )
+        : Icon(icone),
+  );
+  // L'onglet Panier reçoit les produits qui « volent » vers lui
+  return item.route == '/acheteur/panier' ? CiblePanier(child: w) : w;
+}
 
 class _NavItem {
   final IconData  icon;

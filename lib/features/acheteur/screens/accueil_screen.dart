@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../core/sons/sons_app.dart';
 import '../../../core/utils/format_utils.dart';
 import '../../../core/offline/offline_banner.dart';
 import '../../../providers/auth_provider.dart';
@@ -268,14 +269,16 @@ class AccueilScreen extends ConsumerWidget {
                               onTap:   () => context.go(
                                 '/acheteur/produit/${p.slug}',
                               ),
-                              onAjouter: () async {
+                              onAjouter: (bouton) async {
                                 final err = await ref
                                     .read(panierProvider.notifier)
                                     .ajouter(p, 1);
-                                if (ctx.mounted) {
-                                  afficherMessage(ctx,
-                                      err ?? '${p.nom} ajouté au panier',
-                                      succes: err == null);
+                                if (err != null) {
+                                  if (ctx.mounted) afficherMessage(ctx, err, succes: false);
+                                } else if (bouton.mounted) {
+                                  // Le produit « vole » jusqu'à l'onglet Panier, qui rebondit
+                                  volerVersPanier(bouton,
+                                      aLArrivee: () => SonsApp.jouer(SonApp.panier));
                                 }
                               },
                             );

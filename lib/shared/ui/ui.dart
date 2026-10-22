@@ -11,6 +11,9 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import '../../core/constants/app_colors.dart';
+import '../../core/sons/sons_app.dart';
+
+export 'animations.dart';
 
 // ── Surfaces ──────────────────────────────────────────────────────────
 
@@ -927,6 +930,9 @@ class BandeauAlerte extends StatelessWidget {
 /// Message bref en bas d'écran, avec icône de succès ou d'erreur.
 void afficherMessage(BuildContext context, String message,
     {bool succes = true}) {
+  // Les erreurs s'entendent (et vibrent) ; les succès restent silencieux,
+  // chaque action réussie ayant son propre son là où il compte
+  if (!succes) SonsApp.jouer(SonApp.erreur);
   ScaffoldMessenger.of(context)
     ..hideCurrentSnackBar()
     ..showSnackBar(SnackBar(

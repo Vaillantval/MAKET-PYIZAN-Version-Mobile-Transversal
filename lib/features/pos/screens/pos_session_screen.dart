@@ -1,3 +1,4 @@
+import '../../../core/sons/sons_app.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/constants/app_colors.dart';
@@ -38,8 +39,9 @@ class _PosSessionScreenState extends ConsumerState<PosSessionScreen> {
     setState(() => _loading = false);
     if (!mounted) return;
     if (erreur == null) {
+      SonsApp.jouer(SonApp.sessionOuverte);
       _fondsCtrl.clear();
-      _showSnack('Session ouverte avec succès !');
+      _showSnack('Session ouverte');
     } else if (erreur.contains('déjà ouverte')) {
       // Session restée ouverte côté serveur mais inconnue de ce terminal
       // (réinstallation, données effacées, autre terminal) : sans moyen de
@@ -117,6 +119,7 @@ class _PosSessionScreenState extends ConsumerState<PosSessionScreen> {
   }
 
   void _afficherRecap(Map<String, dynamic> recap) {
+    SonsApp.jouer(SonApp.sessionCloturee);
     final ecart = double.tryParse('${recap['ecart_caisse'] ?? 0}') ?? 0;
     final totalVentes = double.tryParse('${recap['total_ventes'] ?? 0}') ?? 0;
     final nbVentes = recap['nb_ventes'] ?? 0;
@@ -203,7 +206,10 @@ class _PosSessionScreenState extends ConsumerState<PosSessionScreen> {
                 ],
 
                 // ── État de la session ──────────────────────────────
-                Container(
+                // La carte se retourne à l'ouverture et à la clôture
+                CarteRetournable(
+                  child: Container(
+                  key: ValueKey(ouverte),
                   padding: const EdgeInsets.fromLTRB(20, 18, 20, 20),
                   decoration: BoxDecoration(
                     color: ouverte ? AppColors.noir : AppColors.blanc,
@@ -252,6 +258,7 @@ class _PosSessionScreenState extends ConsumerState<PosSessionScreen> {
                       ),
                     ],
                   ),
+                ),
                 ),
 
                 // ── Indicateurs du jour ─────────────────────────────

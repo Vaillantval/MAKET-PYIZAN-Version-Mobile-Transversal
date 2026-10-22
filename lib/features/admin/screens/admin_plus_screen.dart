@@ -1,3 +1,4 @@
+import '../../../shared/widgets/ligne_sons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -85,6 +86,7 @@ class AdminPlusScreen extends ConsumerWidget {
                 titre: 'Changer le mot de passe',
                 onTap: () => afficherChangementMotDePasse(context),
               ),
+              const LigneSons(),
               LigneReglage(
                 icone: Icons.logout_rounded,
                 titre: 'Se déconnecter',

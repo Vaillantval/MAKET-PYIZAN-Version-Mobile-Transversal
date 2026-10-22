@@ -1,3 +1,4 @@
+import '../../../core/sons/sons_app.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -15,7 +16,6 @@ import '../providers/pos_exceptions.dart';
 import '../providers/pos_panier_provider.dart';
 import '../providers/pos_vente_provider.dart';
 import '../providers/pos_wallet_provider.dart';
-import 'pos_vente_screen.dart' show HtgLabel;
 
 class PosPaiementScreen extends ConsumerStatefulWidget {
   const PosPaiementScreen({super.key});
@@ -82,6 +82,7 @@ class _PosPaiementScreenState extends ConsumerState<PosPaiementScreen> {
       );
       ref.read(posPanierProvider.notifier).vider();
       if (!mounted) return;
+      SonsApp.jouer(SonApp.vente);
       setState(() {
         _venteConfirmee     = sale;
         _clientNomVente     = clientNomSnapshot;
@@ -91,6 +92,7 @@ class _PosPaiementScreenState extends ConsumerState<PosPaiementScreen> {
     } on PosVenteException catch (e) {
       if (!mounted) return;
       setState(() => _loading = false);
+      SonsApp.jouer(SonApp.erreur);
       if (e.code == 'CODE_INVALIDE') {
         setState(() {
           _erreurWallet  = e.message;
@@ -119,10 +121,7 @@ class _PosPaiementScreenState extends ConsumerState<PosPaiementScreen> {
     } catch (e) {
       if (!mounted) return;
       setState(() => _loading = false);
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text('Erreur : $e'),
-        backgroundColor: AppColors.rouge,
-      ));
+      afficherMessage(context, 'Erreur : $e', succes: false);
     }
   }
 
@@ -975,6 +974,7 @@ class _EcranConfirmationState extends ConsumerState<_EcranConfirmation> {
     if (resultat.indisponible) return; // no-op silencieux
 
     if (!resultat.succes) {
+      SonsApp.jouer(SonApp.erreur);
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text(resultat.erreur ?? 'Erreur d\'impression du reçu.'),
         backgroundColor: AppColors.rouge,
@@ -1001,11 +1001,7 @@ class _EcranConfirmationState extends ConsumerState<_EcranConfirmation> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const CircleAvatar(
-              radius: 40,
-              backgroundColor: AppColors.noir,
-              child: Icon(Icons.check_rounded, size: 44, color: AppColors.blanc),
-            ),
+            const CocheAnimee(taille: 84),
             const SizedBox(height: 18),
             const Text('Vente enregistrée',
                 style: TextStyle(fontSize: 24, fontWeight: FontWeight.w700, letterSpacing: -0.5)),
@@ -1033,7 +1029,15 @@ class _EcranConfirmationState extends ConsumerState<_EcranConfirmation> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       const Text('Total', style: TextStyle(fontWeight: FontWeight.w700)),
-                      HtgLabel(sale.montantTotal, fontSize: 18),
+                      // Le montant encaissé monte depuis zéro
+                      CompteurAnime(
+                        valeur: sale.montantTotal,
+                        depart: 0,
+                        format: FormatUtils.htg,
+                        style: const TextStyle(
+                            fontWeight: FontWeight.w700, fontSize: 18,
+                            color: AppColors.noir),
+                      ),
                     ],
                   ),
                   if (hasWallet) ...[

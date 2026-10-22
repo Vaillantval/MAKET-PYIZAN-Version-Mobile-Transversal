@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../core/sons/sons_app.dart';
 import '../../../core/utils/format_utils.dart';
 import '../../../core/utils/image_utils.dart';
 import '../../../models/produit.dart';
@@ -93,6 +94,7 @@ class _FicheState extends ConsumerState<_Fiche> {
     if (err != null) {
       afficherMessage(context, err, succes: false);
     } else {
+      SonsApp.jouer(SonApp.panier);
       context.go('/acheteur/panier');
     }
   }
