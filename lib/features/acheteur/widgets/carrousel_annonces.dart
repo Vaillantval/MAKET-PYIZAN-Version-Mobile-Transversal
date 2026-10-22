@@ -132,6 +132,8 @@ class _CarteAnnonce extends StatelessWidget {
             CachedNetworkImage(
               imageUrl: ImageUtils.imageUrl(annonce.image),
               fit: BoxFit.cover,
+              // Images du site jusqu'à 1,3 Mo : décodées à la taille d'écran
+              memCacheWidth: 1080,
               placeholder: (_, __) => Container(color: AppColors.surface2),
               errorWidget: (_, __, ___) => fond,
             ),
