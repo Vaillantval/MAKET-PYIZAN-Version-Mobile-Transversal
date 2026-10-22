@@ -44,6 +44,8 @@ class AppEndpoints {
   // Catalogue
   static const String produits      = '/api/products/';
   static const String categories    = '/api/products/categories/';
+  // Annonces (slides) de l'accueil, publiques
+  static const String annonces      = '/api/home/slider/';
   static String produitDetail(String slug) => '/api/products/public/$slug/';
   static const String mesProduits   = '/api/products/mes-produits/';
   static String monProduit(String slug) => '/api/products/mes-produits/$slug/';

@@ -13,6 +13,7 @@ import '../../entreprise/widgets/espace_entreprise.dart';
 import '../providers/catalogue_provider.dart';
 import '../providers/panier_provider.dart';
 import '../providers/wallet_provider.dart';
+import '../widgets/carrousel_annonces.dart';
 import '../widgets/produit_card.dart';
 
 class AccueilScreen extends ConsumerWidget {
@@ -147,7 +148,11 @@ class AccueilScreen extends ConsumerWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          _Bandeau(onTap: () => context.go('/acheteur/catalogue')),
+                          // Annonces du site (slides) ; bandeau fixe à défaut
+                          CarrouselAnnonces(
+                            secours: _Bandeau(
+                                onTap: () => context.go('/acheteur/catalogue')),
+                          ),
                           if (walletState != null) ...[
                           const SizedBox(height: 10),
                           Surface(
