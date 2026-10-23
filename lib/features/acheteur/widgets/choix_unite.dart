@@ -46,9 +46,8 @@ class OptionUnite {
 }
 
 /// Choix de l'unité de vente : une carte par unité (pastille de sélection,
-/// libellé, équivalence en unité de base, prix et disponibilité). Toujours
-/// affiché, même pour une seule unité : l'acheteur voit dans quelle unité
-/// il commande.
+/// libellé, équivalence en unité de base, prix et disponibilité). Affiché
+/// seulement si le produit se vend dans plusieurs unités.
 class ChoixUnite extends StatelessWidget {
   final List<OptionUnite> options;
   final OptionUnite valeur;
@@ -66,7 +65,6 @@ class ChoixUnite extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final base = options.first;
-    final choix = options.length > 1;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -74,11 +72,11 @@ class ChoixUnite extends StatelessWidget {
           _Option(
             option: o,
             equivalence: identical(o, base)
-                ? (choix ? 'Unité de base' : null)
+                ? 'Unité de base'
                 : '1 ${o.libelle} = ${_nombre(o.facteur)} ${base.libelle}',
             stock: o.maxPour(stockBase),
             actif: identical(o, valeur),
-            onTap: choix ? () => onChanged(o) : null,
+            onTap: () => onChanged(o),
           ),
           if (!identical(o, options.last)) const SizedBox(height: 8),
         ],
