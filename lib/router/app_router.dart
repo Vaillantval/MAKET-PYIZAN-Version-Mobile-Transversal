@@ -34,6 +34,7 @@ import '../features/acheteur/screens/wallet_code_paiement_screen.dart';
 import '../features/producteur/screens/dashboard_screen.dart' show DashboardProducteurScreen;
 import '../features/producteur/screens/commandes_recues_screen.dart';
 import '../features/producteur/screens/mes_produits_screen.dart';
+import '../features/producteur/screens/produit_form_screen.dart';
 import '../features/producteur/screens/collectes_screen.dart' show CollectesProducteurScreen;
 import '../features/producteur/screens/profil_producteur_screen.dart';
 import '../features/collecteur/screens/collectes_terrain_screen.dart';
@@ -207,6 +208,16 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/acheteur/produit/:slug',
         builder: (_, state) => ProduitDetailScreen(slug: state.pathParameters['slug']!),
       ),
+      // Formulaire produit de l'entreprise, en plein écran (garde-fous
+      // /producteur/* appliqués par le redirect)
+      GoRoute(
+        path: '/producteur/produit/nouveau',
+        builder: (_, __) => const ProduitFormScreen(),
+      ),
+      GoRoute(
+        path: '/producteur/produit/:slug/modifier',
+        builder: (_, state) => ProduitFormScreen(slug: state.pathParameters['slug']),
+      ),
       // Validation et paiement en plein écran : la barre de paiement reste
       // seule en bas, sans les onglets
       GoRoute(
@@ -305,7 +316,11 @@ final routerProvider = Provider<GoRouter>((ref) {
           GoRoute(path: '/admin/producteurs',  builder: (_, __) => const AdminProducteursScreen()),
           GoRoute(path: '/admin/commandes',    builder: (_, __) => const AdminCommandesScreen()),
           GoRoute(path: '/admin/paiements',    builder: (_, __) => const AdminPaiementsScreen()),
-          GoRoute(path: '/admin/catalogue',    builder: (_, __) => const AdminCatalogueScreen()),
+          GoRoute(
+            path: '/admin/catalogue',
+            builder: (_, state) => AdminCatalogueScreen(
+                statutInitial: state.uri.queryParameters['statut']),
+          ),
           GoRoute(path: '/admin/stocks',       builder: (_, __) => const AdminStocksScreen()),
           GoRoute(path: '/admin/collectes',    builder: (_, __) => const AdminCollectesScreen()),
           GoRoute(path: '/admin/utilisateurs', builder: (_, __) => const AdminUsersScreen()),

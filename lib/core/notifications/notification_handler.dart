@@ -76,6 +76,18 @@ class NotificationHandler {
       case 'producteur_stock':
         _versEspaceEntreprise(context, data, '/producteur/catalogue');
         return;
+      // Décision du superadmin sur un produit (validé / refusé + motif) :
+      // ouvrir la fiche dans la bonne entreprise
+      case 'producteur_produit':
+        final slug = data['slug']?.toString();
+        _versEspaceEntreprise(context, data,
+            slug != null && slug.isNotEmpty
+                ? '/producteur/produit/$slug/modifier'
+                : '/producteur/catalogue');
+        return;
+      case 'admin_produit':
+        context.go('/admin/catalogue?statut=en_attente');
+        return;
 
       case 'admin_commande':
         context.go('/admin/commandes');

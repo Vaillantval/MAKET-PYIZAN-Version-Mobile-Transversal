@@ -164,7 +164,12 @@ Map<String, dynamic> reponseFactice(String path, Map<String, dynamic> user) {
         'collectes_a_venir': 1,
       });
     case '/api/products/mes-produits/':
-      return _ok(produits);
+      return _ok(mesProduits);
+    case '/api/products/unites-mesure/':
+      return _ok([
+        {'id': 1, 'code': 'kg', 'nom': 'Kilogramme (kg)', 'ordre': 1},
+        {'id': 2, 'code': 'sac_25', 'nom': 'Sac 25 kg', 'ordre': 2},
+      ]);
     case '/api/collectes/mes-participations/':
       return _ok([
         {'id': 1, 'statut': 'inscrit', 'statut_label': 'Inscrit',
@@ -253,7 +258,7 @@ Map<String, dynamic>? _reponseAdmin(String path) => switch (path) {
      'departement_label': 'Sud-Est', 'statut': 'en_attente', 'statut_label': 'En attente', 'nb_produits': 0},
   ]),
   '/api/admin/catalogue/' => _ok([
-    for (final p in produits.take(4))
+    for (final p in mesProduits)
       {...p, 'producteur_nom': 'Jaden Kenscoff'},
   ]),
   '/api/admin/stocks/lots/' => _ok([
@@ -286,4 +291,13 @@ List<Map<String, dynamic>> ventesParJour(double base) => [
       'date': DateTime(2026, 9, 21).add(Duration(days: i)).toIso8601String().substring(0, 10),
       'montant': (base * (1 + 0.25 * math.sin(i / 3) + i / 30)).toStringAsFixed(2),
     },
+];
+
+/// Catalogue de l'entreprise avec les statuts de modération.
+final mesProduits = [
+  {...produits[0], 'statut': 'actif', 'statut_label': 'Actif'},
+  {...produits[1], 'statut': 'en_attente', 'statut_label': 'En attente de validation'},
+  {...produits[2], 'statut': 'refuse', 'statut_label': 'Refusé',
+   'motif_refus': "Photo floue : merci d'envoyer une photo nette du produit."},
+  {...produits[3], 'statut': 'epuise', 'statut_label': 'Épuisé'},
 ];

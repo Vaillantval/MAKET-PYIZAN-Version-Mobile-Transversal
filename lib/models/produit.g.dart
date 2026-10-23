@@ -32,6 +32,11 @@ _$ProduitImpl _$$ProduitImplFromJson(Map<String, dynamic> json) =>
       origine: json['origine'] as String? ?? '',
       saison: json['saison'] as String? ?? '',
       createdAt: json['created_at'] as String?,
+      statut: json['statut'] as String? ?? '',
+      statutLabel: json['statut_label'] as String? ?? '',
+      motifRefus: json['motif_refus'] as String? ?? '',
+      soumisLe: json['soumis_le'] as String?,
+      valideLe: json['valide_le'] as String?,
     );
 
 Map<String, dynamic> _$$ProduitImplToJson(_$ProduitImpl instance) =>
@@ -56,4 +61,9 @@ Map<String, dynamic> _$$ProduitImplToJson(_$ProduitImpl instance) =>
       'origine': instance.origine,
       'saison': instance.saison,
       'created_at': instance.createdAt,
+      'statut': instance.statut,
+      'statut_label': instance.statutLabel,
+      'motif_refus': instance.motifRefus,
+      'soumis_le': instance.soumisLe,
+      'valide_le': instance.valideLe,
     };

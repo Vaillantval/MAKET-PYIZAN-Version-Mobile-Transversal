@@ -67,6 +67,8 @@ class AppEndpoints {
   static const String verifierPaiement = '/api/payments/verifier/';
   // Confirmation MonCash/NatCash au retour de la passerelle Plopplop
   static const String plopplopVerify   = '/api/payments/plopplop-verify/';
+  // Comptes de virement / dépôt (public) ; ?usage=recharge pour le wallet
+  static const String instructionsPaiement = '/api/payments/instructions/';
   static const String mesPaiements     = '/api/payments/mes-paiements/';
   static const String validerVoucher   = '/api/payments/voucher/valider/';
   static const String mesVouchers      = '/api/payments/voucher/mes-vouchers/';

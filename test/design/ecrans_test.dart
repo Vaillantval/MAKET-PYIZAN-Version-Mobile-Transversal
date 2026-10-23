@@ -39,6 +39,8 @@ final _ecrans = [
   _Ecran('ent_dashboard',    '/producteur/dashboard',   () => utilisateurMembre, entreprise: 7),
   _Ecran('ent_commandes',    '/producteur/commandes',   () => utilisateurMembre, entreprise: 7),
   _Ecran('ent_produits',     '/producteur/catalogue',   () => utilisateurMembre, entreprise: 7),
+  _Ecran('ent_produit_form', '/producteur/produit/nouveau', () => utilisateurMembre, entreprise: 7),
+  _Ecran('admin_moderation', '/admin/catalogue?statut=en_attente', () => utilisateurAdmin),
   _Ecran('ent_collectes',    '/producteur/collectes',   () => utilisateurMembre, entreprise: 7),
   _Ecran('ent_profil',       '/producteur/profil',      () => utilisateurMembre, entreprise: 7),
   _Ecran('ent_fiche',        '/producteur/entreprise',  () => utilisateurMembre, entreprise: 7),

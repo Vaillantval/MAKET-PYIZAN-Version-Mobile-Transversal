@@ -237,7 +237,7 @@ class DashboardProducteurScreen extends ConsumerWidget {
               icone: Icons.add_rounded,
               libelle: 'Nouveau produit',
               couleur: AppColors.vertVif,
-              onTap: () => context.go('/producteur/produit/nouveau'),
+              onTap: () => context.push('/producteur/produit/nouveau'),
             ),
           ),
           const SizedBox(width: 10),

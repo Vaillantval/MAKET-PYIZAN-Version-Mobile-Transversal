@@ -5,6 +5,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/utils/image_utils.dart';
 import '../../../core/utils/format_utils.dart';
+import '../../../models/produit.dart';
 import '../providers/mes_produits_provider.dart';
 import '../../../shared/widgets/loading_widget.dart';
 import '../../../shared/widgets/empty_state.dart';
@@ -19,7 +20,7 @@ class MesProduitsScreen extends ConsumerWidget {
 
     return Scaffold(
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => context.go('/producteur/produit/nouveau'),
+        onPressed: () => context.push('/producteur/produit/nouveau'),
         icon: const Icon(Icons.add_rounded),
         label: const Text('Produit'),
       ),
@@ -42,7 +43,7 @@ class MesProduitsScreen extends ConsumerWidget {
                       description: 'Ajoutez votre premier produit.',
                       boutonLabel: 'Ajouter un produit',
                       onBouton: () =>
-                          context.go('/producteur/produit/nouveau'),
+                          context.push('/producteur/produit/nouveau'),
                     );
                   }
 
@@ -63,7 +64,7 @@ class MesProduitsScreen extends ConsumerWidget {
                               color: AppColors.grisLeger),
                         );
                         return Surface(
-                          onTap: () => context.go(
+                          onTap: () => context.push(
                             '/producteur/produit/${p.slug}/modifier',
                           ),
                           padding: const EdgeInsets.fromLTRB(12, 12, 4, 12),
@@ -104,7 +105,18 @@ class MesProduitsScreen extends ConsumerWidget {
                                       ),
                                     ),
                                     const SizedBox(height: 6),
-                                    _StockBadge(stock: p.stockReel),
+                                    Wrap(
+                                      spacing: 6,
+                                      runSpacing: 4,
+                                      children: [
+                                        _BadgeModeration(produit: p),
+                                        if (p.statut == 'actif') _StockBadge(stock: p.stockReel),
+                                      ],
+                                    ),
+                                    if (p.enValidation || p.refuse) ...[
+                                      const SizedBox(height: 8),
+                                      _NoteModeration(produit: p),
+                                    ],
                                   ],
                                 ),
                               ),
@@ -112,7 +124,7 @@ class MesProduitsScreen extends ConsumerWidget {
                                 icon: const Icon(Icons.more_vert_rounded,
                                     color: AppColors.grisTexte),
                                 onSelected: (v) => v == 'modifier'
-                                    ? context.go('/producteur/produit/${p.slug}/modifier')
+                                    ? context.push('/producteur/produit/${p.slug}/modifier')
                                     : _confirmerSuppression(context, ref, p.slug),
                                 itemBuilder: (_) => const [
                                   PopupMenuItem(value: 'modifier', child: Text('Modifier')),
@@ -159,6 +171,60 @@ class MesProduitsScreen extends ConsumerWidget {
             child: const Text('Supprimer'),
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// Statut de modération (statut_label du serveur) : orange en validation,
+/// rouge refusé, vert publié.
+class _BadgeModeration extends StatelessWidget {
+  final Produit produit;
+  const _BadgeModeration({required this.produit});
+
+  @override
+  Widget build(BuildContext context) {
+    final couleur = switch (produit.statut) {
+      'en_attente'        => AppColors.orange,
+      'refuse'            => AppColors.rouge,
+      'actif' || 'epuise' => AppColors.vertVif,
+      _                   => AppColors.grisTexte,
+    };
+    final libelle = produit.statutLabel.isNotEmpty
+        ? produit.statutLabel
+        : switch (produit.statut) {
+            'en_attente' => 'En attente de validation',
+            'refuse'     => 'Refusé',
+            'actif'      => 'Publié',
+            'epuise'     => 'Épuisé',
+            ''           => '—',
+            final s      => s,
+          };
+    return PuceStatut(libelle, couleur: couleur);
+  }
+}
+
+class _NoteModeration extends StatelessWidget {
+  final Produit produit;
+  const _NoteModeration({required this.produit});
+
+  @override
+  Widget build(BuildContext context) {
+    final refuse = produit.refuse;
+    final couleur = refuse ? AppColors.rouge : AppColors.orange;
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        color: AppColors.teinte(couleur),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Text(
+        refuse
+            ? '${produit.motifRefus.isNotEmpty ? 'Motif : ${produit.motifRefus}\n' : ''}'
+                'Modifiez le produit : il sera soumis à nouveau.'
+            : 'En cours de validation : invisible aux acheteurs pour le moment.',
+        style: TextStyle(fontSize: 12.5, height: 1.35, color: refuse ? AppColors.rouge : AppColors.noir),
       ),
     );
   }

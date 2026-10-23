@@ -120,3 +120,18 @@ final commandeDetailProvider =
   } catch (_) {}
   return null;
 });
+
+/// Comptes de virement / dépôt pour payer une commande hors ligne
+/// (GET /api/payments/instructions/, public). Liste vide : rien de configuré.
+final moyensDepotProvider = FutureProvider<List<Map<String, dynamic>>>((ref) async {
+  final api = ref.read(apiClientProvider);
+  try {
+    final res  = await api.get(AppEndpoints.instructionsPaiement);
+    final data = res.data as Map<String, dynamic>;
+    if (data['success'] == true && data['data'] is List) {
+      return List<Map<String, dynamic>>.from(
+          (data['data'] as List).whereType<Map>().map((e) => Map<String, dynamic>.from(e)));
+    }
+  } catch (_) {}
+  return const [];
+});

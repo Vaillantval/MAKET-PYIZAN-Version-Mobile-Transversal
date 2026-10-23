@@ -10,23 +10,58 @@ import '../../../shared/widgets/loading_widget.dart';
 import '../../../shared/widgets/empty_state.dart';
 import '../widgets/admin_scaffold.dart';
 
-class AdminCatalogueScreen extends ConsumerWidget {
-  const AdminCatalogueScreen({super.key});
+/// Catalogue (superadmin) : filtres par statut, publication / vedette et
+/// modération des produits soumis par les entreprises.
+class AdminCatalogueScreen extends ConsumerStatefulWidget {
+  /// Filtre ouvert d'emblée (ex. « en_attente » depuis un push admin_produit).
+  final String? statutInitial;
+  const AdminCatalogueScreen({this.statutInitial, super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final state = ref.watch(adminCatalogueProvider);
+  ConsumerState<AdminCatalogueScreen> createState() => _AdminCatalogueScreenState();
+}
+
+class _AdminCatalogueScreenState extends ConsumerState<AdminCatalogueScreen> {
+  static const _filtres = [
+    ('', 'Tous'),
+    ('en_attente', 'À valider'),
+    ('refuse', 'Refusés'),
+    ('actif', 'Publiés'),
+    ('epuise', 'Épuisés'),
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    final s = widget.statutInitial;
+    if (s != null && s != ref.read(adminCatalogueProvider.notifier).statut) {
+      Future.microtask(() => ref.read(adminCatalogueProvider.notifier).charger(statut: s));
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final state  = ref.watch(adminCatalogueProvider);
+    final statut = ref.read(adminCatalogueProvider.notifier).statut;
 
     return AdminScaffold(
       titre: 'Catalogue',
       retour: '/admin/plus',
+      filtres: PastillesFiltre<String>(
+        options: _filtres,
+        valeur: statut,
+        onChanged: (v) => setState(() {
+          ref.read(adminCatalogueProvider.notifier).charger(statut: v);
+        }),
+      ),
       corps: state.when(
         loading: () => const LoadingWidget(),
         error:   (e, _) => ErreurChargement(e),
         data:    (produits) {
           if (produits.isEmpty) {
-            return const EmptyState(
-              icone: Icons.inventory_2_outlined, titre: 'Aucun produit',
+            return EmptyState(
+              icone: Icons.inventory_2_outlined,
+              titre: statut == 'en_attente' ? 'Rien à valider' : 'Aucun produit',
             );
           }
           return RefreshIndicator(
@@ -39,8 +74,10 @@ class AdminCatalogueScreen extends ConsumerWidget {
               separatorBuilder: (_, __) => const SizedBox(height: 10),
               itemBuilder: (_, i) => _LigneProduit(
                 produit: produits[i],
-                onActif: () => _basculer(context, ref, produits[i], vedette: false),
-                onVedette: () => _basculer(context, ref, produits[i], vedette: true),
+                onActif: () => _basculer(context, produits[i], vedette: false),
+                onVedette: () => _basculer(context, produits[i], vedette: true),
+                onApprouver: () => _moderer(context, produits[i], approuver: true),
+                onRefuser: () => _demanderMotif(context, produits[i]),
               ),
             ),
           );
@@ -49,8 +86,8 @@ class AdminCatalogueScreen extends ConsumerWidget {
     );
   }
 
-  Future<void> _basculer(BuildContext ctx, WidgetRef ref,
-      Map<String, dynamic> p, {required bool vedette}) async {
+  Future<void> _basculer(BuildContext ctx, Map<String, dynamic> p,
+      {required bool vedette}) async {
     final id = p['id'] as int?;
     if (id == null) return;
     final n = ref.read(adminCatalogueProvider.notifier);
@@ -59,14 +96,68 @@ class AdminCatalogueScreen extends ConsumerWidget {
       afficherMessage(ctx, 'Modification impossible', succes: false);
     }
   }
+
+  Future<void> _moderer(BuildContext ctx, Map<String, dynamic> p,
+      {required bool approuver, String motif = ''}) async {
+    final id = p['id'] as int?;
+    if (id == null) return;
+    final erreur = await ref
+        .read(adminCatalogueProvider.notifier)
+        .moderer(id, approuver: approuver, motif: motif);
+    if (!ctx.mounted) return;
+    afficherMessage(ctx,
+        erreur ?? (approuver
+            ? 'Produit validé et publié'
+            : "Produit refusé — l'entreprise est prévenue"),
+        succes: erreur == null);
+  }
+
+  Future<void> _demanderMotif(BuildContext ctx, Map<String, dynamic> p) async {
+    final ctrl = TextEditingController();
+    final motif = await showDialog<String>(
+      context: ctx,
+      builder: (dialogue) => AlertDialog(
+        title: const Text('Refuser ce produit ?'),
+        content: TextField(
+          controller: ctrl,
+          autofocus: true,
+          maxLines: 3,
+          decoration: const InputDecoration(
+            hintText: "Motif transmis à l'entreprise (obligatoire)",
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogue),
+            child: const Text('Annuler'),
+          ),
+          FilledButton(
+            style: FilledButton.styleFrom(backgroundColor: AppColors.rouge),
+            onPressed: () {
+              final m = ctrl.text.trim();
+              if (m.isNotEmpty) Navigator.pop(dialogue, m);
+            },
+            child: const Text('Refuser'),
+          ),
+        ],
+      ),
+    );
+    ctrl.dispose();
+    if (motif != null && ctx.mounted) {
+      await _moderer(ctx, p, approuver: false, motif: motif);
+    }
+  }
 }
 
 class _LigneProduit extends StatelessWidget {
   final Map<String, dynamic> produit;
   final VoidCallback onActif;
   final VoidCallback onVedette;
+  final VoidCallback onApprouver;
+  final VoidCallback onRefuser;
   const _LigneProduit({
     required this.produit, required this.onActif, required this.onVedette,
+    required this.onApprouver, required this.onRefuser,
   });
 
   @override
@@ -78,6 +169,8 @@ class _LigneProduit extends StatelessWidget {
     final actif   = p['is_active'] == true;
     final vedette = p['is_featured'] == true;
     final stock   = p['stock_disponible'];
+    final statut  = p['statut']?.toString() ?? '';
+    final aValider = statut == 'en_attente' || statut == 'refuse';
 
     final vignette = Container(
       width: 56, height: 56,
@@ -85,9 +178,7 @@ class _LigneProduit extends StatelessWidget {
       child: const Icon(Icons.image_outlined, color: AppColors.grisLeger),
     );
 
-    return Surface(
-      padding: const EdgeInsets.all(12),
-      child: Row(
+    final ligne = Row(
         children: [
           ClipRRect(
             borderRadius: BorderRadius.circular(12),
@@ -146,6 +237,57 @@ class _LigneProduit extends StatelessWidget {
             ),
             onPressed: onVedette,
           ),
+        ],
+      );
+
+    return Surface(
+      padding: const EdgeInsets.all(12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          ligne,
+          if (statut.isNotEmpty) ...[
+            const SizedBox(height: 8),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: PuceStatut(
+                p['statut_label']?.toString() ?? statut,
+                couleur: switch (statut) {
+                  'en_attente'        => AppColors.orange,
+                  'refuse'            => AppColors.rouge,
+                  'actif' || 'epuise' => AppColors.vertVif,
+                  _                   => AppColors.grisTexte,
+                },
+              ),
+            ),
+          ],
+          if (statut == 'refuse' && '${p['motif_refus'] ?? ''}'.isNotEmpty) ...[
+            const SizedBox(height: 6),
+            Text('Motif : ${p['motif_refus']}',
+                style: const TextStyle(fontSize: 12.5, color: AppColors.rouge)),
+          ],
+          if (aValider) ...[
+            const SizedBox(height: 10),
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: onRefuser,
+                    icon: const Icon(Icons.close_rounded, size: 18, color: AppColors.rouge),
+                    label: const Text('Refuser', style: TextStyle(color: AppColors.rouge)),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: FilledButton.icon(
+                    onPressed: onApprouver,
+                    icon: const Icon(Icons.check_rounded, size: 18),
+                    label: const Text('Valider'),
+                  ),
+                ),
+              ],
+            ),
+          ],
         ],
       ),
     );

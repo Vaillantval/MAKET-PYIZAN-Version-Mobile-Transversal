@@ -54,7 +54,18 @@ mixin _$Produit {
   String get origine => throw _privateConstructorUsedError;
   String get saison => throw _privateConstructorUsedError;
   @JsonKey(name: 'created_at')
-  String? get createdAt => throw _privateConstructorUsedError;
+  String? get createdAt =>
+      throw _privateConstructorUsedError; // Modération (espace entreprise) : en_attente | actif | epuise | refuse
+// | inactif | brouillon ; motif_refus rempli seulement si refusé
+  String get statut => throw _privateConstructorUsedError;
+  @JsonKey(name: 'statut_label')
+  String get statutLabel => throw _privateConstructorUsedError;
+  @JsonKey(name: 'motif_refus')
+  String get motifRefus => throw _privateConstructorUsedError;
+  @JsonKey(name: 'soumis_le')
+  String? get soumisLe => throw _privateConstructorUsedError;
+  @JsonKey(name: 'valide_le')
+  String? get valideLe => throw _privateConstructorUsedError;
 
   /// Serializes this Produit to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -91,7 +102,12 @@ abstract class $ProduitCopyWith<$Res> {
       Map<String, dynamic>? producteur,
       String origine,
       String saison,
-      @JsonKey(name: 'created_at') String? createdAt});
+      @JsonKey(name: 'created_at') String? createdAt,
+      String statut,
+      @JsonKey(name: 'statut_label') String statutLabel,
+      @JsonKey(name: 'motif_refus') String motifRefus,
+      @JsonKey(name: 'soumis_le') String? soumisLe,
+      @JsonKey(name: 'valide_le') String? valideLe});
 }
 
 /// @nodoc
@@ -129,6 +145,11 @@ class _$ProduitCopyWithImpl<$Res, $Val extends Produit>
     Object? origine = null,
     Object? saison = null,
     Object? createdAt = freezed,
+    Object? statut = null,
+    Object? statutLabel = null,
+    Object? motifRefus = null,
+    Object? soumisLe = freezed,
+    Object? valideLe = freezed,
   }) {
     return _then(_value.copyWith(
       id: null == id
@@ -211,6 +232,26 @@ class _$ProduitCopyWithImpl<$Res, $Val extends Produit>
           ? _value.createdAt
           : createdAt // ignore: cast_nullable_to_non_nullable
               as String?,
+      statut: null == statut
+          ? _value.statut
+          : statut // ignore: cast_nullable_to_non_nullable
+              as String,
+      statutLabel: null == statutLabel
+          ? _value.statutLabel
+          : statutLabel // ignore: cast_nullable_to_non_nullable
+              as String,
+      motifRefus: null == motifRefus
+          ? _value.motifRefus
+          : motifRefus // ignore: cast_nullable_to_non_nullable
+              as String,
+      soumisLe: freezed == soumisLe
+          ? _value.soumisLe
+          : soumisLe // ignore: cast_nullable_to_non_nullable
+              as String?,
+      valideLe: freezed == valideLe
+          ? _value.valideLe
+          : valideLe // ignore: cast_nullable_to_non_nullable
+              as String?,
     ) as $Val);
   }
 }
@@ -243,7 +284,12 @@ abstract class _$$ProduitImplCopyWith<$Res> implements $ProduitCopyWith<$Res> {
       Map<String, dynamic>? producteur,
       String origine,
       String saison,
-      @JsonKey(name: 'created_at') String? createdAt});
+      @JsonKey(name: 'created_at') String? createdAt,
+      String statut,
+      @JsonKey(name: 'statut_label') String statutLabel,
+      @JsonKey(name: 'motif_refus') String motifRefus,
+      @JsonKey(name: 'soumis_le') String? soumisLe,
+      @JsonKey(name: 'valide_le') String? valideLe});
 }
 
 /// @nodoc
@@ -279,6 +325,11 @@ class __$$ProduitImplCopyWithImpl<$Res>
     Object? origine = null,
     Object? saison = null,
     Object? createdAt = freezed,
+    Object? statut = null,
+    Object? statutLabel = null,
+    Object? motifRefus = null,
+    Object? soumisLe = freezed,
+    Object? valideLe = freezed,
   }) {
     return _then(_$ProduitImpl(
       id: null == id
@@ -361,6 +412,26 @@ class __$$ProduitImplCopyWithImpl<$Res>
           ? _value.createdAt
           : createdAt // ignore: cast_nullable_to_non_nullable
               as String?,
+      statut: null == statut
+          ? _value.statut
+          : statut // ignore: cast_nullable_to_non_nullable
+              as String,
+      statutLabel: null == statutLabel
+          ? _value.statutLabel
+          : statutLabel // ignore: cast_nullable_to_non_nullable
+              as String,
+      motifRefus: null == motifRefus
+          ? _value.motifRefus
+          : motifRefus // ignore: cast_nullable_to_non_nullable
+              as String,
+      soumisLe: freezed == soumisLe
+          ? _value.soumisLe
+          : soumisLe // ignore: cast_nullable_to_non_nullable
+              as String?,
+      valideLe: freezed == valideLe
+          ? _value.valideLe
+          : valideLe // ignore: cast_nullable_to_non_nullable
+              as String?,
     ));
   }
 }
@@ -389,7 +460,12 @@ class _$ProduitImpl implements _Produit {
       final Map<String, dynamic>? producteur,
       this.origine = '',
       this.saison = '',
-      @JsonKey(name: 'created_at') this.createdAt})
+      @JsonKey(name: 'created_at') this.createdAt,
+      this.statut = '',
+      @JsonKey(name: 'statut_label') this.statutLabel = '',
+      @JsonKey(name: 'motif_refus') this.motifRefus = '',
+      @JsonKey(name: 'soumis_le') this.soumisLe,
+      @JsonKey(name: 'valide_le') this.valideLe})
       : _prixSupplementaires = prixSupplementaires,
         _categorie = categorie,
         _producteur = producteur;
@@ -480,10 +556,27 @@ class _$ProduitImpl implements _Produit {
   @override
   @JsonKey(name: 'created_at')
   final String? createdAt;
+// Modération (espace entreprise) : en_attente | actif | epuise | refuse
+// | inactif | brouillon ; motif_refus rempli seulement si refusé
+  @override
+  @JsonKey()
+  final String statut;
+  @override
+  @JsonKey(name: 'statut_label')
+  final String statutLabel;
+  @override
+  @JsonKey(name: 'motif_refus')
+  final String motifRefus;
+  @override
+  @JsonKey(name: 'soumis_le')
+  final String? soumisLe;
+  @override
+  @JsonKey(name: 'valide_le')
+  final String? valideLe;
 
   @override
   String toString() {
-    return 'Produit(id: $id, nom: $nom, slug: $slug, variete: $variete, description: $description, prixUnitaire: $prixUnitaire, prixOriginal: $prixOriginal, uniteVente: $uniteVente, uniteVenteLabel: $uniteVenteLabel, uniteVenteId: $uniteVenteId, prixSupplementaires: $prixSupplementaires, quantiteMinCommande: $quantiteMinCommande, stockReel: $stockReel, isFeatured: $isFeatured, imagePrincipale: $imagePrincipale, categorie: $categorie, producteur: $producteur, origine: $origine, saison: $saison, createdAt: $createdAt)';
+    return 'Produit(id: $id, nom: $nom, slug: $slug, variete: $variete, description: $description, prixUnitaire: $prixUnitaire, prixOriginal: $prixOriginal, uniteVente: $uniteVente, uniteVenteLabel: $uniteVenteLabel, uniteVenteId: $uniteVenteId, prixSupplementaires: $prixSupplementaires, quantiteMinCommande: $quantiteMinCommande, stockReel: $stockReel, isFeatured: $isFeatured, imagePrincipale: $imagePrincipale, categorie: $categorie, producteur: $producteur, origine: $origine, saison: $saison, createdAt: $createdAt, statut: $statut, statutLabel: $statutLabel, motifRefus: $motifRefus, soumisLe: $soumisLe, valideLe: $valideLe)';
   }
 
   @override
@@ -524,7 +617,16 @@ class _$ProduitImpl implements _Produit {
             (identical(other.origine, origine) || other.origine == origine) &&
             (identical(other.saison, saison) || other.saison == saison) &&
             (identical(other.createdAt, createdAt) ||
-                other.createdAt == createdAt));
+                other.createdAt == createdAt) &&
+            (identical(other.statut, statut) || other.statut == statut) &&
+            (identical(other.statutLabel, statutLabel) ||
+                other.statutLabel == statutLabel) &&
+            (identical(other.motifRefus, motifRefus) ||
+                other.motifRefus == motifRefus) &&
+            (identical(other.soumisLe, soumisLe) ||
+                other.soumisLe == soumisLe) &&
+            (identical(other.valideLe, valideLe) ||
+                other.valideLe == valideLe));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -550,7 +652,12 @@ class _$ProduitImpl implements _Produit {
         const DeepCollectionEquality().hash(_producteur),
         origine,
         saison,
-        createdAt
+        createdAt,
+        statut,
+        statutLabel,
+        motifRefus,
+        soumisLe,
+        valideLe
       ]);
 
   /// Create a copy of Produit
@@ -591,7 +698,12 @@ abstract class _Produit implements Produit {
       final Map<String, dynamic>? producteur,
       final String origine,
       final String saison,
-      @JsonKey(name: 'created_at') final String? createdAt}) = _$ProduitImpl;
+      @JsonKey(name: 'created_at') final String? createdAt,
+      final String statut,
+      @JsonKey(name: 'statut_label') final String statutLabel,
+      @JsonKey(name: 'motif_refus') final String motifRefus,
+      @JsonKey(name: 'soumis_le') final String? soumisLe,
+      @JsonKey(name: 'valide_le') final String? valideLe}) = _$ProduitImpl;
 
   factory _Produit.fromJson(Map<String, dynamic> json) = _$ProduitImpl.fromJson;
 
@@ -648,7 +760,23 @@ abstract class _Produit implements Produit {
   String get saison;
   @override
   @JsonKey(name: 'created_at')
-  String? get createdAt;
+  String?
+      get createdAt; // Modération (espace entreprise) : en_attente | actif | epuise | refuse
+// | inactif | brouillon ; motif_refus rempli seulement si refusé
+  @override
+  String get statut;
+  @override
+  @JsonKey(name: 'statut_label')
+  String get statutLabel;
+  @override
+  @JsonKey(name: 'motif_refus')
+  String get motifRefus;
+  @override
+  @JsonKey(name: 'soumis_le')
+  String? get soumisLe;
+  @override
+  @JsonKey(name: 'valide_le')
+  String? get valideLe;
 
   /// Create a copy of Produit
   /// with the given fields replaced by the non-null parameter values.

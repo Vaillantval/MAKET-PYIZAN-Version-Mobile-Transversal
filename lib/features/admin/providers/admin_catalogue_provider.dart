@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/api/api_client.dart';
 import '../../../core/api/api_endpoints.dart';
+import '../../../core/utils/api_error.dart';
 import '../../../providers/auth_provider.dart';
 
 final adminCatalogueProvider =
@@ -38,6 +39,26 @@ class AdminCatalogueNotifier
         );
       }
     } catch (e, st) { state = AsyncValue.error(e, st); }
+  }
+
+  String get statut => _statut;
+
+  /// POST /api/admin/catalogue/<id>/moderer/ — action « approuver » ou
+  /// « refuser » (motif obligatoire, transmis à l'entreprise par email et
+  /// push). Renvoie null en cas de succès, sinon le message du serveur.
+  Future<String?> moderer(int id, {required bool approuver, String motif = ''}) async {
+    const parDefaut = 'La décision n\'a pas pu être enregistrée.';
+    try {
+      final res = await _api.post('${AppEndpoints.adminCatalogue}$id/moderer/', data: {
+        'action': approuver ? 'approuver' : 'refuser',
+        if (!approuver) 'motif': motif,
+      });
+      final data = res.data as Map<String, dynamic>;
+      if (data['success'] == true) { await charger(); return null; }
+      return extraireMessageErreur(data['error'], parDefaut);
+    } catch (e) {
+      return messageErreurApi(e, parDefaut);
+    }
   }
 
   Future<bool> toggleActif(int id) => _basculer(id, 'is_active');

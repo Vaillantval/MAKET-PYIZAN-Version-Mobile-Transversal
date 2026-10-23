@@ -30,6 +30,13 @@ class Produit with _$Produit {
     @Default('') String origine,
     @Default('') String saison,
     @JsonKey(name: 'created_at')        String? createdAt,
+    // Modération (espace entreprise) : en_attente | actif | epuise | refuse
+    // | inactif | brouillon ; motif_refus rempli seulement si refusé
+    @Default('') String statut,
+    @JsonKey(name: 'statut_label')      @Default('') String statutLabel,
+    @JsonKey(name: 'motif_refus')       @Default('') String motifRefus,
+    @JsonKey(name: 'soumis_le')         String? soumisLe,
+    @JsonKey(name: 'valide_le')         String? valideLe,
   }) = _Produit;
 
   factory Produit.fromJson(Map<String, dynamic> json) =>
@@ -45,4 +52,11 @@ extension ProduitPromo on Produit {
     final pct = ((avant - apres) / avant * 100).round();
     return pct > 0 ? pct : null;
   }
+}
+
+extension ProduitModeration on Produit {
+  bool get enValidation => statut == 'en_attente';
+  bool get refuse => statut == 'refuse';
+  /// Visible des acheteurs (publié, éventuellement en rupture)
+  bool get publie => statut == 'actif' || statut == 'epuise';
 }
