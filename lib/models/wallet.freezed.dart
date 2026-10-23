@@ -406,7 +406,9 @@ mixin _$WalletDepotHorsLigne {
   @JsonKey(name: 'numero_moncash')
   String? get numeroMoncash => throw _privateConstructorUsedError;
   @JsonKey(name: 'numero_natcash')
-  String? get numeroNatcash => throw _privateConstructorUsedError;
+  String? get numeroNatcash =>
+      throw _privateConstructorUsedError; // Comptes configurés par l'admin pour les recharges (banque, MonCash…)
+  List<Map<String, dynamic>> get moyens => throw _privateConstructorUsedError;
 
   /// Serializes this WalletDepotHorsLigne to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -426,7 +428,8 @@ abstract class $WalletDepotHorsLigneCopyWith<$Res> {
   @useResult
   $Res call(
       {@JsonKey(name: 'numero_moncash') String? numeroMoncash,
-      @JsonKey(name: 'numero_natcash') String? numeroNatcash});
+      @JsonKey(name: 'numero_natcash') String? numeroNatcash,
+      List<Map<String, dynamic>> moyens});
 }
 
 /// @nodoc
@@ -447,6 +450,7 @@ class _$WalletDepotHorsLigneCopyWithImpl<$Res,
   $Res call({
     Object? numeroMoncash = freezed,
     Object? numeroNatcash = freezed,
+    Object? moyens = null,
   }) {
     return _then(_value.copyWith(
       numeroMoncash: freezed == numeroMoncash
@@ -457,6 +461,10 @@ class _$WalletDepotHorsLigneCopyWithImpl<$Res,
           ? _value.numeroNatcash
           : numeroNatcash // ignore: cast_nullable_to_non_nullable
               as String?,
+      moyens: null == moyens
+          ? _value.moyens
+          : moyens // ignore: cast_nullable_to_non_nullable
+              as List<Map<String, dynamic>>,
     ) as $Val);
   }
 }
@@ -471,7 +479,8 @@ abstract class _$$WalletDepotHorsLigneImplCopyWith<$Res>
   @useResult
   $Res call(
       {@JsonKey(name: 'numero_moncash') String? numeroMoncash,
-      @JsonKey(name: 'numero_natcash') String? numeroNatcash});
+      @JsonKey(name: 'numero_natcash') String? numeroNatcash,
+      List<Map<String, dynamic>> moyens});
 }
 
 /// @nodoc
@@ -489,6 +498,7 @@ class __$$WalletDepotHorsLigneImplCopyWithImpl<$Res>
   $Res call({
     Object? numeroMoncash = freezed,
     Object? numeroNatcash = freezed,
+    Object? moyens = null,
   }) {
     return _then(_$WalletDepotHorsLigneImpl(
       numeroMoncash: freezed == numeroMoncash
@@ -499,6 +509,10 @@ class __$$WalletDepotHorsLigneImplCopyWithImpl<$Res>
           ? _value.numeroNatcash
           : numeroNatcash // ignore: cast_nullable_to_non_nullable
               as String?,
+      moyens: null == moyens
+          ? _value._moyens
+          : moyens // ignore: cast_nullable_to_non_nullable
+              as List<Map<String, dynamic>>,
     ));
   }
 }
@@ -508,7 +522,9 @@ class __$$WalletDepotHorsLigneImplCopyWithImpl<$Res>
 class _$WalletDepotHorsLigneImpl implements _WalletDepotHorsLigne {
   const _$WalletDepotHorsLigneImpl(
       {@JsonKey(name: 'numero_moncash') this.numeroMoncash,
-      @JsonKey(name: 'numero_natcash') this.numeroNatcash});
+      @JsonKey(name: 'numero_natcash') this.numeroNatcash,
+      final List<Map<String, dynamic>> moyens = const []})
+      : _moyens = moyens;
 
   factory _$WalletDepotHorsLigneImpl.fromJson(Map<String, dynamic> json) =>
       _$$WalletDepotHorsLigneImplFromJson(json);
@@ -519,10 +535,20 @@ class _$WalletDepotHorsLigneImpl implements _WalletDepotHorsLigne {
   @override
   @JsonKey(name: 'numero_natcash')
   final String? numeroNatcash;
+// Comptes configurés par l'admin pour les recharges (banque, MonCash…)
+  final List<Map<String, dynamic>> _moyens;
+// Comptes configurés par l'admin pour les recharges (banque, MonCash…)
+  @override
+  @JsonKey()
+  List<Map<String, dynamic>> get moyens {
+    if (_moyens is EqualUnmodifiableListView) return _moyens;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_moyens);
+  }
 
   @override
   String toString() {
-    return 'WalletDepotHorsLigne(numeroMoncash: $numeroMoncash, numeroNatcash: $numeroNatcash)';
+    return 'WalletDepotHorsLigne(numeroMoncash: $numeroMoncash, numeroNatcash: $numeroNatcash, moyens: $moyens)';
   }
 
   @override
@@ -533,12 +559,14 @@ class _$WalletDepotHorsLigneImpl implements _WalletDepotHorsLigne {
             (identical(other.numeroMoncash, numeroMoncash) ||
                 other.numeroMoncash == numeroMoncash) &&
             (identical(other.numeroNatcash, numeroNatcash) ||
-                other.numeroNatcash == numeroNatcash));
+                other.numeroNatcash == numeroNatcash) &&
+            const DeepCollectionEquality().equals(other._moyens, _moyens));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, numeroMoncash, numeroNatcash);
+  int get hashCode => Object.hash(runtimeType, numeroMoncash, numeroNatcash,
+      const DeepCollectionEquality().hash(_moyens));
 
   /// Create a copy of WalletDepotHorsLigne
   /// with the given fields replaced by the non-null parameter values.
@@ -560,9 +588,9 @@ class _$WalletDepotHorsLigneImpl implements _WalletDepotHorsLigne {
 
 abstract class _WalletDepotHorsLigne implements WalletDepotHorsLigne {
   const factory _WalletDepotHorsLigne(
-          {@JsonKey(name: 'numero_moncash') final String? numeroMoncash,
-          @JsonKey(name: 'numero_natcash') final String? numeroNatcash}) =
-      _$WalletDepotHorsLigneImpl;
+      {@JsonKey(name: 'numero_moncash') final String? numeroMoncash,
+      @JsonKey(name: 'numero_natcash') final String? numeroNatcash,
+      final List<Map<String, dynamic>> moyens}) = _$WalletDepotHorsLigneImpl;
 
   factory _WalletDepotHorsLigne.fromJson(Map<String, dynamic> json) =
       _$WalletDepotHorsLigneImpl.fromJson;
@@ -572,7 +600,10 @@ abstract class _WalletDepotHorsLigne implements WalletDepotHorsLigne {
   String? get numeroMoncash;
   @override
   @JsonKey(name: 'numero_natcash')
-  String? get numeroNatcash;
+  String?
+      get numeroNatcash; // Comptes configurés par l'admin pour les recharges (banque, MonCash…)
+  @override
+  List<Map<String, dynamic>> get moyens;
 
   /// Create a copy of WalletDepotHorsLigne
   /// with the given fields replaced by the non-null parameter values.

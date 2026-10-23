@@ -5,6 +5,7 @@ import '../../core/api/api_client.dart';
 import '../../core/api/api_endpoints.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/utils/api_error.dart';
+import '../../core/utils/string_utils.dart';
 
 /// POST /api/auth/change-password/ {current_password, new_password}.
 Future<void> afficherChangementMotDePasse(BuildContext context) {
@@ -87,8 +88,7 @@ class _ChangerMotDePasseSheetState extends ConsumerState<_ChangerMotDePasseSheet
               obscureText: true,
               decoration: const InputDecoration(
                 labelText: 'Nouveau mot de passe'),
-              validator: (v) =>
-                  (v?.length ?? 0) < 8 ? 'Min. 8 caractères' : null,
+              validator: validerMotDePasse,
             ),
             if (_erreur != null)
               Padding(

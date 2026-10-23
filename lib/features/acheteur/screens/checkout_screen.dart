@@ -1,7 +1,6 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
@@ -14,6 +13,7 @@ import '../providers/commande_provider.dart';
 import '../providers/adresse_provider.dart';
 import '../providers/panier_provider.dart';
 import '../providers/wallet_provider.dart';
+import '../../../shared/widgets/compte_depot.dart';
 import '../../../shared/widgets/logo_paiement.dart';
 import '../../../shared/ui/ui.dart';
 
@@ -279,7 +279,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
             // Comptes configurés par l'administration (rien : texte seul)
             ...?ref.watch(moyensDepotProvider).valueOrNull?.map((m) => Padding(
                   padding: const EdgeInsets.only(top: 10),
-                  child: _CompteDepot(m),
+                  child: CompteDepotCarte(m),
                 )),
             const SizedBox(height: 10),
             _Preuve(
@@ -926,85 +926,4 @@ class _TexteInfo extends StatelessWidget {
           ),
         ],
       );
-}
-
-/// Compte de virement / dépôt (banque, MonCash, NatCash…) ; le numéro se
-/// copie d'un toucher.
-class _CompteDepot extends StatelessWidget {
-  final Map<String, dynamic> compte;
-  const _CompteDepot(this.compte);
-
-  @override
-  Widget build(BuildContext context) {
-    final type    = '${compte['type'] ?? ''}';
-    final logo    = compte['logo'] as String?;
-    final numero  = '${compte['numero_compte'] ?? ''}';
-    final details = [
-      if ('${compte['nom_titulaire'] ?? ''}'.isNotEmpty) 'Titulaire : ${compte['nom_titulaire']}',
-      if ('${compte['devise'] ?? ''}'.isNotEmpty) 'Devise : ${compte['devise']}',
-    ].join(' · ');
-    final instructions = '${compte['instructions'] ?? ''}';
-
-    final Widget visuel = logo != null && logo.isNotEmpty
-        ? ClipRRect(
-            borderRadius: BorderRadius.circular(8),
-            child: Image.network(logo, width: 34, height: 34, fit: BoxFit.contain,
-                errorBuilder: (_, __, ___) => LogoPaiement(type, taille: 34)),
-          )
-        : LogoPaiement(type == 'banque' || type == 'autre' ? 'hors_ligne' : type, taille: 34);
-
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: AppColors.blanc,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppColors.grisBord),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          visuel,
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('${compte['nom'] ?? compte['type_label'] ?? ''}',
-                    style: const TextStyle(fontWeight: FontWeight.w700)),
-                if (numero.isNotEmpty)
-                  InkWell(
-                    onTap: () {
-                      Clipboard.setData(ClipboardData(text: numero));
-                      afficherMessage(context, 'Numéro copié');
-                    },
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 2),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(numero,
-                              style: const TextStyle(
-                                  fontSize: 15, fontWeight: FontWeight.w700,
-                                  letterSpacing: 0.4)),
-                          const SizedBox(width: 6),
-                          const Icon(Icons.copy_rounded, size: 15, color: AppColors.grisTexte),
-                        ],
-                      ),
-                    ),
-                  ),
-                if (details.isNotEmpty)
-                  Text(details,
-                      style: const TextStyle(fontSize: 12, color: AppColors.grisTexte)),
-                if (instructions.isNotEmpty) ...[
-                  const SizedBox(height: 4),
-                  Text(instructions,
-                      style: const TextStyle(fontSize: 12.5, height: 1.35)),
-                ],
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 }

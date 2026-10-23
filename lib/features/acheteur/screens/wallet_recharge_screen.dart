@@ -11,6 +11,7 @@ import '../../../core/offline/connectivity_service.dart';
 import '../../../core/storage/local_storage.dart';
 import '../../../models/wallet.dart';
 import '../providers/wallet_provider.dart';
+import '../../../shared/widgets/compte_depot.dart';
 import '../../../shared/widgets/logo_paiement.dart';
 import 'wallet_screen.dart' show EcranWalletHorsLigne;
 
@@ -351,7 +352,17 @@ class _OngletHorsLigne extends StatelessWidget {
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if (depot?.numeroMoncash != null || depot?.numeroNatcash != null)
+        // Comptes configurés par l'administration ; à défaut, les seuls
+        // numéros MonCash / NatCash de dépôt
+        if (depot != null && depot!.moyens.isNotEmpty) ...[
+          const Text('Comptes de dépôt',
+              style: TextStyle(fontWeight: FontWeight.w700, color: AppColors.noir)),
+          const SizedBox(height: 8),
+          for (final m in depot!.moyens) ...[
+            CompteDepotCarte(m),
+            const SizedBox(height: 10),
+          ],
+        ] else if (depot?.numeroMoncash != null || depot?.numeroNatcash != null)
           Container(
             margin: const EdgeInsets.only(bottom: 12),
             padding: const EdgeInsets.all(14),

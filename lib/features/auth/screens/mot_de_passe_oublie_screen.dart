@@ -6,6 +6,7 @@ import '../../../core/api/api_client.dart';
 import '../../../core/api/api_endpoints.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/utils/api_error.dart';
+import '../../../core/utils/string_utils.dart';
 
 /// Mot de passe oublié, en deux étapes :
 /// 1. POST /api/auth/password-reset/ {email} → email avec un code à 6 chiffres
@@ -145,8 +146,7 @@ class _MotDePasseOublieScreenState extends ConsumerState<MotDePasseOublieScreen>
                         onPressed: () => setState(() => _obscure = !_obscure),
                       ),
                     ),
-                    validator: (v) =>
-                        (v?.length ?? 0) < 8 ? 'Min. 8 caractères' : null,
+                    validator: validerMotDePasse,
                   ),
                 ],
                 const SizedBox(height: 28),

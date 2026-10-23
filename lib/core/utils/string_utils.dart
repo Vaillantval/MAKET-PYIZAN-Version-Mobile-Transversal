@@ -42,3 +42,14 @@ class StringUtils {
     return buffer.toString();
   }
 }
+
+/// Règles du serveur pour un nouveau mot de passe : au moins 8 caractères
+/// et pas uniquement des chiffres. Renvoie le message d'erreur, ou null.
+String? validerMotDePasse(String? v) {
+  final mdp = v ?? '';
+  if (mdp.length < 8) return 'Min. 8 caractères';
+  if (RegExp(r'^\d+$').hasMatch(mdp)) {
+    return 'Ne doit pas contenir que des chiffres';
+  }
+  return null;
+}

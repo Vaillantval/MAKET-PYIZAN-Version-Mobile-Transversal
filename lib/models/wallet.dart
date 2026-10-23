@@ -34,6 +34,8 @@ class WalletDepotHorsLigne with _$WalletDepotHorsLigne {
   const factory WalletDepotHorsLigne({
     @JsonKey(name: 'numero_moncash') String? numeroMoncash,
     @JsonKey(name: 'numero_natcash') String? numeroNatcash,
+    // Comptes configurés par l'admin pour les recharges (banque, MonCash…)
+    @Default([]) List<Map<String, dynamic>> moyens,
   }) = _WalletDepotHorsLigne;
 
   factory WalletDepotHorsLigne.fromJson(Map<String, dynamic> json) =>

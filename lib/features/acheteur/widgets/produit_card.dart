@@ -33,7 +33,8 @@ class ProduitCard extends ConsumerWidget {
     final favori    = ref.watch(favorisProvider).contains(produit.id);
     final remise    = produit.remisePourcent;
     final imageUrl  = ImageUtils.imageUrl(produit.imagePrincipale);
-    final enRupture = produit.stockReel <= 0;
+    // Rupture : statut « epuise » du serveur (repli sur le stock réel)
+    final enRupture = produit.statut == 'epuise' || produit.stockReel <= 0;
     final vendeur   = (produit.producteur?['nom'] ?? '').toString();
 
     return Material(
@@ -76,7 +77,7 @@ class ProduitCard extends ConsumerWidget {
                       if (enRupture)
                         const Positioned(
                           top: 8, left: 8,
-                          child: _Badge(texte: 'Rupture', fond: AppColors.noir,
+                          child: _Badge(texte: 'Rupture de stock', fond: AppColors.noir,
                               texteCouleur: AppColors.blanc),
                         )
                       else if (produit.stockReel <= 5)

@@ -6,6 +6,7 @@ import '../../../core/constants/app_colors.dart';
 import '../../../providers/auth_provider.dart';
 import '../../../shared/widgets/geo_selector.dart';
 import '../../entreprise/widgets/entreprise_form_fields.dart';
+import '../../../core/utils/string_utils.dart';
 
 class RegisterScreen extends ConsumerStatefulWidget {
   const RegisterScreen({super.key});
@@ -219,8 +220,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                           setState(() => _obscure = !_obscure),
                     ),
                   ),
-                  validator: (v) => (v?.length ?? 0) < 8
-                      ? 'Min. 8 caractères' : null,
+                  validator: validerMotDePasse,
                 ),
                 const SizedBox(height: 20),
 
