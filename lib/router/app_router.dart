@@ -207,20 +207,27 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/acheteur/produit/:slug',
         builder: (_, state) => ProduitDetailScreen(slug: state.pathParameters['slug']!),
       ),
+      // Validation et paiement en plein écran : la barre de paiement reste
+      // seule en bas, sans les onglets
+      GoRoute(path: '/acheteur/checkout', builder: (_, __) => const CheckoutScreen()),
+      GoRoute(
+        path: '/acheteur/paiement/mobile',
+        builder: (_, state) {
+          // extra : {url, ref, methode} (cf. CheckoutScreen)
+          final extra = state.extra is Map ? state.extra as Map : const {};
+          return PaiementMoncashScreen(
+            redirectUrl: '${extra['url'] ?? state.uri.queryParameters['url'] ?? ''}',
+            commandeRef: extra['ref']?.toString() ?? state.uri.queryParameters['ref'],
+            methode:     extra['methode']?.toString() ?? 'moncash',
+          );
+        },
+      ),
       ShellRoute(
         builder: (ctx, state, child) => AcheteurShell(child: child),
         routes: [
           GoRoute(path: '/acheteur/accueil',    builder: (_, __) => const AccueilScreen()),
           GoRoute(path: '/acheteur/catalogue',  builder: (_, __) => const CatalogueScreen()),
           GoRoute(path: '/acheteur/panier',     builder: (_, __) => const PanierScreen()),
-          GoRoute(path: '/acheteur/checkout',   builder: (_, __) => const CheckoutScreen()),
-          GoRoute(
-            path: '/acheteur/paiement/moncash',
-            builder: (_, state) {
-              final redirectUrl = state.uri.queryParameters['redirectUrl'] ?? '/acheteur/commandes';
-              return PaiementMoncashScreen(redirectUrl: redirectUrl);
-            },
-          ),
           GoRoute(path: '/acheteur/commandes',  builder: (_, __) => const CommandesScreen()),
           GoRoute(
             path: '/acheteur/commande/:numero',

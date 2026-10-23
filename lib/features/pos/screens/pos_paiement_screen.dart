@@ -121,7 +121,7 @@ class _PosPaiementScreenState extends ConsumerState<PosPaiementScreen> {
     } catch (e) {
       if (!mounted) return;
       setState(() => _loading = false);
-      afficherMessage(context, 'Erreur : $e', succes: false);
+      afficherMessage(context, ErreurChargement.message(e), succes: false);
     }
   }
 

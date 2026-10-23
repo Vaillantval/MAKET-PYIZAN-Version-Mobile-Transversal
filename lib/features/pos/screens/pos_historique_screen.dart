@@ -53,7 +53,7 @@ class _PosHistoriqueScreenState extends ConsumerState<PosHistoriqueScreen> {
           onRefresh: () => ref.read(posHistoriqueProvider.notifier).charger(),
           child: state.when(
             loading: () => const Center(child: CircularProgressIndicator()),
-            error:   (e, _) => Center(child: Text('Erreur : $e')),
+            error:   (e, _) => ErreurChargement(e),
             data: (toutes) {
               final ventes = switch (_filtre) {
                 'attente' => toutes.where((v) => v.syncStatus == 'enAttente').toList(),

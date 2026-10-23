@@ -44,7 +44,7 @@ class _AdminCommandesScreenState extends ConsumerState<AdminCommandesScreen> {
       ),
       corps: state.when(
         loading: () => const LoadingWidget(),
-        error:   (e, _) => Center(child: Text('$e')),
+        error:   (e, _) => ErreurChargement(e),
         data:    (liste) {
           final commandes = _statut.isEmpty
               ? liste

@@ -34,7 +34,7 @@ class _AdminStocksScreenState extends ConsumerState<AdminStocksScreen> {
       ),
       corps: state.when(
         loading: () => const LoadingWidget(),
-        error:   (e, _) => Center(child: Text('$e')),
+        error:   (e, _) => ErreurChargement(e),
         data:    (data) {
           final liste = (data[_vue] as List?)
                   ?.cast<Map<String, dynamic>>() ?? const [];

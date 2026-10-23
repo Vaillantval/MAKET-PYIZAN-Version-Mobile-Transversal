@@ -185,7 +185,7 @@ class _PosSessionScreenState extends ConsumerState<PosSessionScreen> {
       body: SafeArea(
         child: sessionState.when(
           loading: () => const Center(child: CircularProgressIndicator()),
-          error:   (e, _) => Center(child: Text('Erreur : $e')),
+          error:   (e, _) => ErreurChargement(e),
           data: (session) {
             final ouverte = session != null && session.statut == 'ouverte';
 

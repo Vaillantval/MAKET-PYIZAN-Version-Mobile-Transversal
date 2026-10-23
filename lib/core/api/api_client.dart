@@ -4,16 +4,24 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 import '../constants/app_constants.dart';
 import '../storage/secure_storage.dart';
+import '../../providers/auth_provider.dart';
 
 final apiClientProvider = Provider<ApiClient>((ref) {
-  return ApiClient(ref.read(secureStorageProvider));
+  return ApiClient(
+    ref.read(secureStorageProvider),
+    // Lu à l'appel seulement (authProvider dépend lui-même de ce client)
+    onSessionExpiree: () => ref.read(authProvider.notifier).sessionExpiree(),
+  );
 });
 
 class ApiClient {
   late final Dio _dio;
   final SecureStorage _storage;
+  /// Appelé quand le serveur refuse le renouvellement du jeton (compte
+  /// supprimé, jeton révoqué) : l'app doit repasser en déconnecté.
+  final void Function()? onSessionExpiree;
 
-  ApiClient(this._storage) {
+  ApiClient(this._storage, {this.onSessionExpiree}) {
     _dio = Dio(
       BaseOptions(
         baseUrl:        AppConstants.baseUrl,
@@ -127,7 +135,10 @@ class ApiClient {
       }
       // Jeton refusé par le serveur → déconnexion. Échec réseau (null) :
       // garder la session, la requête échoue simplement (mode hors ligne)
-      if (refreshed == false) await _storage.clearTokens();
+      if (refreshed == false) {
+        await _storage.clearTokens();
+        onSessionExpiree?.call();
+      }
     }
     handler.next(error);
   }

@@ -52,7 +52,7 @@ class _AdminCollectesScreenState extends ConsumerState<AdminCollectesScreen> {
       ),
       corps: state.when(
         loading: () => const LoadingWidget(),
-        error:   (e, _) => Center(child: Text('$e')),
+        error:   (e, _) => ErreurChargement(e),
         data:    (collectes) {
           if (collectes.isEmpty) {
             return const EmptyState(

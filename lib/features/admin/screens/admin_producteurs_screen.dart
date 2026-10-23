@@ -44,7 +44,7 @@ class _AdminProducteursScreenState
       ),
       corps: state.when(
         loading: () => const LoadingWidget(),
-        error:   (e, _) => Center(child: Text('$e')),
+        error:   (e, _) => ErreurChargement(e),
         data:    (liste) {
           final entreprises = _statut.isEmpty
               ? liste

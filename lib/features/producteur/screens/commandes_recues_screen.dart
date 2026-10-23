@@ -72,7 +72,7 @@ class _CommandesList extends ConsumerWidget {
 
     return state.when(
       loading: () => const LoadingWidget(),
-      error:   (e, _) => Center(child: Text('Erreur : $e')),
+      error:   (e, _) => ErreurChargement(e),
       data:    (commandes) {
         if (commandes.isEmpty) {
           return const EmptyState(

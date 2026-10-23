@@ -22,7 +22,7 @@ class AdminCatalogueScreen extends ConsumerWidget {
       retour: '/admin/plus',
       corps: state.when(
         loading: () => const LoadingWidget(),
-        error:   (e, _) => Center(child: Text('$e')),
+        error:   (e, _) => ErreurChargement(e),
         data:    (produits) {
           if (produits.isEmpty) {
             return const EmptyState(

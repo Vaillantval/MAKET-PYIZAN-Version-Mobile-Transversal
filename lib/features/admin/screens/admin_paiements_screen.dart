@@ -24,7 +24,7 @@ class AdminPaiementsScreen extends ConsumerWidget {
       sousTitre: state.whenOrNull(data: (l) => '${l.length} à vérifier'),
       corps: state.when(
         loading: () => const LoadingWidget(),
-        error:   (e, _) => Center(child: Text('$e')),
+        error:   (e, _) => ErreurChargement(e),
         data:    (paiements) {
           if (paiements.isEmpty) {
             return const EmptyState(

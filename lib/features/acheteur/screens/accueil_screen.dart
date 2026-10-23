@@ -9,7 +9,7 @@ import '../../../providers/auth_provider.dart';
 import '../../../shared/ui/ui.dart';
 import '../../../shared/widgets/categorie_chip.dart';
 import '../../../shared/widgets/loading_widget.dart';
-import '../../../shared/widgets/logo_anime.dart';
+import '../../../shared/widgets/marque_animee.dart';
 import '../../entreprise/widgets/espace_entreprise.dart';
 import '../providers/catalogue_provider.dart';
 import '../providers/panier_provider.dart';
@@ -47,14 +47,14 @@ class AccueilScreen extends ConsumerWidget {
                       padding: const EdgeInsets.fromLTRB(20, 10, 16, 0),
                       child: Row(
                         children: [
-                          const LogoAnime(),
-                          const SizedBox(width: 10),
                           const Expanded(
-                            child: Text('Makèt Peyizan',
-                                style: TextStyle(
-                                    fontSize: 17,
-                                    fontWeight: FontWeight.w700,
-                                    letterSpacing: -0.3)),
+                            child: Align(
+                              alignment: Alignment.centerLeft,
+                              child: FittedBox(
+                                fit: BoxFit.scaleDown,
+                                child: MarqueAnimee(),
+                              ),
+                            ),
                           ),
                           // Accès à l'espace entreprise (membres d'au moins
                           // une entreprise ; la création se fait depuis le Profil)
@@ -96,7 +96,7 @@ class AccueilScreen extends ConsumerWidget {
                               style: const TextStyle(
                                   fontSize: 15, color: AppColors.grisTexte)),
                           const SizedBox(height: 2),
-                          const Text('Le marché local,\nlivré chez vous.',
+                          const Text('Sòti nan jaden\nrive lakay ou.',
                               style: TextStyle(
                                   fontSize: 28,
                                   height: 1.1,

@@ -72,7 +72,7 @@ class _AdminUsersScreenState
       ),
       corps: state.when(
         loading: () => const LoadingWidget(),
-        error:   (e, _) => Center(child: Text('$e')),
+        error:   (e, _) => ErreurChargement(e),
         data:    (users) {
           if (users.isEmpty) {
             return const EmptyState(

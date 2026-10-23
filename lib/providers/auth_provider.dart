@@ -45,7 +45,8 @@ class AuthState {
 final sessionUtilisateurProvider = Provider<int?>(
     (ref) => ref.watch(authProvider.select((s) => s.user?.id)));
 
-final authProvider = StateNotifierProvider<AuthNotifier, AuthState>((ref) {
+final StateNotifierProvider<AuthNotifier, AuthState> authProvider =
+    StateNotifierProvider<AuthNotifier, AuthState>((ref) {
   return AuthNotifier(
     ref.read(apiClientProvider),
     ref.read(secureStorageProvider),
@@ -265,6 +266,20 @@ class AuthNotifier extends StateNotifier<AuthState> {
     await _cache.clearAll();
     await _ref.read(entrepriseActiveIdProvider.notifier).quitter();
     state = const AuthState(status: AuthStatus.unauthenticated);
+  }
+
+  /// Session refusée par le serveur (renouvellement du jeton impossible) :
+  /// repasser en déconnecté sans appel réseau. Les écrans publics (boutique,
+  /// panier visiteur) restent accessibles, le reste redemande la connexion.
+  Future<void> sessionExpiree() async {
+    if (state.status != AuthStatus.authenticated) return;
+    await _storage.clearAll();
+    await _cache.clearAll();
+    await _ref.read(entrepriseActiveIdProvider.notifier).quitter();
+    state = const AuthState(
+      status: AuthStatus.unauthenticated,
+      error: 'Votre session a expiré. Reconnectez-vous.',
+    );
   }
 
   /// Recharger le profil (ex: après création d'une entreprise ou pour

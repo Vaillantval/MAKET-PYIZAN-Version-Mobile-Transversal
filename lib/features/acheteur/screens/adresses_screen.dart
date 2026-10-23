@@ -18,7 +18,7 @@ class AdressesScreen extends ConsumerWidget {
       appBar: AppBar(title: const Text('Mes adresses')),
       body: state.when(
         loading: () => const LoadingWidget(message: 'Chargement...'),
-        error: (e, _) => Center(child: Text('Erreur : $e')),
+        error: (e, _) => ErreurChargement(e),
         data: (adresses) {
           if (adresses.isEmpty) {
             return EmptyState(

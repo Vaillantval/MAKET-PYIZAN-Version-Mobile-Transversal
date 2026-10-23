@@ -29,7 +29,7 @@ class ProduitDetailScreen extends ConsumerWidget {
       loading: () => const Scaffold(body: LoadingWidget(message: 'Chargement…')),
       error: (e, _) => Scaffold(
         appBar: AppBar(),
-        body: Center(child: Text('Erreur : $e')),
+        body: ErreurChargement(e),
       ),
       data: (produit) {
         if (produit == null) {

@@ -29,7 +29,7 @@ class CommandeDetailScreen extends ConsumerWidget {
       ),
       body: commandeAsync.when(
         loading: () => const LoadingWidget(message: 'Chargement…'),
-        error: (e, _) => Center(child: Text('Erreur : $e')),
+        error: (e, _) => ErreurChargement(e),
         data: (commande) {
           if (commande == null) {
             return EmptyState(

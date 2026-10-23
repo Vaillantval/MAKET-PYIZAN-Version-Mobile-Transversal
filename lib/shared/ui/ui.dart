@@ -9,8 +9,10 @@ library;
 
 import 'dart:math' as math;
 
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import '../../core/constants/app_colors.dart';
+import '../../core/utils/api_error.dart';
 import '../../core/sons/sons_app.dart';
 
 export 'animations.dart';
@@ -951,4 +953,54 @@ void afficherMessage(BuildContext context, String message,
         ],
       ),
     ));
+}
+
+// ── Erreur de chargement ──────────────────────────────────────────────
+
+/// Écran d'erreur lisible à la place de l'exception brute : session
+/// expirée (401), problème de connexion, ou message du serveur, avec un
+/// bouton « Réessayer » facultatif.
+class ErreurChargement extends StatelessWidget {
+  final Object erreur;
+  final VoidCallback? onReessayer;
+  const ErreurChargement(this.erreur, {this.onReessayer, super.key});
+
+  static String message(Object e) {
+    if (e is DioException) {
+      if (e.response?.statusCode == 401) {
+        return 'Votre session a expiré. Reconnectez-vous pour continuer.';
+      }
+      if (e.response == null) {
+        return 'Connexion impossible. Vérifiez votre accès internet.';
+      }
+    }
+    return messageErreurApi(e, 'Une erreur est survenue. Réessayez dans un instant.');
+  }
+
+  @override
+  Widget build(BuildContext context) => Center(
+        child: Padding(
+          padding: const EdgeInsets.all(28),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const TuileIcone(Icons.cloud_off_rounded,
+                  couleur: AppColors.orange, taille: 56),
+              const SizedBox(height: 14),
+              Text(message(erreur),
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                      fontSize: 14.5, height: 1.4, color: AppColors.grisTexte)),
+              if (onReessayer != null) ...[
+                const SizedBox(height: 16),
+                OutlinedButton.icon(
+                  onPressed: onReessayer,
+                  icon: const Icon(Icons.refresh_rounded, size: 18),
+                  label: const Text('Réessayer'),
+                ),
+              ],
+            ],
+          ),
+        ),
+      );
 }

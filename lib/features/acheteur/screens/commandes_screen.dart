@@ -47,7 +47,7 @@ class _CommandesScreenState extends ConsumerState<CommandesScreen> {
             Expanded(
               child: state.when(
                 loading: () => const LoadingWidget(message: 'Chargement…'),
-                error: (e, _) => Center(child: Text('Erreur : $e')),
+                error: (e, _) => ErreurChargement(e),
                 data: (toutes) {
                   final commandes = switch (_filtre) {
                     'en_cours' => toutes.where((c) => _enCours.contains(c.statut)).toList(),

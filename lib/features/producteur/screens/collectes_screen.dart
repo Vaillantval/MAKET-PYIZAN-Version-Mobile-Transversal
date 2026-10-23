@@ -24,7 +24,7 @@ class CollectesProducteurScreen extends ConsumerWidget {
             Expanded(
               child: state.when(
                 loading: () => const LoadingWidget(),
-                error:   (e, _) => Center(child: Text('Erreur : $e')),
+                error:   (e, _) => ErreurChargement(e),
                 data:    (participations) {
                   if (participations.isEmpty) {
                     return const EmptyState(

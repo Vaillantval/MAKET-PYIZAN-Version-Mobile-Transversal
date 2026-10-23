@@ -20,7 +20,7 @@ class CommandeDetailScreen extends ConsumerWidget {
       appBar: AppBar(title: Text(numero)),
       body: state.when(
         loading: () => const LoadingWidget(),
-        error:   (e, _) => Center(child: Text('Erreur : $e')),
+        error:   (e, _) => ErreurChargement(e),
         data:    (commande) {
           if (commande == null) {
             return const EmptyState(

@@ -30,6 +30,7 @@ final _ecrans = [
   _Ecran('catalogue',        '/acheteur/catalogue',     () => utilisateurMembre),
   _Ecran('produit',          '/acheteur/produit/produit-1', () => utilisateurMembre),
   _Ecran('panier',           '/acheteur/panier',        () => utilisateurMembre),
+  _Ecran('checkout',         '/acheteur/checkout',      () => utilisateurMembre),
   _Ecran('commandes',        '/acheteur/commandes',     () => utilisateurMembre),
   _Ecran('commande_detail',  '/acheteur/commande/CMD-2026-00128', () => utilisateurMembre),
   _Ecran('profil',           '/acheteur/profil',        () => utilisateurMembre),

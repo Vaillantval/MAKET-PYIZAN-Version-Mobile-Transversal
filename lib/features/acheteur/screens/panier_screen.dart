@@ -44,7 +44,8 @@ class PanierScreen extends ConsumerWidget {
             Expanded(
               child: panierState.when(
                 loading: () => const LoadingWidget(message: 'Chargement du panier…'),
-                error:   (e, _) => Center(child: Text('Erreur : $e')),
+                error:   (e, _) => ErreurChargement(e,
+                    onReessayer: () => ref.read(panierProvider.notifier).charger()),
                 data:    (panier) {
                   if (panier.items.isEmpty) {
                     return EmptyState(
@@ -223,7 +224,7 @@ class PanierScreen extends ConsumerWidget {
                                 if (exigerConnexion(context, ref,
                                     retour: '/acheteur/checkout',
                                     motif: 'pour passer la commande')) {
-                                  context.go('/acheteur/checkout');
+                                  context.push('/acheteur/checkout');
                                 }
                               },
                               child: const Text('Passer la commande'),

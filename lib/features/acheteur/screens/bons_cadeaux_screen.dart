@@ -226,7 +226,7 @@ class _OngletBonsAchetes extends ConsumerWidget {
       loading: () => const Center(
           child: CircularProgressIndicator(color: AppColors.vertVif)),
       error: (e, _) => Center(
-          child: Text('Erreur : $e',
+          child: Text(ErreurChargement.message(e),
               style: const TextStyle(color: AppColors.rouge))),
       data: (bons) => bons.isEmpty
           ? const Center(
@@ -282,7 +282,7 @@ class _OngletBonsRecus extends ConsumerWidget {
       loading: () => const Center(
           child: CircularProgressIndicator(color: AppColors.vertVif)),
       error: (e, _) => Center(
-          child: Text('Erreur : $e',
+          child: Text(ErreurChargement.message(e),
               style: const TextStyle(color: AppColors.rouge))),
       data: (bons) => bons.isEmpty
           ? const Center(
