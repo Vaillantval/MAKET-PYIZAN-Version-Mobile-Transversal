@@ -21,3 +21,13 @@ class Adresse with _$Adresse {
   factory Adresse.fromJson(Map<String, dynamic> json) =>
       _$AdresseFromJson(json);
 }
+
+extension AdresseAffichage on Adresse {
+  /// Libellé du département à partir du code serveur (« sud_est » →
+  /// « Sud-Est », « grand_anse » → « Grand-Anse »).
+  String get departementLabel => departement
+      .split('_')
+      .where((m) => m.isNotEmpty)
+      .map((m) => m[0].toUpperCase() + m.substring(1))
+      .join('-');
+}

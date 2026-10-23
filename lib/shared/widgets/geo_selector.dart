@@ -78,10 +78,17 @@ class _GeoSelectorState extends ConsumerState<GeoSelector> {
   }
 
   void _setInitialValues() {
-    if (widget.initialDept != null) {
-      _selectedDept = widget.initialDept;
-      _chargerCommunes(widget.initialDept!);
-    }
+    final initial = widget.initialDept;
+    if (initial == null || initial.isEmpty) return;
+    // Accepte le slug (« sud_est ») ou le nom (« Sud-Est ») : la liste
+    // déroulante, elle, n'a que des slugs
+    final dept = _depts.firstWhere(
+      (d) => d['slug'] == initial || d['nom'] == initial,
+      orElse: () => {},
+    );
+    if (dept.isEmpty) return;
+    setState(() => _selectedDept = dept['slug'] as String);
+    _chargerCommunes(_selectedDept!);
   }
 
   void _chargerCommunes(String deptSlug) {

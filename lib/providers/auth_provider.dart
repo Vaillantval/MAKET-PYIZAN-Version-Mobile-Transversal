@@ -268,6 +268,21 @@ class AuthNotifier extends StateNotifier<AuthState> {
     state = const AuthState(status: AuthStatus.unauthenticated);
   }
 
+  /// Remplace le département du profil (donné à l'inscription) — appelé
+  /// quand l'acheteur enregistre une adresse dans un autre département.
+  /// Best-effort : un échec n'empêche pas l'adresse d'être créée.
+  Future<void> mettreAJourDepartement(String departement) async {
+    try {
+      final res  = await _api.patch(AppEndpoints.me, data: {'departement': departement});
+      final data = res.data as Map<String, dynamic>;
+      if (data['success'] == true && data['data'] is Map<String, dynamic>) {
+        final brut = data['data'] as Map<String, dynamic>;
+        await _cache.saveUser(brut);
+        state = state.copyWith(user: User.fromJson(brut));
+      }
+    } catch (_) {}
+  }
+
   /// Session refusée par le serveur (renouvellement du jeton impossible) :
   /// repasser en déconnecté sans appel réseau. Les écrans publics (boutique,
   /// panier visiteur) restent accessibles, le reste redemande la connexion.

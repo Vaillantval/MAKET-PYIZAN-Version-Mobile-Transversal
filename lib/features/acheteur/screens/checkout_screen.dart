@@ -477,7 +477,7 @@ class _Adresses extends StatelessWidget {
                         Text(a.rue,
                             style: const TextStyle(fontWeight: FontWeight.w700)),
                         const SizedBox(height: 2),
-                        Text('${a.commune} · ${a.departement}',
+                        Text('${a.commune} · ${a.departementLabel}',
                             style: const TextStyle(
                                 fontSize: 12.5, color: AppColors.grisTexte)),
                       ],

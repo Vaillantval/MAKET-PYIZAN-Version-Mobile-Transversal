@@ -28,7 +28,10 @@ mixin _$User {
   @JsonKey(name: 'last_name')
   String get lastName => throw _privateConstructorUsedError;
   String get role => throw _privateConstructorUsedError;
-  String get telephone => throw _privateConstructorUsedError;
+  String get telephone =>
+      throw _privateConstructorUsedError; // Département donné à l'inscription (profil acheteur, slug : ouest,
+// sud_est…) — présélectionné dans le formulaire d'adresse
+  String get departement => throw _privateConstructorUsedError;
   String? get photo => throw _privateConstructorUsedError;
   @JsonKey(name: 'is_verified')
   bool get isVerified => throw _privateConstructorUsedError;
@@ -63,6 +66,7 @@ abstract class $UserCopyWith<$Res> {
       @JsonKey(name: 'last_name') String lastName,
       String role,
       String telephone,
+      String departement,
       String? photo,
       @JsonKey(name: 'is_verified') bool isVerified,
       @JsonKey(name: 'is_superuser') bool isSuperuser,
@@ -93,6 +97,7 @@ class _$UserCopyWithImpl<$Res, $Val extends User>
     Object? lastName = null,
     Object? role = null,
     Object? telephone = null,
+    Object? departement = null,
     Object? photo = freezed,
     Object? isVerified = null,
     Object? isSuperuser = null,
@@ -128,6 +133,10 @@ class _$UserCopyWithImpl<$Res, $Val extends User>
       telephone: null == telephone
           ? _value.telephone
           : telephone // ignore: cast_nullable_to_non_nullable
+              as String,
+      departement: null == departement
+          ? _value.departement
+          : departement // ignore: cast_nullable_to_non_nullable
               as String,
       photo: freezed == photo
           ? _value.photo
@@ -172,6 +181,7 @@ abstract class _$$UserImplCopyWith<$Res> implements $UserCopyWith<$Res> {
       @JsonKey(name: 'last_name') String lastName,
       String role,
       String telephone,
+      String departement,
       String? photo,
       @JsonKey(name: 'is_verified') bool isVerified,
       @JsonKey(name: 'is_superuser') bool isSuperuser,
@@ -199,6 +209,7 @@ class __$$UserImplCopyWithImpl<$Res>
     Object? lastName = null,
     Object? role = null,
     Object? telephone = null,
+    Object? departement = null,
     Object? photo = freezed,
     Object? isVerified = null,
     Object? isSuperuser = null,
@@ -234,6 +245,10 @@ class __$$UserImplCopyWithImpl<$Res>
       telephone: null == telephone
           ? _value.telephone
           : telephone // ignore: cast_nullable_to_non_nullable
+              as String,
+      departement: null == departement
+          ? _value.departement
+          : departement // ignore: cast_nullable_to_non_nullable
               as String,
       photo: freezed == photo
           ? _value.photo
@@ -274,6 +289,7 @@ class _$UserImpl implements _User {
       @JsonKey(name: 'last_name') required this.lastName,
       required this.role,
       this.telephone = '',
+      this.departement = '',
       this.photo,
       @JsonKey(name: 'is_verified') this.isVerified = false,
       @JsonKey(name: 'is_superuser') this.isSuperuser = false,
@@ -302,6 +318,11 @@ class _$UserImpl implements _User {
   @override
   @JsonKey()
   final String telephone;
+// Département donné à l'inscription (profil acheteur, slug : ouest,
+// sud_est…) — présélectionné dans le formulaire d'adresse
+  @override
+  @JsonKey()
+  final String departement;
   @override
   final String? photo;
   @override
@@ -329,7 +350,7 @@ class _$UserImpl implements _User {
 
   @override
   String toString() {
-    return 'User(id: $id, username: $username, email: $email, firstName: $firstName, lastName: $lastName, role: $role, telephone: $telephone, photo: $photo, isVerified: $isVerified, isSuperuser: $isSuperuser, isStaff: $isStaff, profilProducteurStatut: $profilProducteurStatut, entreprises: $entreprises)';
+    return 'User(id: $id, username: $username, email: $email, firstName: $firstName, lastName: $lastName, role: $role, telephone: $telephone, departement: $departement, photo: $photo, isVerified: $isVerified, isSuperuser: $isSuperuser, isStaff: $isStaff, profilProducteurStatut: $profilProducteurStatut, entreprises: $entreprises)';
   }
 
   @override
@@ -348,6 +369,8 @@ class _$UserImpl implements _User {
             (identical(other.role, role) || other.role == role) &&
             (identical(other.telephone, telephone) ||
                 other.telephone == telephone) &&
+            (identical(other.departement, departement) ||
+                other.departement == departement) &&
             (identical(other.photo, photo) || other.photo == photo) &&
             (identical(other.isVerified, isVerified) ||
                 other.isVerified == isVerified) &&
@@ -371,6 +394,7 @@ class _$UserImpl implements _User {
       lastName,
       role,
       telephone,
+      departement,
       photo,
       isVerified,
       isSuperuser,
@@ -403,6 +427,7 @@ abstract class _User implements User {
       @JsonKey(name: 'last_name') required final String lastName,
       required final String role,
       final String telephone,
+      final String departement,
       final String? photo,
       @JsonKey(name: 'is_verified') final bool isVerified,
       @JsonKey(name: 'is_superuser') final bool isSuperuser,
@@ -428,7 +453,11 @@ abstract class _User implements User {
   @override
   String get role;
   @override
-  String get telephone;
+  String
+      get telephone; // Département donné à l'inscription (profil acheteur, slug : ouest,
+// sud_est…) — présélectionné dans le formulaire d'adresse
+  @override
+  String get departement;
   @override
   String? get photo;
   @override

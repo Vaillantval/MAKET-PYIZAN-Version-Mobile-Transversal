@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/api/api_client.dart';
 import '../../../core/api/api_endpoints.dart';
+import '../../../core/utils/api_error.dart';
 import '../../../models/adresse.dart';
 import '../../../providers/auth_provider.dart';
 
@@ -34,16 +35,22 @@ class AdresseNotifier
     }
   }
 
-  Future<bool> creer(Map<String, dynamic> body) async {
+  /// POST /api/auth/adresses/ — champs requis côté serveur : libelle,
+  /// nom_complet, rue, commune, departement (slug). Renvoie null en cas de
+  /// succès, sinon le message d'erreur du serveur.
+  Future<String?> creer(Map<String, dynamic> body) async {
+    const parDefaut = "L'adresse n'a pas pu être créée.";
     try {
       final res  = await _api.post(AppEndpoints.adresses, data: body);
       final data = res.data as Map<String, dynamic>;
       if (data['success'] == true) {
         await charger();
-        return true;
+        return null;
       }
-    } catch (_) {}
-    return false;
+      return extraireMessageErreur(data['error'], parDefaut);
+    } catch (e) {
+      return messageErreurApi(e, parDefaut);
+    }
   }
 
   Future<bool> setDefault(int id) async {

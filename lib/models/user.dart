@@ -14,6 +14,9 @@ class User with _$User {
     @JsonKey(name: 'last_name')  required String lastName,
     required String role,
     @Default('') String telephone,
+    // Département donné à l'inscription (profil acheteur, slug : ouest,
+    // sud_est…) — présélectionné dans le formulaire d'adresse
+    @Default('') String departement,
     String? photo,
     @JsonKey(name: 'is_verified')  @Default(false) bool isVerified,
     @JsonKey(name: 'is_superuser') @Default(false) bool isSuperuser,

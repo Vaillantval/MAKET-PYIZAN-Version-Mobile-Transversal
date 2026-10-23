@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../providers/auth_provider.dart';
+import '../../../models/adresse.dart';
 import '../providers/adresse_provider.dart';
 import '../../../shared/widgets/geo_selector.dart';
 import '../../../shared/widgets/loading_widget.dart';
@@ -57,7 +59,7 @@ class AdressesScreen extends ConsumerWidget {
                             ),
                           ),
                           const SizedBox(height: 2),
-                          Text('${addr.commune}, ${addr.departement}',
+                          Text('${addr.commune}, ${addr.departementLabel}',
                             style: const TextStyle(
                               fontSize: 12.5,
                               color: AppColors.grisTexte,
@@ -152,46 +154,85 @@ class _ModalCreationAdresse extends ConsumerStatefulWidget {
 
 class _ModalCreationAdresseState
     extends ConsumerState<_ModalCreationAdresse> {
-  late String _dept = '';
-  late String _commune = '';
-  late String _section = '';
-  final _rueCtrl = TextEditingController();
+  static const _libelles = ['Domicile', 'Bureau', 'Autre'];
+
+  String _libelle = 'Domicile';
+  String _dept    = '';
+  String _commune = '';
+  String _section = '';
+  final _rueCtrl     = TextEditingController();
+  final _nomCtrl     = TextEditingController();
+  final _telCtrl     = TextEditingController();
+  final _detailsCtrl = TextEditingController();
   bool _isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // Destinataire prérempli avec le compte connecté
+    final user = ref.read(authProvider).user;
+    if (user != null) {
+      _nomCtrl.text = '${user.firstName} ${user.lastName}'.trim();
+      _telCtrl.text = user.telephone;
+      // Département donné à l'inscription, présélectionné (modifiable)
+      _deptProfil = _slugDepartement(user.departement);
+      _dept = _deptProfil;
+    }
+  }
+
+  /// Département du profil au format du serveur (« Sud-Est » → « sud_est »).
+  String _deptProfil = '';
+
+  static String _slugDepartement(String v) => v
+      .trim()
+      .toLowerCase()
+      .replaceAll(RegExp(r"[\s'\-]+"), '_');
 
   @override
   void dispose() {
     _rueCtrl.dispose();
+    _nomCtrl.dispose();
+    _telCtrl.dispose();
+    _detailsCtrl.dispose();
     super.dispose();
   }
 
   Future<void> _creer() async {
-    if (_dept.isEmpty ||
-        _commune.isEmpty ||
-        _rueCtrl.text.isEmpty) {
-      afficherMessage(context, 'Veuillez remplir tous les champs', succes: false);
+    if (_dept.isEmpty || _commune.isEmpty ||
+        _rueCtrl.text.trim().isEmpty || _nomCtrl.text.trim().isEmpty) {
+      afficherMessage(context,
+          'Renseignez le destinataire, le département, la commune et la rue.',
+          succes: false);
       return;
     }
 
     setState(() => _isLoading = true);
-
-    final success = await widget.ref
-        .read(adressesProvider.notifier)
-        .creer({
-      'rue': _rueCtrl.text,
-      'commune': _commune,
-      'departement': _dept,
+    final premiere = (widget.ref.read(adressesProvider).valueOrNull ?? const []).isEmpty;
+    final erreur = await widget.ref.read(adressesProvider.notifier).creer({
+      'libelle':           _libelle,
+      'nom_complet':       _nomCtrl.text.trim(),
+      'telephone':         _telCtrl.text.trim(),
+      'rue':               _rueCtrl.text.trim(),
+      'commune':           _commune,
+      'departement':       _dept,
       'section_communale': _section,
+      'details':           _detailsCtrl.text.trim(),
+      // La première adresse devient l'adresse par défaut
+      if (premiere) 'is_default': true,
     });
-
+    if (!mounted) return;
     setState(() => _isLoading = false);
 
-    if (mounted) {
-      if (success) {
-        afficherMessage(context, 'Adresse ajoutée');
-        Navigator.pop(context);
-      } else {
-        afficherMessage(context, 'L\'adresse n\'a pas pu être créée', succes: false);
+    if (erreur == null) {
+      // Autre département que celui du profil : il remplace celui de
+      // l'inscription
+      if (_dept != _deptProfil) {
+        widget.ref.read(authProvider.notifier).mettreAJourDepartement(_dept);
       }
+      afficherMessage(context, 'Adresse ajoutée');
+      Navigator.pop(context);
+    } else {
+      afficherMessage(context, erreur, succes: false);
     }
   }
 
@@ -214,10 +255,45 @@ class _ModalCreationAdresseState
                 fontWeight: FontWeight.w700,
               ),
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 16),
+
+            // Libellé
+            Wrap(
+              spacing: 8,
+              children: [
+                for (final l in _libelles)
+                  ChoiceChip(
+                    label: Text(l),
+                    selected: _libelle == l,
+                    onSelected: (_) => setState(() => _libelle = l),
+                  ),
+              ],
+            ),
+            const SizedBox(height: 16),
+
+            // Destinataire
+            TextField(
+              controller: _nomCtrl,
+              textCapitalization: TextCapitalization.words,
+              decoration: const InputDecoration(
+                labelText: 'Nom du destinataire',
+                prefixIcon: Icon(Icons.person_outline_rounded),
+              ),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: _telCtrl,
+              keyboardType: TextInputType.phone,
+              decoration: const InputDecoration(
+                labelText: 'Téléphone (facultatif)',
+                prefixIcon: Icon(Icons.phone_outlined),
+              ),
+            ),
+            const SizedBox(height: 16),
 
             // Sélecteur géographique
             GeoSelector(
+              initialDept: _deptProfil.isEmpty ? null : _deptProfil,
               onChanged: (dept, commune, section) {
                 setState(() {
                   _dept = dept;
@@ -234,6 +310,15 @@ class _ModalCreationAdresseState
               decoration: const InputDecoration(
                 labelText: 'Rue / Lieu-dit',
                 prefixIcon: Icon(Icons.signpost_outlined),
+              ),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: _detailsCtrl,
+              maxLines: 2,
+              decoration: const InputDecoration(
+                labelText: 'Instructions de livraison (facultatif)',
+                prefixIcon: Icon(Icons.notes_rounded),
               ),
             ),
             const SizedBox(height: 20),
