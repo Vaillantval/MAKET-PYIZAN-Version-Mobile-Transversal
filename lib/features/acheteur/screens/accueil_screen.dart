@@ -9,6 +9,7 @@ import '../../../providers/auth_provider.dart';
 import '../../../shared/ui/ui.dart';
 import '../../../shared/widgets/categorie_chip.dart';
 import '../../../shared/widgets/loading_widget.dart';
+import '../../../shared/widgets/logo_anime.dart';
 import '../../entreprise/widgets/espace_entreprise.dart';
 import '../providers/catalogue_provider.dart';
 import '../providers/panier_provider.dart';
@@ -46,11 +47,7 @@ class AccueilScreen extends ConsumerWidget {
                       padding: const EdgeInsets.fromLTRB(20, 10, 16, 0),
                       child: Row(
                         children: [
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(10),
-                            child: Image.asset('assets/images/maketlakay.jpeg',
-                                width: 34, height: 34, fit: BoxFit.cover),
-                          ),
+                          const LogoAnime(),
                           const SizedBox(width: 10),
                           const Expanded(
                             child: Text('MaketLakay',

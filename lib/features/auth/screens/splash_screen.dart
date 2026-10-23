@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../shared/widgets/logo_anime.dart';
 import '../../../core/constants/app_colors.dart';
 
 class SplashScreen extends ConsumerStatefulWidget {
@@ -51,18 +52,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
               mainAxisSize: MainAxisSize.min,
               children: [
                 // Logo
-                Container(
-                  width:  100,
-                  height: 100,
-                  decoration: BoxDecoration(
-                    color: AppColors.blanc,
-                    borderRadius: BorderRadius.circular(30),
-                    image: const DecorationImage(
-                      image: AssetImage('assets/images/maketlakay.jpeg'),
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                ),
+                const LogoAnime(taille: 100, rayon: 30),
                 const SizedBox(height: 24),
                 const Text.rich(
                   TextSpan(children: [

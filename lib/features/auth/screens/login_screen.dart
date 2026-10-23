@@ -2,6 +2,7 @@ import '../../../shared/ui/ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../../shared/widgets/logo_anime.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../providers/auth_provider.dart';
 
@@ -59,19 +60,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 Center(
                   child: Column(
                     children: [
-                      Container(
-                        width:  96,
-                        height: 96,
-                        decoration: BoxDecoration(
-                          color:        AppColors.blanc,
-                          borderRadius: BorderRadius.circular(28),
-                          border: Border.all(color: AppColors.grisBord),
-                          image: const DecorationImage(
-                            image: AssetImage('assets/images/maketlakay.jpeg'),
-                            fit: BoxFit.cover,
-                          ),
-                        ),
-                      ),
+                      LogoAnime(
+                          taille: 96,
+                          rayon: 28,
+                          bordure: Border.all(color: AppColors.grisBord)),
                       const SizedBox(height: 16),
                       const Text.rich(
                         TextSpan(children: [
