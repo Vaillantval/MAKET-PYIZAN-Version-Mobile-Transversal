@@ -441,20 +441,95 @@ Widget _buildBottomNav(BuildContext context, List<_NavItem> items) {
         i.autres.any((a) => location.startsWith(a)),
   ).clamp(0, items.length - 1);
 
-  return DecoratedBox(
-    decoration: const BoxDecoration(
-      border: Border(top: BorderSide(color: AppColors.grisBord)),
-    ),
-    child: NavigationBar(
-      selectedIndex: currentIndex,
-      onDestinationSelected: (i) => context.go(items[i].route),
-      destinations: items.map((i) => NavigationDestination(
-        icon:         _iconeNav(i, i.icon),
-        selectedIcon: _iconeNav(i, i.iconActif ?? i.icon),
-        label:        i.label,
-      )).toList(),
+  // Barre flottante en pilule vert forêt (cf. maquettes) : l'onglet actif
+  // est posé dans une pastille claire, les autres en blanc atténué.
+  return SafeArea(
+    top: false,
+    minimum: const EdgeInsets.only(bottom: 10),
+    child: Padding(
+      padding: const EdgeInsets.fromLTRB(14, 4, 14, 0),
+      child: Container(
+        height: 66,
+        padding: const EdgeInsets.all(6),
+        decoration: BoxDecoration(
+          color: AppColors.noir,
+          borderRadius: BorderRadius.circular(33),
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.noir.withValues(alpha: 0.18),
+              blurRadius: 18,
+              offset: const Offset(0, 6),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            for (var i = 0; i < items.length; i++)
+              Expanded(
+                child: _OngletNav(
+                  item: items[i],
+                  actif: i == currentIndex,
+                  onTap: () => context.go(items[i].route),
+                ),
+              ),
+          ],
+        ),
+      ),
     ),
   );
+}
+
+class _OngletNav extends StatelessWidget {
+  final _NavItem item;
+  final bool actif;
+  final VoidCallback onTap;
+  const _OngletNav({required this.item, required this.actif, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    final couleur = actif ? AppColors.noir : AppColors.blanc.withValues(alpha: 0.72);
+    return Semantics(
+      button: true,
+      selected: actif,
+      label: item.label,
+      excludeSemantics: true,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 220),
+          curve: Curves.easeOutCubic,
+          margin: const EdgeInsets.symmetric(horizontal: 2),
+          decoration: BoxDecoration(
+            color: actif ? AppColors.vertMenthe : Colors.transparent,
+            borderRadius: BorderRadius.circular(27),
+          ),
+          child: IconTheme(
+            data: IconThemeData(color: couleur, size: 22),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                _iconeNav(item, actif ? (item.iconActif ?? item.icon) : item.icon),
+                const SizedBox(height: 2),
+                Text(
+                  item.label,
+                  maxLines: 1,
+                  overflow: TextOverflow.fade,
+                  softWrap: false,
+                  style: TextStyle(
+                    fontFamily: 'DMSans',
+                    fontSize: 10.5,
+                    fontWeight: actif ? FontWeight.w700 : FontWeight.w500,
+                    color: couleur,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 }
 
 Widget _iconeNav(_NavItem item, IconData icone) {

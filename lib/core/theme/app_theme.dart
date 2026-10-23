@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 import '../constants/app_colors.dart';
 
-/// Thème Material 3 de Makèt Peyizan : fond gris très clair, cartes blanches à
-/// bordure fine, aucune ombre, barres d'application claires, boutons
-/// principaux noirs en pilule, typographie DM Sans. Le vert de la marque est
-/// l'accent (sélection, navigation, focus).
+/// Thème Material 3 de Makèt Peyizan : fond sauge clair, cartes blanches
+/// très arrondies à bordure fine, aucune ombre, barres d'application
+/// claires, boutons principaux vert forêt en pilule, typographie DM Sans.
 class AppTheme {
-  static const _rayon = 14.0;
+  static const _rayon = 16.0;
 
   static ThemeData get lightTheme {
     final scheme = ColorScheme.fromSeed(
@@ -146,7 +145,7 @@ class AppTheme {
         elevation: 0,
         margin: const EdgeInsets.symmetric(vertical: 4),
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(18),
+          borderRadius: BorderRadius.circular(22),
           side: const BorderSide(color: AppColors.grisBord),
         ),
       ),

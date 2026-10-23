@@ -80,8 +80,12 @@ class DashboardProducteurScreen extends ConsumerWidget {
         .clamp(0, s.commandesTotal);
 
     return [
-      // ── Revenus ─────────────────────────────────────────────
+      // ── Revenus : en-tête vert forêt (cf. maquette tableau de bord) ──
       Surface(
+        couleur: AppColors.noir,
+        bordure: false,
+        rayon: 26,
+        padding: const EdgeInsets.all(20),
         child: Row(
           children: [
             Expanded(
@@ -90,22 +94,23 @@ class DashboardProducteurScreen extends ConsumerWidget {
                 children: [
                   const Text('Revenus du mois',
                       style: TextStyle(
-                          fontSize: 13, color: AppColors.grisTexte)),
+                          fontSize: 13, color: Color(0xB8FFFFFF))),
                   const SizedBox(height: 6),
                   FittedBox(
                     fit: BoxFit.scaleDown,
                     alignment: Alignment.centerLeft,
                     child: Text(FormatUtils.htg(s.revenusMois),
                         style: const TextStyle(
-                            fontSize: 26,
+                            fontSize: 28,
                             fontWeight: FontWeight.w700,
+                            color: AppColors.blanc,
                             letterSpacing: -0.8)),
                   ),
                   const SizedBox(height: 10),
                   Row(
                     children: [
                       const Icon(Icons.account_balance_outlined,
-                          size: 15, color: AppColors.grisLeger),
+                          size: 15, color: Color(0x99FFFFFF)),
                       const SizedBox(width: 6),
                       Flexible(
                         child: Text(
@@ -113,7 +118,7 @@ class DashboardProducteurScreen extends ConsumerWidget {
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: const TextStyle(
-                              fontSize: 12.5, color: AppColors.grisTexte),
+                              fontSize: 12.5, color: Color(0xB8FFFFFF)),
                         ),
                       ),
                     ],
@@ -126,13 +131,14 @@ class DashboardProducteurScreen extends ConsumerWidget {
               children: [
                 AnneauProgression(
                   valeur: tauxLivraison,
-                  couleur: AppColors.vertVif,
+                  couleur: AppColors.vertMoyen,
+                  couleurTexte: AppColors.blanc,
                   taille: 70,
                 ),
                 const SizedBox(height: 6),
                 const Text('livrées',
                     style: TextStyle(
-                        fontSize: 11.5, color: AppColors.grisTexte)),
+                        fontSize: 11.5, color: Color(0xB8FFFFFF))),
               ],
             ),
           ],

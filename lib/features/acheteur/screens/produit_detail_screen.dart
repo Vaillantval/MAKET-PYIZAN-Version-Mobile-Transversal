@@ -139,6 +139,17 @@ class _FicheState extends ConsumerState<_Fiche> {
               ),
               const SizedBox(width: 8),
             ],
+            // Panneau blanc arrondi qui chevauche le bas de l'image
+            bottom: const PreferredSize(
+              preferredSize: Size.fromHeight(26),
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  color: AppColors.blanc,
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
+                ),
+                child: SizedBox(height: 26, width: double.infinity),
+              ),
+            ),
             flexibleSpace: FlexibleSpaceBar(
               background: imageUrl.isNotEmpty
                   ? CachedNetworkImage(imageUrl: imageUrl, fit: BoxFit.cover)
@@ -153,7 +164,7 @@ class _FicheState extends ConsumerState<_Fiche> {
           ),
           SliverToBoxAdapter(
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
+              padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [

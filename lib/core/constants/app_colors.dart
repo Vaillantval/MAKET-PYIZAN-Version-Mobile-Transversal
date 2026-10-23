@@ -2,27 +2,28 @@ import 'package:flutter/material.dart';
 
 /// Palette Makèt Peyizan.
 ///
-/// Interface sobre : fond gris très clair, cartes blanches à bordure fine,
-/// texte encre, actions principales en noir. Le vert de la marque sert
-/// d'accent (sélection, navigation, indicateurs) ; les tableaux de bord
-/// utilisent des paires couleur / teinte pastel pour les indicateurs.
+/// Inspirée du logo et des maquettes de référence : fond sauge clair,
+/// cartes blanches arrondies, encre vert forêt très profond pour les textes
+/// comme pour les actions principales (boutons, sélections, barre de
+/// navigation). Le vert vif et l'or du soleil servent d'accents ; les
+/// tableaux de bord utilisent des paires couleur / teinte pastel.
 class AppColors {
-  // Marque (logo « ML » : vert forêt + orange)
-  static const Color vertFonce  = Color(0xFF0B4A24);
-  static const Color vertVif    = Color(0xFF1F8A4C);
-  static const Color vertMoyen  = Color(0xFF6CB87A);
-  static const Color vertMenthe = Color(0xFFE8F4EC);
-  static const Color jaune      = Color(0xFFF26B1D); // orange du logo
-  static const Color jauneClair = Color(0xFFFFF1E8);
+  // Marque (logo : vert forêt, vert prairie, soleil doré)
+  static const Color vertFonce  = Color(0xFF1F4A2C);
+  static const Color vertVif    = Color(0xFF2E8540);
+  static const Color vertMoyen  = Color(0xFF7DB86A);
+  static const Color vertMenthe = Color(0xFFDDEBD5);
+  static const Color jaune      = Color(0xFFD99A0B); // or du soleil (lisible sur blanc)
+  static const Color jauneClair = Color(0xFFFFF5D6);
 
-  // Neutres
+  // Neutres (teintés de vert, comme les maquettes)
   static const Color blanc      = Color(0xFFFFFFFF);
-  static const Color noir       = Color(0xFF141416); // encre : textes, boutons
-  static const Color grisClair  = Color(0xFFF6F6F8); // fond des écrans
-  static const Color surface2   = Color(0xFFF1F1F4); // vignettes, pastilles
-  static const Color grisTexte  = Color(0xFF6E6E78);
-  static const Color grisLeger  = Color(0xFFA3A3AD); // libellés discrets
-  static const Color grisBord   = Color(0xFFEBEBEF);
+  static const Color noir       = Color(0xFF17301F); // encre : textes, boutons
+  static const Color grisClair  = Color(0xFFEEF2EA); // fond sauge des écrans
+  static const Color surface2   = Color(0xFFE4EBDF); // vignettes, pastilles
+  static const Color grisTexte  = Color(0xFF5B6A5F);
+  static const Color grisLeger  = Color(0xFF97A39A); // libellés discrets
+  static const Color grisBord   = Color(0xFFDDE5D8);
 
   // Couleurs d'état / d'indicateurs (fort + teinte)
   static const Color rouge       = Color(0xFFD94141);
@@ -33,12 +34,12 @@ class AppColors {
   static const Color bleuTeinte  = Color(0xFFEBF2FE);
   static const Color violet      = Color(0xFF7657E8);
   static const Color violetTeinte= Color(0xFFF0EDFD);
-  static const Color vertTeinte  = Color(0xFFE9F6EE);
+  static const Color vertTeinte  = Color(0xFFE3EFDB);
   static const Color ambre       = Color(0xFFD9A11A);
   static const Color ambreTeinte = Color(0xFFFFF7E0);
 
   // Ancien dégradé des en-têtes (cartes solde)
-  static const Color vertDegrade = Color(0xFF17703A);
+  static const Color vertDegrade = Color(0xFF2B6A3C);
 
   // Statuts commandes
   static const Color statutAttente   = orange;
@@ -53,7 +54,7 @@ class AppColors {
         0xFF3B78E7 => bleuTeinte,
         0xFF7657E8 => violetTeinte,
         0xFFD9A11A => ambreTeinte,
-        0xFF1F8A4C || 0xFF0B4A24 => vertTeinte,
+        0xFF2E8540 || 0xFF1F4A2C => vertTeinte,
         _ => c.withValues(alpha: 0.10),
       };
 }

@@ -116,8 +116,12 @@ class AdminDashboardScreen extends ConsumerWidget {
         .clamp(0, s.totalCommandes);
 
     return [
-      // ── Revenus ─────────────────────────────────────────────
+      // ── Revenus : en-tête vert forêt (cf. maquette tableau de bord) ──
       Surface(
+        couleur: AppColors.noir,
+        bordure: false,
+        rayon: 26,
+        padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -126,10 +130,10 @@ class AdminDashboardScreen extends ConsumerWidget {
                 const Expanded(
                   child: Text('Revenus du mois',
                       style: TextStyle(
-                          fontSize: 13, color: AppColors.grisTexte)),
+                          fontSize: 13, color: Color(0xB8FFFFFF))),
                 ),
                 PuceStatut('${s.commandesMois} commande(s)',
-                    couleur: AppColors.vertVif),
+                    couleur: AppColors.vertMoyen),
               ],
             ),
             const SizedBox(height: 6),
@@ -138,14 +142,16 @@ class AdminDashboardScreen extends ConsumerWidget {
               alignment: Alignment.centerLeft,
               child: Text(FormatUtils.htg(s.revenuMois),
                   style: const TextStyle(
-                      fontSize: 28,
+                      fontSize: 30,
                       fontWeight: FontWeight.w700,
+                      color: AppColors.blanc,
                       letterSpacing: -0.8)),
             ),
             const SizedBox(height: 14),
             BarreProgression(
               s.revenuMois == 0 ? 0 : s.revenu7j / s.revenuMois,
-              couleur: AppColors.vertFonce,
+              couleur: AppColors.vertMoyen,
+              fond: AppColors.blanc.withValues(alpha: 0.14),
             ),
             const SizedBox(height: 10),
             Row(
@@ -304,14 +310,15 @@ class _MiniStat extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(libelle,
-              style: const TextStyle(fontSize: 12, color: AppColors.grisTexte)),
+              style: TextStyle(fontSize: 12, color: AppColors.blanc.withValues(alpha: 0.72))),
           const SizedBox(height: 2),
           FittedBox(
             fit: BoxFit.scaleDown,
             alignment: Alignment.centerLeft,
             child: Text(valeur,
                 style: const TextStyle(
-                    fontSize: 14.5, fontWeight: FontWeight.w700)),
+                    fontSize: 14.5, fontWeight: FontWeight.w700,
+                    color: AppColors.blanc)),
           ),
         ],
       );

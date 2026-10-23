@@ -493,6 +493,7 @@ class AnneauProgression extends StatelessWidget {
   final double taille;
   final double epaisseur;
   final String? texte;
+  final Color couleurTexte;
 
   const AnneauProgression({
     required this.valeur,
@@ -500,6 +501,7 @@ class AnneauProgression extends StatelessWidget {
     this.taille = 64,
     this.epaisseur = 7,
     this.texte,
+    this.couleurTexte = AppColors.noir,
     super.key,
   });
 
@@ -516,7 +518,7 @@ class AnneauProgression extends StatelessWidget {
                 style: TextStyle(
                     fontSize: taille * 0.2,
                     fontWeight: FontWeight.w700,
-                    color: AppColors.noir)),
+                    color: couleurTexte)),
           ),
         ),
       );

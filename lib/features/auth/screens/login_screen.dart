@@ -67,10 +67,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       const SizedBox(height: 16),
                       const Text.rich(
                         TextSpan(children: [
-                          TextSpan(text: 'Maket',
+                          TextSpan(text: 'Makèt ',
                               style: TextStyle(color: AppColors.vertFonce)),
-                          TextSpan(text: 'Lakay',
-                              style: TextStyle(color: AppColors.jaune)),
+                          TextSpan(text: 'Peyizan',
+                              style: TextStyle(color: AppColors.vertVif)),
                         ]),
                         style: TextStyle(
                           fontSize:    30,
@@ -80,7 +80,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       ),
                       const SizedBox(height: 2),
                       const Text(
-                        'Sòti nan jaden, rive lakay ou',
+                        'Sòti nan jaden rive lakay, manje m se medikaman m',
                         style: TextStyle(
                           fontSize: 13,
                           color:    AppColors.grisTexte,

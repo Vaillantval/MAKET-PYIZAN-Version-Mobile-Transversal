@@ -56,8 +56,8 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                 const SizedBox(height: 24),
                 const Text.rich(
                   TextSpan(children: [
-                    TextSpan(text: 'Maket'),
-                    TextSpan(text: 'Lakay', style: TextStyle(color: AppColors.jaune)),
+                    TextSpan(text: 'Makèt '),
+                    TextSpan(text: 'Peyizan', style: TextStyle(color: AppColors.jaune)),
                   ]),
                   style: TextStyle(
                     fontSize:   34,
@@ -68,7 +68,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Sòti nan jaden, rive lakay ou',
+                  'Sòti nan jaden rive lakay, manje m se medikaman m',
                   style: TextStyle(
                     fontSize: 14,
                     color:    AppColors.blanc.withValues(alpha: 0.7),
