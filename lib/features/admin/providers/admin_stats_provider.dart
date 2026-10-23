@@ -4,6 +4,7 @@ import '../../../core/api/api_endpoints.dart';
 import '../../../core/offline/cache_manager.dart';
 import '../../../core/offline/connectivity_service.dart';
 import '../../../providers/auth_provider.dart';
+import '../../../shared/ui/courbe_ventes.dart';
 
 class AdminStats {
   // Utilisateurs
@@ -38,6 +39,9 @@ class AdminStats {
   // Vouchers
   final int vouchersActifs;
 
+  // Courbe des ventes (ventes_par_jour, 30 derniers jours)
+  final List<PointVente> ventesParJour;
+
   const AdminStats({
     this.totalUsers           = 0,
     this.totalProducteurs     = 0,
@@ -63,6 +67,7 @@ class AdminStats {
     this.collectesEnCours     = 0,
     this.collectesEnRetard    = 0,
     this.vouchersActifs       = 0,
+    this.ventesParJour        = const [],
   });
 
   factory AdminStats.fromJson(Map<String, dynamic> j) => AdminStats(
@@ -90,6 +95,7 @@ class AdminStats {
     collectesEnCours:    j['collectes_en_cours']     as int?    ?? 0,
     collectesEnRetard:   j['collectes_en_retard']    as int?    ?? 0,
     vouchersActifs:      j['vouchers_actifs']        as int?    ?? 0,
+    ventesParJour:       lireVentesParJour(j['ventes_par_jour']),
   );
 }
 

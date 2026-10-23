@@ -1,17 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:shimmer/shimmer.dart';
 import '../../../models/produit.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/utils/image_utils.dart';
 import '../../../core/utils/format_utils.dart';
+import '../providers/favoris_provider.dart';
 
 /// Carte produit des grilles (accueil, catalogue, similaires).
 ///
-/// Vignette sur fond gris clair, vendeur en petites capitales, nom et
-/// prix. L'image occupe l'espace laissé par le texte (Expanded) : la carte
-/// tient dans n'importe quelle cellule de grille.
-class ProduitCard extends StatelessWidget {
+/// Vignette sur fond sauge (badge de statut ou de remise, cœur favori),
+/// vendeur en petites capitales, nom, prix (barré si promotion) et bouton
+/// panier carré arrondi (cf. maquettes). L'image occupe l'espace laissé
+/// par le texte (Expanded) : la carte tient dans n'importe quelle cellule.
+class ProduitCard extends ConsumerWidget {
   final Produit      produit;
   final VoidCallback onTap;
   /// Reçoit le contexte du bouton « + » (point de départ de l'animation
@@ -26,7 +29,9 @@ class ProduitCard extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final favori    = ref.watch(favorisProvider).contains(produit.id);
+    final remise    = produit.remisePourcent;
     final imageUrl  = ImageUtils.imageUrl(produit.imagePrincipale);
     final enRupture = produit.stockReel <= 0;
     final vendeur   = (produit.producteur?['nom'] ?? '').toString();
@@ -34,7 +39,7 @@ class ProduitCard extends StatelessWidget {
     return Material(
       color: AppColors.blanc,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(20),
         side: const BorderSide(color: AppColors.grisBord),
       ),
       clipBehavior: Clip.antiAlias,
@@ -48,7 +53,7 @@ class ProduitCard extends StatelessWidget {
               // ── Vignette ───────────────────────────────────────
               Expanded(
                 child: ClipRRect(
-                  borderRadius: BorderRadius.circular(14),
+                  borderRadius: BorderRadius.circular(15),
                   child: Stack(
                     fit: StackFit.expand,
                     children: [
@@ -80,34 +85,46 @@ class ProduitCard extends StatelessWidget {
                           child: _Badge(texte: '${produit.stockReel} restants',
                               fond: AppColors.blanc, texteCouleur: AppColors.rouge),
                         )
+                      else if (remise != null)
+                        Positioned(
+                          top: 8, left: 8,
+                          child: _Badge(texte: '-$remise%',
+                              fond: AppColors.vertVif, texteCouleur: AppColors.blanc),
+                        )
                       else if (produit.isFeatured)
                         const Positioned(
                           top: 8, left: 8,
                           child: _Badge(texte: 'Sélection', fond: AppColors.blanc,
                               texteCouleur: AppColors.noir),
                         ),
-                      if (onAjouter != null && !enRupture)
-                        Positioned(
-                          right: 6, bottom: 6,
-                          child: Builder(
-                            builder: (bouton) => Material(
-                            color: AppColors.noir,
-                            shape: const CircleBorder(),
-                            child: InkWell(
-                              customBorder: const CircleBorder(),
-                              onTap: () => onAjouter!(bouton),
-                              child: const Tooltip(
-                                message: 'Ajouter au panier',
-                                child: SizedBox(
-                                  width: 34, height: 34,
-                                  child: Icon(Icons.add_rounded,
-                                      size: 20, color: AppColors.blanc),
+                      Positioned(
+                        top: 6, right: 6,
+                        child: Material(
+                          color: AppColors.blanc,
+                          shape: const CircleBorder(),
+                          child: InkWell(
+                            customBorder: const CircleBorder(),
+                            onTap: () => ref
+                                .read(favorisProvider.notifier)
+                                .basculer(produit.id),
+                            child: Tooltip(
+                              message: favori
+                                  ? 'Retirer des favoris'
+                                  : 'Ajouter aux favoris',
+                              child: SizedBox(
+                                width: 30, height: 30,
+                                child: Icon(
+                                  favori
+                                      ? Icons.favorite_rounded
+                                      : Icons.favorite_border_rounded,
+                                  size: 17,
+                                  color: favori ? AppColors.rouge : AppColors.noir,
                                 ),
                               ),
                             ),
                           ),
-                          ),
                         ),
+                      ),
                     ],
                   ),
                 ),
@@ -141,24 +158,69 @@ class ProduitCard extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 6),
-                    Text.rich(
-                      TextSpan(children: [
-                        TextSpan(
-                          text: FormatUtils.htg(produit.prixUnitaire),
-                          style: const TextStyle(
-                            fontSize: 14, fontWeight: FontWeight.w700,
-                            color: AppColors.noir,
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              if (remise != null)
+                                Text(
+                                  FormatUtils.htg(produit.prixOriginal!),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: const TextStyle(
+                                    fontSize: 10.5,
+                                    color: AppColors.grisLeger,
+                                    decoration: TextDecoration.lineThrough,
+                                  ),
+                                ),
+                              Text.rich(
+                                TextSpan(children: [
+                                  TextSpan(
+                                    text: FormatUtils.htg(produit.prixUnitaire),
+                                    style: const TextStyle(
+                                      fontSize: 14, fontWeight: FontWeight.w700,
+                                      color: AppColors.noir,
+                                    ),
+                                  ),
+                                  TextSpan(
+                                    text: '  ${produit.uniteVenteLabel}',
+                                    style: const TextStyle(
+                                      fontSize: 11, color: AppColors.grisTexte,
+                                    ),
+                                  ),
+                                ]),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ],
                           ),
                         ),
-                        TextSpan(
-                          text: '  ${produit.uniteVenteLabel}',
-                          style: const TextStyle(
-                            fontSize: 11, color: AppColors.grisTexte,
+                        if (onAjouter != null && !enRupture) ...[
+                          const SizedBox(width: 6),
+                          Builder(
+                            builder: (bouton) => Material(
+                              color: AppColors.noir,
+                              borderRadius: BorderRadius.circular(10),
+                              child: InkWell(
+                                borderRadius: BorderRadius.circular(10),
+                                onTap: () => onAjouter!(bouton),
+                                child: const Tooltip(
+                                  message: 'Ajouter au panier',
+                                  child: SizedBox(
+                                    width: 32, height: 32,
+                                    child: Icon(Icons.shopping_bag_outlined,
+                                        size: 17, color: AppColors.blanc),
+                                  ),
+                                ),
+                              ),
+                            ),
                           ),
-                        ),
-                      ]),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
+                        ],
+                      ],
                     ),
                   ],
                 ),

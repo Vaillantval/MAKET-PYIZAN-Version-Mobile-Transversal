@@ -9,6 +9,7 @@ import '../providers/admin_stats_provider.dart';
 import '../../../shared/widgets/loading_widget.dart';
 import '../../../core/offline/offline_banner.dart';
 import '../../../core/notifications/notification_provider.dart';
+import '../../../shared/ui/courbe_ventes.dart';
 
 class AdminDashboardScreen extends ConsumerWidget {
   const AdminDashboardScreen({super.key});
@@ -167,6 +168,11 @@ class AdminDashboardScreen extends ConsumerWidget {
           ],
         ),
       ),
+
+      if (s.ventesParJour.length > 1) ...[
+        const SizedBox(height: 12),
+        CourbeVentes(s.ventesParJour),
+      ],
 
       if (alertes.isNotEmpty) ...[
         const TitreSection('À traiter'),

@@ -4,6 +4,7 @@ import '../../../core/api/api_endpoints.dart';
 import '../../../core/offline/cache_manager.dart';
 import '../../../core/offline/connectivity_service.dart';
 import '../../../providers/entreprise_provider.dart';
+import '../../../shared/ui/courbe_ventes.dart';
 
 class DashboardStats {
   final int     commandesEnAttente;
@@ -17,6 +18,8 @@ class DashboardStats {
   final int     nbProduitsEpuises;
   final int     alertesStock;
   final int     collectesAVenir;
+  // Courbe des ventes (ventes_par_jour, 30 derniers jours)
+  final List<PointVente> ventesParJour;
 
   const DashboardStats({
     this.commandesEnAttente  = 0,
@@ -30,6 +33,7 @@ class DashboardStats {
     this.nbProduitsEpuises   = 0,
     this.alertesStock        = 0,
     this.collectesAVenir     = 0,
+    this.ventesParJour       = const [],
   });
 
   factory DashboardStats.fromJson(Map<String, dynamic> json) =>
@@ -49,6 +53,7 @@ class DashboardStats {
         nbProduitsEpuises:   json['nb_produits_epuises']   as int? ?? 0,
         alertesStock:        json['alertes_stock']         as int? ?? 0,
         collectesAVenir:     json['collectes_a_venir']     as int? ?? 0,
+        ventesParJour:       lireVentesParJour(json['ventes_par_jour']),
       );
 }
 

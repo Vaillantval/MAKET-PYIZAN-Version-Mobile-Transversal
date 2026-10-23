@@ -309,71 +309,91 @@ class AccueilScreen extends ConsumerWidget {
   }
 }
 
-/// Bandeau d'accueil (vert de la marque) menant à la boutique.
+/// Bandeau d'accueil clair (cf. maquettes) menant à la boutique : texte et
+/// bouton à gauche, panier de produits stylisé à droite.
 class _Bandeau extends StatelessWidget {
   final VoidCallback onTap;
   const _Bandeau({required this.onTap});
 
   @override
   Widget build(BuildContext context) => Material(
-        color: AppColors.vertFonce,
-        borderRadius: BorderRadius.circular(22),
+        color: AppColors.vertMenthe,
+        borderRadius: BorderRadius.circular(24),
         clipBehavior: Clip.antiAlias,
         child: InkWell(
           onTap: onTap,
-          child: Stack(
-            children: [
-              const Positioned(
-                right: -18, bottom: -24,
-                child: Icon(Icons.eco_rounded,
-                    size: 150, color: Color(0x1FFFFFFF)),
-              ),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(20, 20, 20, 18),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text('DIRECT PRODUCTEUR',
-                        style: TextStyle(
-                            fontSize: 11,
-                            letterSpacing: 1.2,
-                            fontWeight: FontWeight.w700,
-                            color: Color(0xB3FFFFFF))),
-                    const SizedBox(height: 6),
-                    const Text('Produits frais\nd\'Haïti, au juste prix',
-                        style: TextStyle(
-                            fontSize: 21,
-                            height: 1.15,
-                            fontWeight: FontWeight.w700,
-                            letterSpacing: -0.4,
-                            color: AppColors.blanc)),
-                    const SizedBox(height: 14),
-                    Container(
-                      padding: const EdgeInsets.fromLTRB(16, 8, 8, 8),
-                      decoration: BoxDecoration(
-                        color: AppColors.blanc,
-                        borderRadius: BorderRadius.circular(30),
-                      ),
-                      child: const Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text('Découvrir',
-                              style: TextStyle(
-                                  fontSize: 13.5, fontWeight: FontWeight.w700)),
-                          SizedBox(width: 8),
-                          CircleAvatar(
-                            radius: 12,
-                            backgroundColor: AppColors.noir,
-                            child: Icon(Icons.arrow_forward_rounded,
-                                size: 14, color: AppColors.blanc),
-                          ),
-                        ],
-                      ),
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(minHeight: 172),
+            child: Stack(
+              children: [
+                // Visuel : halo, panier et feuilles
+                Positioned(
+                  right: -26, top: -10, bottom: -10,
+                  child: Container(
+                    width: 170,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: AppColors.blanc.withValues(alpha: 0.55),
                     ),
-                  ],
+                  ),
                 ),
-              ),
-            ],
+                const Positioned(
+                  right: 18, bottom: 22,
+                  child: Icon(Icons.shopping_basket_rounded,
+                      size: 92, color: AppColors.vertFonce),
+                ),
+                const Positioned(
+                  right: 92, top: 22,
+                  child: Icon(Icons.eco_rounded,
+                      size: 34, color: AppColors.vertVif),
+                ),
+                const Positioned(
+                  right: 16, top: 16,
+                  child: Icon(Icons.wb_sunny_rounded,
+                      size: 30, color: AppColors.jaune),
+                ),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 20, 140, 20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Text('Direct producteur',
+                          style: TextStyle(
+                              fontSize: 12.5,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.vertVif)),
+                      const SizedBox(height: 4),
+                      const Text("Produits frais\nd'Haïti",
+                            style: TextStyle(
+                                fontSize: 22,
+                                height: 1.12,
+                                fontWeight: FontWeight.w700,
+                                letterSpacing: -0.5,
+                                color: AppColors.noir)),
+                      const SizedBox(height: 4),
+                      const Text('Au juste prix, sans intermédiaire',
+                          style: TextStyle(
+                              fontSize: 12.5, color: AppColors.grisTexte)),
+                      const SizedBox(height: 12),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 18, vertical: 9),
+                        decoration: BoxDecoration(
+                          color: AppColors.noir,
+                          borderRadius: BorderRadius.circular(30),
+                        ),
+                        child: const Text('Découvrir',
+                            style: TextStyle(
+                                fontSize: 13.5,
+                                fontWeight: FontWeight.w700,
+                                color: AppColors.blanc)),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       );

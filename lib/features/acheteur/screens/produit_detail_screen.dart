@@ -13,6 +13,7 @@ import '../providers/catalogue_provider.dart';
 import '../providers/panier_provider.dart';
 import '../widgets/produit_card.dart';
 import '../widgets/choix_unite.dart';
+import '../providers/favoris_provider.dart';
 import '../../../shared/widgets/loading_widget.dart';
 
 class ProduitDetailScreen extends ConsumerWidget {
@@ -102,6 +103,7 @@ class _FicheState extends ConsumerState<_Fiche> {
   @override
   Widget build(BuildContext context) {
     final produit   = widget.produit;
+    final remise    = produit.remisePourcent;
     final imageUrl  = ImageUtils.imageUrl(produit.imagePrincipale);
     final enStock   = _maximum > 0;
     final vendeur   = (produit.producteur?['nom'] ?? '').toString();
@@ -130,6 +132,18 @@ class _FicheState extends ConsumerState<_Fiche> {
                       : context.go('/acheteur/catalogue')),
             ),
             actions: [
+              Padding(
+                padding: const EdgeInsets.all(6),
+                child: BoutonRond(
+                    ref.watch(favorisProvider).contains(produit.id)
+                        ? Icons.favorite_rounded
+                        : Icons.favorite_border_rounded,
+                    taille: 40,
+                    tooltip: 'Favori',
+                    onTap: () => ref
+                        .read(favorisProvider.notifier)
+                        .basculer(produit.id)),
+              ),
               Padding(
                 padding: const EdgeInsets.all(6),
                 child: BoutonRond(Icons.shopping_bag_outlined,
@@ -195,6 +209,20 @@ class _FicheState extends ConsumerState<_Fiche> {
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
+                          // Promotion : sur l'unité de base seulement
+                          if (remise != null && identical(_unite, _options.first))
+                            Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(FormatUtils.htg(produit.prixOriginal!),
+                                    style: const TextStyle(
+                                        fontSize: 12.5,
+                                        color: AppColors.grisLeger,
+                                        decoration: TextDecoration.lineThrough)),
+                                const SizedBox(width: 6),
+                                PuceStatut('-$remise%', couleur: AppColors.vertVif),
+                              ],
+                            ),
                           Text(FormatUtils.htg(_unite.prix),
                               style: const TextStyle(
                                   fontSize: 19, fontWeight: FontWeight.w700)),

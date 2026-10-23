@@ -13,6 +13,7 @@ import '../features/auth/screens/splash_screen.dart';
 import '../features/auth/screens/login_screen.dart';
 import '../features/auth/screens/register_screen.dart';
 import '../features/auth/screens/mot_de_passe_oublie_screen.dart';
+import '../features/auth/screens/bienvenue_screen.dart';
 import '../features/auth/screens/pending_validation_screen.dart';
 import '../features/acheteur/providers/panier_provider.dart';
 import '../features/acheteur/screens/accueil_screen.dart';
@@ -90,7 +91,7 @@ final routerProvider = Provider<GoRouter>((ref) {
       // '/splash' est volontairement exclu : c'est un écran de transit qui
       // doit toujours être quitté dès que le statut d'auth est résolu (sinon
       // l'app reste bloquée dessus indéfiniment une fois non-authentifié).
-      final isAuth  = ['/login', '/register', '/mot-de-passe-oublie'].contains(path);
+      final isAuth  = ['/login', '/register', '/mot-de-passe-oublie', '/bienvenue'].contains(path);
 
       if (status == AuthStatus.unknown) {
         return path == '/splash' ? null : '/splash';
@@ -100,7 +101,12 @@ final routerProvider = Provider<GoRouter>((ref) {
       // fiches produits) se parcourt sans compte ; le reste (panier,
       // commandes, profil…) demande de se connecter, puis y ramène.
       if (status == AuthStatus.unauthenticated) {
-        if (path == '/splash') return '/acheteur/accueil';
+        if (path == '/splash') {
+          // Premier lancement : présentation de l'app avant la boutique
+          final vue = ref.read(localStorageProvider)
+              .getBool(AppConstants.keyBienvenueVue);
+          return vue ? '/acheteur/accueil' : '/bienvenue';
+        }
         if (isAuth || _estPublique(path)) return null;
         return Uri(path: '/login', queryParameters: {'from': state.uri.toString()})
             .toString();
@@ -177,6 +183,10 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path:    '/register',
         builder: (_, __) => const RegisterScreen(),
+      ),
+      GoRoute(
+        path:    '/bienvenue',
+        builder: (_, __) => const BienvenueScreen(),
       ),
       GoRoute(
         path:    '/mot-de-passe-oublie',

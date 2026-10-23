@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:maketpeyizan/core/constants/app_constants.dart';
 import 'package:maketpeyizan/router/app_router.dart';
 
 import 'design/donnees.dart';
@@ -18,6 +19,15 @@ void main() {
     final c = await monterApp(tester, chemin: '/splash', visiteur: true);
     expect(_lieu(c), '/acheteur/accueil');
     expect(find.text('Connexion'), findsOneWidget);
+  });
+
+  testWidgets("au tout premier lancement, la présentation s'affiche d'abord", (tester) async {
+    final c = await monterApp(tester, chemin: '/splash', visiteur: true,
+        prefsEnPlus: {AppConstants.keyBienvenueVue: false});
+    expect(_lieu(c), '/bienvenue');
+    await tester.tap(find.text('Passer'));
+    await laisserCharger(tester);
+    expect(_lieu(c), '/acheteur/accueil');
   });
 
   testWidgets('la boutique et les fiches produits sont publiques', (tester) async {

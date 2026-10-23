@@ -20,6 +20,7 @@ class _Ecran {
 }
 
 final _ecrans = [
+  _Ecran('bienvenue',        '/bienvenue',              () => utilisateurAcheteur, visiteur: true),
   _Ecran('connexion',        '/login',                  () => utilisateurAcheteur),
   _Ecran('inscription',      '/register',               () => utilisateurAcheteur),
   _Ecran('mdp_oublie',       '/mot-de-passe-oublie',    () => utilisateurAcheteur),

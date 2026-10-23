@@ -26,6 +26,9 @@ class AppConstants {
   static const String keyEntrepriseActive     = 'entreprise_active';
   static const String keyEntrepriseActiveRole = 'entreprise_active_role';
 
+  // Écran d'accueil du premier lancement (montré une seule fois)
+  static const String keyBienvenueVue = 'bienvenue_vue';
+
   // POS
   static const String keyPosDeviceUid    = 'pos_device_uid'; // secure storage
   static const String keyPosOnboardingVu = 'pos_onboarding_vu';

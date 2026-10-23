@@ -2,6 +2,8 @@
 /// écrans dans les tests de design.
 library;
 
+import 'dart:math' as math;
+
 const _entreprise1 = {
   'id': 7, 'membre_id': 11, 'nom': 'Jaden Kenscoff', 'type': 'producteur',
   'type_label': 'Producteur', 'statut': 'actif', 'code': 'PROD-2026-0007',
@@ -36,10 +38,11 @@ final utilisateurAdmin = {
 
 Map<String, dynamic> _produit(int id, String nom, String prix, String unite, int stock,
         {String categorie = 'Légumes', bool vedette = false, String commune = 'Kenscoff',
-        List<Map<String, dynamic>> autresUnites = const []}) => {
+        String? prixOriginal, List<Map<String, dynamic>> autresUnites = const []}) => {
   'id': id, 'nom': nom, 'slug': 'produit-$id', 'variete': '', 'description':
       'Produit frais récolté le matin, cultivé sans pesticides dans les mornes.',
-  'prix_unitaire': prix, 'unite_vente': unite, 'unite_vente_label': unite,
+  'prix_unitaire': prix, 'prix_original': prixOriginal,
+  'unite_vente': unite, 'unite_vente_label': unite,
   'unite_vente_id': 100 + id,
   'quantite_min_commande': 1, 'stock_reel': stock, 'stock_disponible': stock,
   'is_featured': vedette, 'image_principale': null, 'origine': 'Kenscoff',
@@ -58,7 +61,7 @@ final produits = [
      'prix': '5200.00', 'facteur_conversion': '50.000'},
   ]),
   _produit(2, 'Bananes plantain', '60.00', 'pièce', 3, categorie: 'Fruits'),
-  _produit(3, 'Café moulu des Thiotte (500 g)', '450.00', 'pièce', 18,
+  _produit(3, 'Café moulu des Thiotte (500 g)', '450.00', 'pièce', 18, prixOriginal: '500.00',
       categorie: 'Café', commune: 'Thiotte'),
   _produit(4, 'Pois noirs', '210.00', 'kg', 0, categorie: 'Céréales'),
   _produit(5, 'Mangues Francique', '35.00', 'pièce', 120, categorie: 'Fruits', vedette: true),
@@ -156,7 +159,7 @@ Map<String, dynamic> reponseFactice(String path, Map<String, dynamic> user) {
     case '/api/auth/producteur/stats/':
       return _ok({
         'commandes_en_attente': 3, 'commandes_confirmees': 5, 'commandes_livrees': 41,
-        'commandes_total': 49, 'revenus_total': '86450.00', 'revenus_mois': '12800.00',
+        'commandes_total': 49, 'revenus_total': '86450.00', 'revenus_mois': '12800.00', 'ventes_par_jour': ventesParJour(380),
         'nb_produits_actifs': 12, 'nb_produits_epuises': 2, 'alertes_stock': 1,
         'collectes_a_venir': 1,
       });
@@ -216,7 +219,7 @@ Map<String, dynamic>? _reponseAdmin(String path) => switch (path) {
     'producteurs_attente': 4, 'total_acheteurs': 1190, 'nouveaux_users_30j': 132,
     'total_commandes': 642, 'commandes_en_attente': 18, 'commandes_livrees': 548,
     'commandes_annulees': 31, 'commandes_litige': 2, 'commandes_mois': 96,
-    'revenu_total': '2846500.00', 'revenu_mois': '418250.00', 'revenu_7j': '96400.00',
+    'revenu_total': '2846500.00', 'revenu_mois': '418250.00', 'revenu_7j': '96400.00', 'ventes_par_jour': ventesParJour(11000),
     'paiements_a_verifier': 5, 'montant_a_verifier': '23850.00',
     'total_produits': 412, 'produits_epuises': 17, 'alertes_stock': 6,
     'collectes_planifiees': 3, 'collectes_en_cours': 1, 'collectes_en_retard': 1,
@@ -275,3 +278,12 @@ Map<String, dynamic>? _reponseAdmin(String path) => switch (path) {
   ]),
   _ => null,
 };
+
+/// 30 jours de ventes factices (courbe des tableaux de bord).
+List<Map<String, dynamic>> ventesParJour(double base) => [
+  for (var i = 0; i < 30; i++)
+    {
+      'date': DateTime(2026, 9, 21).add(Duration(days: i)).toIso8601String().substring(0, 10),
+      'montant': (base * (1 + 0.25 * math.sin(i / 3) + i / 30)).toStringAsFixed(2),
+    },
+];

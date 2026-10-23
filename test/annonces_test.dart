@@ -76,7 +76,7 @@ void main() {
     expect(find.text('Produits frais, directement du marche'), findsOneWidget);
     expect(find.text('Voir le catalogue'), findsOneWidget);
     // Le bandeau fixe laisse la place au carrousel
-    expect(find.text('DIRECT PRODUCTEUR'), findsNothing);
+    expect(find.text('Direct producteur'), findsNothing);
 
     await tester.tap(find.text('Voir le catalogue'));
     await laisserCharger(tester);
@@ -89,6 +89,6 @@ void main() {
 
   testWidgets("sans annonce, l'accueil garde son bandeau", (tester) async {
     await monterApp(tester, chemin: '/acheteur/accueil', visiteur: true);
-    expect(find.text('DIRECT PRODUCTEUR'), findsOneWidget);
+    expect(find.text('Direct producteur'), findsOneWidget);
   });
 }

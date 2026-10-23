@@ -26,7 +26,10 @@ mixin _$Produit {
   String get variete => throw _privateConstructorUsedError;
   String get description => throw _privateConstructorUsedError;
   @JsonKey(name: 'prix_unitaire')
-  String get prixUnitaire => throw _privateConstructorUsedError;
+  String get prixUnitaire =>
+      throw _privateConstructorUsedError; // Prix avant remise (promotion) ; absent ou ≤ prix_unitaire : pas de promo
+  @JsonKey(name: 'prix_original')
+  String? get prixOriginal => throw _privateConstructorUsedError;
   @JsonKey(name: 'unite_vente')
   String get uniteVente => throw _privateConstructorUsedError;
   @JsonKey(name: 'unite_vente_label')
@@ -74,6 +77,7 @@ abstract class $ProduitCopyWith<$Res> {
       String variete,
       String description,
       @JsonKey(name: 'prix_unitaire') String prixUnitaire,
+      @JsonKey(name: 'prix_original') String? prixOriginal,
       @JsonKey(name: 'unite_vente') String uniteVente,
       @JsonKey(name: 'unite_vente_label') String uniteVenteLabel,
       @JsonKey(name: 'unite_vente_id') int? uniteVenteId,
@@ -111,6 +115,7 @@ class _$ProduitCopyWithImpl<$Res, $Val extends Produit>
     Object? variete = null,
     Object? description = null,
     Object? prixUnitaire = null,
+    Object? prixOriginal = freezed,
     Object? uniteVente = null,
     Object? uniteVenteLabel = null,
     Object? uniteVenteId = freezed,
@@ -150,6 +155,10 @@ class _$ProduitCopyWithImpl<$Res, $Val extends Produit>
           ? _value.prixUnitaire
           : prixUnitaire // ignore: cast_nullable_to_non_nullable
               as String,
+      prixOriginal: freezed == prixOriginal
+          ? _value.prixOriginal
+          : prixOriginal // ignore: cast_nullable_to_non_nullable
+              as String?,
       uniteVente: null == uniteVente
           ? _value.uniteVente
           : uniteVente // ignore: cast_nullable_to_non_nullable
@@ -220,6 +229,7 @@ abstract class _$$ProduitImplCopyWith<$Res> implements $ProduitCopyWith<$Res> {
       String variete,
       String description,
       @JsonKey(name: 'prix_unitaire') String prixUnitaire,
+      @JsonKey(name: 'prix_original') String? prixOriginal,
       @JsonKey(name: 'unite_vente') String uniteVente,
       @JsonKey(name: 'unite_vente_label') String uniteVenteLabel,
       @JsonKey(name: 'unite_vente_id') int? uniteVenteId,
@@ -255,6 +265,7 @@ class __$$ProduitImplCopyWithImpl<$Res>
     Object? variete = null,
     Object? description = null,
     Object? prixUnitaire = null,
+    Object? prixOriginal = freezed,
     Object? uniteVente = null,
     Object? uniteVenteLabel = null,
     Object? uniteVenteId = freezed,
@@ -294,6 +305,10 @@ class __$$ProduitImplCopyWithImpl<$Res>
           ? _value.prixUnitaire
           : prixUnitaire // ignore: cast_nullable_to_non_nullable
               as String,
+      prixOriginal: freezed == prixOriginal
+          ? _value.prixOriginal
+          : prixOriginal // ignore: cast_nullable_to_non_nullable
+              as String?,
       uniteVente: null == uniteVente
           ? _value.uniteVente
           : uniteVente // ignore: cast_nullable_to_non_nullable
@@ -360,6 +375,7 @@ class _$ProduitImpl implements _Produit {
       this.variete = '',
       this.description = '',
       @JsonKey(name: 'prix_unitaire') required this.prixUnitaire,
+      @JsonKey(name: 'prix_original') this.prixOriginal,
       @JsonKey(name: 'unite_vente') required this.uniteVente,
       @JsonKey(name: 'unite_vente_label') required this.uniteVenteLabel,
       @JsonKey(name: 'unite_vente_id') this.uniteVenteId,
@@ -396,6 +412,10 @@ class _$ProduitImpl implements _Produit {
   @override
   @JsonKey(name: 'prix_unitaire')
   final String prixUnitaire;
+// Prix avant remise (promotion) ; absent ou ≤ prix_unitaire : pas de promo
+  @override
+  @JsonKey(name: 'prix_original')
+  final String? prixOriginal;
   @override
   @JsonKey(name: 'unite_vente')
   final String uniteVente;
@@ -463,7 +483,7 @@ class _$ProduitImpl implements _Produit {
 
   @override
   String toString() {
-    return 'Produit(id: $id, nom: $nom, slug: $slug, variete: $variete, description: $description, prixUnitaire: $prixUnitaire, uniteVente: $uniteVente, uniteVenteLabel: $uniteVenteLabel, uniteVenteId: $uniteVenteId, prixSupplementaires: $prixSupplementaires, quantiteMinCommande: $quantiteMinCommande, stockReel: $stockReel, isFeatured: $isFeatured, imagePrincipale: $imagePrincipale, categorie: $categorie, producteur: $producteur, origine: $origine, saison: $saison, createdAt: $createdAt)';
+    return 'Produit(id: $id, nom: $nom, slug: $slug, variete: $variete, description: $description, prixUnitaire: $prixUnitaire, prixOriginal: $prixOriginal, uniteVente: $uniteVente, uniteVenteLabel: $uniteVenteLabel, uniteVenteId: $uniteVenteId, prixSupplementaires: $prixSupplementaires, quantiteMinCommande: $quantiteMinCommande, stockReel: $stockReel, isFeatured: $isFeatured, imagePrincipale: $imagePrincipale, categorie: $categorie, producteur: $producteur, origine: $origine, saison: $saison, createdAt: $createdAt)';
   }
 
   @override
@@ -479,6 +499,8 @@ class _$ProduitImpl implements _Produit {
                 other.description == description) &&
             (identical(other.prixUnitaire, prixUnitaire) ||
                 other.prixUnitaire == prixUnitaire) &&
+            (identical(other.prixOriginal, prixOriginal) ||
+                other.prixOriginal == prixOriginal) &&
             (identical(other.uniteVente, uniteVente) ||
                 other.uniteVente == uniteVente) &&
             (identical(other.uniteVenteLabel, uniteVenteLabel) ||
@@ -515,6 +537,7 @@ class _$ProduitImpl implements _Produit {
         variete,
         description,
         prixUnitaire,
+        prixOriginal,
         uniteVente,
         uniteVenteLabel,
         uniteVenteId,
@@ -554,6 +577,7 @@ abstract class _Produit implements Produit {
       final String variete,
       final String description,
       @JsonKey(name: 'prix_unitaire') required final String prixUnitaire,
+      @JsonKey(name: 'prix_original') final String? prixOriginal,
       @JsonKey(name: 'unite_vente') required final String uniteVente,
       @JsonKey(name: 'unite_vente_label') required final String uniteVenteLabel,
       @JsonKey(name: 'unite_vente_id') final int? uniteVenteId,
@@ -583,7 +607,11 @@ abstract class _Produit implements Produit {
   String get description;
   @override
   @JsonKey(name: 'prix_unitaire')
-  String get prixUnitaire;
+  String
+      get prixUnitaire; // Prix avant remise (promotion) ; absent ou ≤ prix_unitaire : pas de promo
+  @override
+  @JsonKey(name: 'prix_original')
+  String? get prixOriginal;
   @override
   @JsonKey(name: 'unite_vente')
   String get uniteVente;

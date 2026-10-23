@@ -103,6 +103,7 @@ Future<ProviderContainer> monterApp(
     if (connecte) AppConstants.keyRefreshToken: 'jeton',
     AppConstants.keyUserRole: user['role'] as String,
     AppConstants.keyPosOnboardingVu: true,
+    AppConstants.keyBienvenueVue: true,
     if (entrepriseActive != null) AppConstants.keyEntrepriseActive: entrepriseActive,
     if (entrepriseActive != null) AppConstants.keyEntrepriseActiveRole: roleEntreprise,
     ...prefsEnPlus,

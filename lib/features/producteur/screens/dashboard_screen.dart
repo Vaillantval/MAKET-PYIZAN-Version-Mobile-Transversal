@@ -10,6 +10,7 @@ import '../../entreprise/widgets/espace_entreprise.dart';
 import '../providers/dashboard_provider.dart';
 import '../../../shared/widgets/loading_widget.dart';
 import '../../../core/offline/offline_banner.dart';
+import '../../../shared/ui/courbe_ventes.dart';
 
 class DashboardProducteurScreen extends ConsumerWidget {
   const DashboardProducteurScreen({super.key});
@@ -144,6 +145,11 @@ class DashboardProducteurScreen extends ConsumerWidget {
           ],
         ),
       ),
+
+      if (s.ventesParJour.length > 1) ...[
+        const SizedBox(height: 12),
+        CourbeVentes(s.ventesParJour),
+      ],
 
       // ── À traiter ───────────────────────────────────────────
       const TitreSection('À suivre'),

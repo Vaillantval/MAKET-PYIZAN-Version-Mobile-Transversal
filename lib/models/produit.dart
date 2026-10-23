@@ -13,6 +13,8 @@ class Produit with _$Produit {
     @Default('') String variete,
     @Default('') String description,
     @JsonKey(name: 'prix_unitaire')     required String prixUnitaire,
+    // Prix avant remise (promotion) ; absent ou ≤ prix_unitaire : pas de promo
+    @JsonKey(name: 'prix_original')     String? prixOriginal,
     @JsonKey(name: 'unite_vente')       required String uniteVente,
     @JsonKey(name: 'unite_vente_label') required String uniteVenteLabel,
     @JsonKey(name: 'unite_vente_id')    int? uniteVenteId,
@@ -32,4 +34,15 @@ class Produit with _$Produit {
 
   factory Produit.fromJson(Map<String, dynamic> json) =>
       _$ProduitFromJson(json);
+}
+
+extension ProduitPromo on Produit {
+  /// Remise en pourcentage (arrondie), ou null sans promotion.
+  int? get remisePourcent {
+    final avant = double.tryParse(prixOriginal ?? '');
+    final apres = double.tryParse(prixUnitaire);
+    if (avant == null || apres == null || avant <= 0 || apres >= avant) return null;
+    final pct = ((avant - apres) / avant * 100).round();
+    return pct > 0 ? pct : null;
+  }
 }
