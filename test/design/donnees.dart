@@ -1,4 +1,4 @@
-/// Données factices au format du backend MaketLakay, pour rendre les
+/// Données factices au format du backend Makèt Peyizan, pour rendre les
 /// écrans dans les tests de design.
 library;
 

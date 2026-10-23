@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:maketlakay/core/notifications/notifications_locales.dart';
-import 'package:maketlakay/core/sons/sons_app.dart';
-import 'package:maketlakay/shared/ui/animations.dart';
+import 'package:maketpeyizan/core/notifications/notifications_locales.dart';
+import 'package:maketpeyizan/core/sons/sons_app.dart';
+import 'package:maketpeyizan/shared/ui/animations.dart';
 
 void main() {
   group('canal des notifications push', () {
@@ -27,8 +27,8 @@ void main() {
     });
 
     test('push inconnu : canal par défaut du manifeste', () {
-      expect(canal({'screen': 'producteur_collecte'}), 'maketlakay_alertes');
-      expect(canal({}), 'maketlakay_alertes');
+      expect(canal({'screen': 'producteur_collecte'}), 'maketpeyizan_alertes');
+      expect(canal({}), 'maketpeyizan_alertes');
     });
 
     test('chaque canal avec son a un fichier dans res/raw', () {

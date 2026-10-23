@@ -55,7 +55,7 @@ void main() async {
           PosLocalStorage(posSessionBox, posSalesBox),
         ),
       ],
-      child: const MaketLakayApp(),
+      child: const MaketPeyizanApp(),
     ),
   );
 }

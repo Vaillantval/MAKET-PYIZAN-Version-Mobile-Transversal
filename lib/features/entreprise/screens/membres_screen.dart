@@ -254,7 +254,7 @@ class _AjoutMembreSheetState extends ConsumerState<_AjoutMembreSheet> {
             fontSize: 18, fontWeight: FontWeight.w700)),
           const SizedBox(height: 6),
           const Text(
-            'La personne doit déjà avoir un compte MaketLakay.',
+            'La personne doit déjà avoir un compte Makèt Peyizan.',
             style: TextStyle(fontSize: 12, color: AppColors.grisTexte),
           ),
           const SizedBox(height: 16),

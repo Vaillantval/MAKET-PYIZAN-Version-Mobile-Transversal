@@ -8,9 +8,9 @@ import 'dart:io';
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:maketlakay/features/pos/providers/pos_catalogue_provider.dart';
-import 'package:maketlakay/features/pos/providers/pos_panier_provider.dart';
-import 'package:maketlakay/router/app_router.dart';
+import 'package:maketpeyizan/features/pos/providers/pos_catalogue_provider.dart';
+import 'package:maketpeyizan/features/pos/providers/pos_panier_provider.dart';
+import 'package:maketpeyizan/router/app_router.dart';
 
 import '../design/harness.dart';
 

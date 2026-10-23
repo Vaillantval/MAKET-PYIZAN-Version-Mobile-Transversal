@@ -1,4 +1,4 @@
-package ht.maketlakay.app
+package ht.maketpeyizan.app
 
 import io.flutter.embedding.android.FlutterActivity
 

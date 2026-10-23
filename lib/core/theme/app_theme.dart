@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../constants/app_colors.dart';
 
-/// Thème Material 3 de MaketLakay : fond gris très clair, cartes blanches à
+/// Thème Material 3 de Makèt Peyizan : fond gris très clair, cartes blanches à
 /// bordure fine, aucune ombre, barres d'application claires, boutons
 /// principaux noirs en pilule, typographie DM Sans. Le vert de la marque est
 /// l'accent (sélection, navigation, focus).

@@ -5,8 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:maketlakay/features/acheteur/providers/annonces_provider.dart';
-import 'package:maketlakay/router/app_router.dart';
+import 'package:maketpeyizan/features/acheteur/providers/annonces_provider.dart';
+import 'package:maketpeyizan/router/app_router.dart';
 
 import 'design/donnees.dart';
 import 'design/harness.dart';
@@ -19,14 +19,14 @@ final _slides = [
   {'id': 2, 'titre': 'Produits frais, directement du marche',
    'sous_titre': "Achetez vos legumes et fruits frais recoltes localement, livres jusqu'a vous.",
    'texte_bouton': 'Voir le catalogue', 'lien': '#catalogue',
-   'image': 'https://maketlakay.ht/media/slider/slide_1.jpg', 'ordre': 0},
-  {'id': 1, 'titre': 'MaketLakay', 'sous_titre': 'Tout kalite pwodui',
+   'image': 'https://maketpeyizan.ht/media/slider/slide_1.jpg', 'ordre': 0},
+  {'id': 1, 'titre': 'Makèt Peyizan', 'sous_titre': 'Tout kalite pwodui',
    'texte_bouton': 'Découvrir', 'lien': '#catalogue',
-   'image': 'https://maketlakay.ht/media/slider/poivron_4.jpg', 'ordre': 1},
+   'image': 'https://maketpeyizan.ht/media/slider/poivron_4.jpg', 'ordre': 1},
   {'id': 3, 'titre': "Vendez vos recoltes, touchez plus d'acheteurs",
-   'sous_titre': 'Rejoignez MaketLakay et vendez directement aux consommateurs.',
+   'sous_titre': 'Rejoignez Makèt Peyizan et vendez directement aux consommateurs.',
    'texte_bouton': 'Devenir producteur', 'lien': '/inscription/',
-   'image': 'https://maketlakay.ht/media/slider/slide_2.jpg', 'ordre': 2},
+   'image': 'https://maketpeyizan.ht/media/slider/slide_2.jpg', 'ordre': 2},
 ];
 
 void main() {
@@ -47,7 +47,7 @@ void main() {
       expect(routeAnnonce('/connexion/')!.route, '/login');
       expect(routeAnnonce('/panier/')!.route, '/acheteur/panier');
       expect(routeAnnonce('/produits/cafe-moulu/')!.route, '/acheteur/produit/cafe-moulu');
-      expect(routeAnnonce('https://maketlakay.ht/produits/cafe-moulu/')!.route,
+      expect(routeAnnonce('https://maketpeyizan.ht/produits/cafe-moulu/')!.route,
           '/acheteur/produit/cafe-moulu');
       final cat = routeAnnonce('/catalogue/?categorie=fruits')!;
       expect(cat.route, '/acheteur/catalogue');
@@ -55,7 +55,7 @@ void main() {
     });
 
     test('les autres pages du site et les sites externes : navigateur', () {
-      expect(routeAnnonce('/apropos/')!.web.toString(), 'https://maketlakay.ht/apropos/');
+      expect(routeAnnonce('/apropos/')!.web.toString(), 'https://maketpeyizan.ht/apropos/');
       expect(routeAnnonce('https://moncash.ht/promo')!.web.toString(), 'https://moncash.ht/promo');
     });
 

@@ -148,9 +148,9 @@ class PosPrinterNotifier extends StateNotifier<PosPrinterState> {
     double? montantRecu,
   }) async {
     // ── En-tête ──────────────────────────────────────────────────
-    await _texte('MAKETLAKAY',
+    await _texte('MAKET PEYIZAN',
         style: SunmiTextStyle(bold: true, align: SunmiPrintAlign.CENTER, fontSize: 40));
-    await _texte('maketlakay.ht',
+    await _texte('maketpeyizan.ht',
         style: SunmiTextStyle(align: SunmiPrintAlign.CENTER, fontSize: 20));
     await SunmiPrinter.line();
 
@@ -202,7 +202,7 @@ class PosPrinterNotifier extends StateNotifier<PosPrinterState> {
     // ── Pied de page ─────────────────────────────────────────────
     await _texte('Mèsi anpil ! Merci de votre achat',
         style: SunmiTextStyle(align: SunmiPrintAlign.CENTER));
-    await _texte('MaketLakay — pwodwi lokal, kalite lokal',
+    await _texte('Makèt Peyizan — pwodwi lokal, kalite lokal',
         style: SunmiTextStyle(align: SunmiPrintAlign.CENTER, fontSize: 18));
 
     await SunmiPrinter.lineWrap(3);

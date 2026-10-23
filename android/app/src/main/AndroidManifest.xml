@@ -2,7 +2,7 @@
     <!-- Android 13+ : afficher les notifications (demandé à l'exécution) -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
     <application
-        android:label="MaketLakay"
+        android:label="Makèt Peyizan"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity
@@ -41,7 +41,7 @@
              en arrière-plan ou app fermée. -->
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_channel_id"
-            android:value="maketlakay_alertes" />
+            android:value="maketpeyizan_alertes" />
         <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->
         <meta-data

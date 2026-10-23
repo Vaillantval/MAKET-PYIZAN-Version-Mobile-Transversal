@@ -2,9 +2,9 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:maketlakay/core/notifications/notification_handler.dart';
-import 'package:maketlakay/features/pos/providers/pos_terminal_status_provider.dart';
-import 'package:maketlakay/router/app_router.dart';
+import 'package:maketpeyizan/core/notifications/notification_handler.dart';
+import 'package:maketpeyizan/features/pos/providers/pos_terminal_status_provider.dart';
+import 'package:maketpeyizan/router/app_router.dart';
 
 import 'design/donnees.dart';
 import 'design/harness.dart';

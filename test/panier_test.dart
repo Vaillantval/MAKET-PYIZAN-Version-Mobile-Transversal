@@ -2,12 +2,12 @@
 // transfert sur le compte à la connexion, et unités de vente.
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:maketlakay/core/api/api_client.dart';
-import 'package:maketlakay/core/offline/offline_manager.dart';
-import 'package:maketlakay/core/storage/local_storage.dart';
-import 'package:maketlakay/features/acheteur/providers/panier_provider.dart';
-import 'package:maketlakay/features/acheteur/widgets/choix_unite.dart';
-import 'package:maketlakay/models/produit.dart';
+import 'package:maketpeyizan/core/api/api_client.dart';
+import 'package:maketpeyizan/core/offline/offline_manager.dart';
+import 'package:maketpeyizan/core/storage/local_storage.dart';
+import 'package:maketpeyizan/features/acheteur/providers/panier_provider.dart';
+import 'package:maketpeyizan/features/acheteur/widgets/choix_unite.dart';
+import 'package:maketpeyizan/models/produit.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'design/donnees.dart';

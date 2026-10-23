@@ -50,7 +50,7 @@ class AccueilScreen extends ConsumerWidget {
                           const LogoAnime(),
                           const SizedBox(width: 10),
                           const Expanded(
-                            child: Text('MaketLakay',
+                            child: Text('Makèt Peyizan',
                                 style: TextStyle(
                                     fontSize: 17,
                                     fontWeight: FontWeight.w700,

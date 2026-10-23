@@ -3,7 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:maketlakay/router/app_router.dart';
+import 'package:maketpeyizan/router/app_router.dart';
 
 import 'design/donnees.dart';
 import 'design/harness.dart';

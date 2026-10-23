@@ -19,7 +19,7 @@ class NotificationsLocales {
   /// L'identifiant doit rester celui du manifeste
   /// (default_notification_channel_id).
   static const canal = AndroidNotificationChannel(
-    'maketlakay_alertes',
+    'maketpeyizan_alertes',
     'Autres notifications',
     description: 'Collectes, messages et informations générales',
     importance: Importance.high,

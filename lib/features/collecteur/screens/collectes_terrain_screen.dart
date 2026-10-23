@@ -5,7 +5,7 @@ import '../../../providers/auth_provider.dart';
 
 /// Espace agent de collecte.
 ///
-/// Le backend MaketLakay assigne les collectes aux agents depuis le tableau
+/// Le backend Makèt Peyizan assigne les collectes aux agents depuis le tableau
 /// de bord, mais n'expose pas encore d'API « mes collectes » pour eux :
 /// plutôt qu'un écran en erreur (403), on indique clairement où les suivre.
 class CollectesTerrainScreen extends ConsumerWidget {
@@ -53,7 +53,7 @@ class CollectesTerrainScreen extends ConsumerWidget {
                 const SizedBox(height: 8),
                 const Text(
                   'En attendant, vos collectes (dates, zones, producteurs) '
-                  'vous sont communiquées par l\'équipe MaketLakay depuis le '
+                  'vous sont communiquées par l\'équipe Makèt Peyizan depuis le '
                   'tableau de bord. Contactez votre responsable pour toute '
                   'question.',
                   textAlign: TextAlign.center,

@@ -3,9 +3,9 @@
 // premier appel /api/pos/* ne crée la demande d'activation.
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:maketlakay/core/api/api_client.dart';
-import 'package:maketlakay/core/storage/secure_storage.dart';
-import 'package:maketlakay/features/pos/providers/pos_terminal_status_provider.dart';
+import 'package:maketpeyizan/core/api/api_client.dart';
+import 'package:maketpeyizan/core/storage/secure_storage.dart';
+import 'package:maketpeyizan/features/pos/providers/pos_terminal_status_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class _ApiStatut implements ApiClient {

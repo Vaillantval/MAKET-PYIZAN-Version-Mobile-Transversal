@@ -53,7 +53,7 @@ class _PosTerminalBloqueState extends ConsumerState<PosTerminalBloque> {
           AppColors.rouge,
           'Terminal refusé',
           'La demande d\'activation de ce terminal a été refusée. Contactez '
-              'l\'administration MaketLakay.',
+              'l\'administration Makèt Peyizan.',
         ),
       PosTerminalStatut.roleInvalide => (
           Icons.no_accounts_outlined,
@@ -68,7 +68,7 @@ class _PosTerminalBloqueState extends ConsumerState<PosTerminalBloque> {
           'Terminal désactivé',
           'Ce terminal a été désactivé ou appartient à un autre agent : il ne '
               'peut pas enregistrer de ventes. Contactez l\'administration '
-              'MaketLakay.',
+              'Makèt Peyizan.',
         ),
     };
 

@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 # Publie l'APK release sur GitHub sous un nom fixe, pour que le lien de
 # téléchargement ne change jamais :
-#   https://github.com/Vaillantval/MaketLakay_Version_Mobile_Tr/releases/latest/download/MaketLakay.apk
+#   https://github.com/Vaillantval/MAKET-PYIZAN-Version-Mobile-Transversal/releases/latest/download/MaketPeyizan.apk
 #
 # Crée la release v<version de pubspec.yaml>, y dépose l'APK sous le nom
-# MaketLakay.apk, puis supprime les APK des releases précédentes (les notes
+# MaketPeyizan.apk, puis supprime les APK des releases précédentes (les notes
 # de version restent).
 #
 # Usage : scripts/publier_release.sh notes.md
@@ -12,8 +12,8 @@
 #   un seul fichier pour tous les appareils, 32 et 64 bits)
 set -euo pipefail
 
-REPO="Vaillantval/MaketLakay_Version_Mobile_Tr"
-NOM_APK="MaketLakay.apk"
+REPO="Vaillantval/MAKET-PYIZAN-Version-Mobile-Transversal"
+NOM_APK="MaketPeyizan.apk"
 APK="build/app/outputs/flutter-apk/app-release.apk"
 NOTES="${1:?Usage : $0 notes.md}"
 
@@ -27,7 +27,7 @@ API="https://api.github.com/repos/$REPO"
 auth=(-H "Authorization: Bearer $TOKEN" -H "Accept: application/vnd.github+json")
 
 # 1. Release
-CORPS=$(python -c "import json,sys;print(json.dumps({'tag_name':sys.argv[1],'target_commitish':'main','name':'MaketLakay '+sys.argv[2],'body':open(sys.argv[3],encoding='utf-8').read(),'make_latest':'true'}))" "$TAG" "$VERSION" "$NOTES")
+CORPS=$(python -c "import json,sys;print(json.dumps({'tag_name':sys.argv[1],'target_commitish':'main','name':'Makèt Peyizan '+sys.argv[2],'body':open(sys.argv[3],encoding='utf-8').read(),'make_latest':'true'}))" "$TAG" "$VERSION" "$NOTES")
 ID=$(curl -sf "${auth[@]}" -X POST "$API/releases" -d "$CORPS" | python -c "import json,sys;print(json.load(sys.stdin)['id'])")
 echo "Release $TAG créée ($ID)"
 

@@ -22,7 +22,7 @@ class NotificationHandler {
     final screen = data['screen'] as String? ?? '';
     final numero = (data['numero'] ?? data['numero_commande']) as String?;
 
-    // Clé `screen` envoyée par le backend MaketLakay (apps/emails/
+    // Clé `screen` envoyée par le backend Makèt Peyizan (apps/emails/
     // fcm_notifications.py, wallet, POS)
     switch (screen) {
       // Portefeuille (cashback, parrainage, retrait payé, recharge validée,

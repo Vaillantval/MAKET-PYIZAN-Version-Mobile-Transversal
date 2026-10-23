@@ -10,16 +10,16 @@ import 'providers/auth_provider.dart';
 import 'features/pos/providers/pos_terminal_status_provider.dart';
 import 'router/app_router.dart';
 
-class MaketLakayApp extends ConsumerStatefulWidget {
-  const MaketLakayApp({super.key});
+class MaketPeyizanApp extends ConsumerStatefulWidget {
+  const MaketPeyizanApp({super.key});
 
   @override
-  ConsumerState<MaketLakayApp> createState() =>
-      _MaketLakayAppState();
+  ConsumerState<MaketPeyizanApp> createState() =>
+      _MaketPeyizanAppState();
 }
 
-class _MaketLakayAppState
-    extends ConsumerState<MaketLakayApp> {
+class _MaketPeyizanAppState
+    extends ConsumerState<MaketPeyizanApp> {
 
   @override
   void initState() {
@@ -88,7 +88,7 @@ class _MaketLakayAppState
     final router = ref.watch(routerProvider);
 
     return MaterialApp.router(
-      title:           'MaketLakay',
+      title:           'Makèt Peyizan',
       theme:           AppTheme.lightTheme,
       routerConfig:    router,
       debugShowCheckedModeBanner: false,

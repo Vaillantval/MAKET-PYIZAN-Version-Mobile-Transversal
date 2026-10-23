@@ -127,7 +127,7 @@ class ProfilScreen extends ConsumerWidget {
             ]),
 
             // ── Entreprises : accès à l'espace vendeur ──────────
-            const Surtitre('Vendre sur MaketLakay'),
+            const Surtitre('Vendre sur Makèt Peyizan'),
             const MesEntreprisesCard(),
 
             // ── Sécurité & aide ─────────────────────────────────

@@ -16,7 +16,7 @@ plugins {
 }
 
 android {
-    namespace = "ht.maketlakay.app"
+    namespace = "ht.maketpeyizan.app"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
@@ -32,7 +32,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "ht.maketlakay.app"
+        applicationId = "ht.maketpeyizan.app"
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode

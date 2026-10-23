@@ -1,12 +1,12 @@
 class AppConstants {
   /// Supervision des caisses (tableau de bord web superadmin)
   static const String urlSupervisionPos =
-      'https://maketlakay.ht/dashboard/superadmin/pos/';
+      'https://maketpeyizan.ht/dashboard/superadmin/pos/';
 
   // API
   static const String baseUrl = String.fromEnvironment(
     'BASE_URL',
-    defaultValue: 'https://maketlakay.ht',
+    defaultValue: 'https://maketpeyizan.ht',
   );
   static const Duration connectTimeout  = Duration(seconds: 30);
   static const Duration receiveTimeout  = Duration(seconds: 30);

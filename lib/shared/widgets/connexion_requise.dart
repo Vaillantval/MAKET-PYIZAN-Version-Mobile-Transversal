@@ -30,7 +30,7 @@ bool exigerConnexion(BuildContext context, WidgetRef ref,
                 textAlign: TextAlign.center,
                 style: TextStyle(fontSize: 19, fontWeight: FontWeight.w700)),
             const SizedBox(height: 6),
-            Text('Un compte MaketLakay est nécessaire $motif.',
+            Text('Un compte Makèt Peyizan est nécessaire $motif.',
                 textAlign: TextAlign.center,
                 style: const TextStyle(
                     fontSize: 14, color: AppColors.grisTexte, height: 1.4)),

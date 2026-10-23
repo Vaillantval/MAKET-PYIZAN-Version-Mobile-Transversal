@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-/// Palette MaketLakay.
+/// Palette Makèt Peyizan.
 ///
 /// Interface sobre : fond gris très clair, cartes blanches à bordure fine,
 /// texte encre, actions principales en noir. Le vert de la marque sert

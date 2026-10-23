@@ -8,20 +8,20 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hive/hive.dart';
 import 'package:intl/date_symbol_data_local.dart';
-import 'package:maketlakay/core/api/api_client.dart';
-import 'package:maketlakay/core/constants/app_constants.dart';
-import 'package:maketlakay/core/offline/connectivity_service.dart';
-import 'package:maketlakay/core/storage/local_storage.dart';
-import 'package:maketlakay/core/storage/pos_local_storage.dart';
-import 'package:maketlakay/core/storage/secure_storage.dart';
-import 'package:maketlakay/core/theme/app_theme.dart';
-import 'package:maketlakay/router/app_router.dart';
+import 'package:maketpeyizan/core/api/api_client.dart';
+import 'package:maketpeyizan/core/constants/app_constants.dart';
+import 'package:maketpeyizan/core/offline/connectivity_service.dart';
+import 'package:maketpeyizan/core/storage/local_storage.dart';
+import 'package:maketpeyizan/core/storage/pos_local_storage.dart';
+import 'package:maketpeyizan/core/storage/secure_storage.dart';
+import 'package:maketpeyizan/core/theme/app_theme.dart';
+import 'package:maketpeyizan/router/app_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'donnees.dart';
 
 /// Faux client API : renvoie des réponses réalistes (format backend
-/// MaketLakay) selon le chemin, sans réseau.
+/// Makèt Peyizan) selon le chemin, sans réseau.
 class FakeApi implements ApiClient {
   final Map<String, dynamic> Function(String path) repondre;
   FakeApi(this.repondre);

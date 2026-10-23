@@ -304,7 +304,7 @@ class _CarteWallet extends StatelessWidget {
                 const Row(
                   children: [
                     Text(
-                      'MAKETLAKAY',
+                      'MAKET PEYIZAN',
                       style: TextStyle(
                         color: Color(0x99FFFFFF),
                         fontSize: 11,
@@ -365,13 +365,13 @@ class _CarteParrainage extends StatelessWidget {
   final WalletParrainage parrainage;
   const _CarteParrainage({required this.parrainage});
 
-  String get _lien => 'https://maketlakay.ht/inscription/?parrain=${parrainage.code}';
+  String get _lien => 'https://maketpeyizan.ht/inscription/?parrain=${parrainage.code}';
 
   void _partager() {
     Share.share(
-      'Rejoins MaketLakay avec mon code de parrainage ${parrainage.code} '
+      'Rejoins Makèt Peyizan avec mon code de parrainage ${parrainage.code} '
       'et profite d\'un bonus sur ton portefeuille : $_lien',
-      subject: 'Invitation MaketLakay',
+      subject: 'Invitation Makèt Peyizan',
     );
   }
 
