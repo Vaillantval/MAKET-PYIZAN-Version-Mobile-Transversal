@@ -242,12 +242,12 @@ class _FicheState extends ConsumerState<_Fiche> {
                             fontWeight: FontWeight.w700,
                             color: AppColors.grisLeger)),
                   ],
-                  if (_options.length > 1) ...[
+                  ...[
                     const SizedBox(height: 18),
-                    const Text('Unité',
-                        style: TextStyle(
+                    Text(_options.length > 1 ? "Choisissez l'unité" : 'Vendu par',
+                        style: const TextStyle(
                             fontSize: 14, fontWeight: FontWeight.w700)),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 10),
                     ChoixUnite(
                       options: _options,
                       valeur: _unite,

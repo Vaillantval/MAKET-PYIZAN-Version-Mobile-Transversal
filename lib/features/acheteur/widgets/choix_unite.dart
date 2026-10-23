@@ -45,7 +45,10 @@ class OptionUnite {
   }
 }
 
-/// Choix de l'unité de vente (affiché seulement s'il y en a plusieurs).
+/// Choix de l'unité de vente : une carte par unité (pastille de sélection,
+/// libellé, équivalence en unité de base, prix et disponibilité). Toujours
+/// affiché, même pour une seule unité : l'acheteur voit dans quelle unité
+/// il commande.
 class ChoixUnite extends StatelessWidget {
   final List<OptionUnite> options;
   final OptionUnite valeur;
@@ -61,69 +64,133 @@ class ChoixUnite extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) => Wrap(
-        spacing: 8,
-        runSpacing: 8,
-        children: [
-          for (final o in options)
-            _Option(
-              option: o,
-              actif: identical(o, valeur),
-              disponible: o.maxPour(stockBase) > 0,
-              onTap: () => onChanged(o),
-            ),
+  Widget build(BuildContext context) {
+    final base = options.first;
+    final choix = options.length > 1;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        for (final o in options) ...[
+          _Option(
+            option: o,
+            equivalence: identical(o, base)
+                ? (choix ? 'Unité de base' : null)
+                : '1 ${o.libelle} = ${_nombre(o.facteur)} ${base.libelle}',
+            stock: o.maxPour(stockBase),
+            actif: identical(o, valeur),
+            onTap: choix ? () => onChanged(o) : null,
+          ),
+          if (!identical(o, options.last)) const SizedBox(height: 8),
         ],
-      );
+      ],
+    );
+  }
+
+  static String _nombre(double v) => v == v.roundToDouble()
+      ? v.toInt().toString()
+      : v.toStringAsFixed(3)
+          .replaceFirst(RegExp(r'0+$'), '')
+          .replaceAll('.', ',');
 }
 
 class _Option extends StatelessWidget {
   final OptionUnite option;
+  final String? equivalence;
+  final int stock;
   final bool actif;
-  final bool disponible;
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
   const _Option({
     required this.option,
+    required this.equivalence,
+    required this.stock,
     required this.actif,
-    required this.disponible,
     required this.onTap,
   });
 
   @override
-  Widget build(BuildContext context) => Material(
-        color: actif ? AppColors.noir : AppColors.blanc,
+  Widget build(BuildContext context) {
+    final disponible = stock > 0;
+    final encre = disponible ? AppColors.noir : AppColors.grisLeger;
+    return Semantics(
+      selected: actif,
+      inMutuallyExclusiveGroup: true,
+      child: Material(
+        color: actif ? AppColors.vertMenthe : AppColors.blanc,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(14),
-          side: actif
-              ? BorderSide.none
-              : const BorderSide(color: AppColors.grisBord),
+          borderRadius: BorderRadius.circular(16),
+          side: BorderSide(
+            color: actif ? AppColors.vertFonce : AppColors.grisBord,
+            width: actif ? 1.6 : 1,
+          ),
         ),
         clipBehavior: Clip.antiAlias,
         child: InkWell(
           onTap: disponible ? onTap : null,
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
+            padding: const EdgeInsets.fromLTRB(12, 12, 14, 12),
+            child: Row(
               children: [
-                Text(option.libelle,
-                    style: TextStyle(
-                      fontSize: 13.5,
-                      fontWeight: FontWeight.w600,
-                      color: actif
-                          ? AppColors.blanc
-                          : disponible
-                              ? AppColors.noir
-                              : AppColors.grisLeger,
-                    )),
-                Text(FormatUtils.htg(option.prix),
-                    style: TextStyle(
-                      fontSize: 11.5,
-                      color: actif ? const Color(0xB3FFFFFF) : AppColors.grisTexte,
-                    )),
+                // Pastille de sélection
+                AnimatedContainer(
+                  duration: const Duration(milliseconds: 180),
+                  width: 22,
+                  height: 22,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: actif ? AppColors.vertFonce : AppColors.blanc,
+                    border: Border.all(
+                      color: actif ? AppColors.vertFonce : AppColors.grisLeger,
+                      width: 1.6,
+                    ),
+                  ),
+                  child: actif
+                      ? const Icon(Icons.check_rounded,
+                          size: 14, color: AppColors.blanc)
+                      : null,
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(option.libelle,
+                          style: TextStyle(
+                              fontSize: 14.5,
+                              fontWeight: FontWeight.w700,
+                              color: encre)),
+                      if (equivalence != null) ...[
+                        const SizedBox(height: 2),
+                        Text(equivalence!,
+                            style: const TextStyle(
+                                fontSize: 12, color: AppColors.grisTexte)),
+                      ],
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text(FormatUtils.htg(option.prix),
+                        style: TextStyle(
+                            fontSize: 14.5,
+                            fontWeight: FontWeight.w700,
+                            color: encre)),
+                    const SizedBox(height: 2),
+                    Text(disponible ? '$stock dispo.' : 'Épuisé',
+                        style: TextStyle(
+                            fontSize: 11.5,
+                            fontWeight: FontWeight.w600,
+                            color: disponible
+                                ? AppColors.vertVif
+                                : AppColors.rouge)),
+                  ],
+                ),
               ],
             ),
           ),
         ),
-      );
+      ),
+    );
+  }
 }
