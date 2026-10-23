@@ -209,7 +209,16 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
       // Validation et paiement en plein écran : la barre de paiement reste
       // seule en bas, sans les onglets
-      GoRoute(path: '/acheteur/checkout', builder: (_, __) => const CheckoutScreen()),
+      GoRoute(
+        path: '/acheteur/checkout',
+        builder: (_, __) => const CheckoutScreen(),
+        // Ouverts depuis la validation : hors du shell, sinon go_router
+        // empilerait une seconde copie de la page du shell (même clé)
+        routes: [
+          GoRoute(path: 'adresses', builder: (_, __) => const AdressesScreen()),
+          GoRoute(path: 'recharge', builder: (_, __) => const WalletRechargeScreen()),
+        ],
+      ),
       GoRoute(
         path: '/acheteur/paiement/mobile',
         builder: (_, state) {

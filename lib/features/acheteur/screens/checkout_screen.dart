@@ -198,7 +198,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                         choisie: adresse,
                         onChanged: (a) => setState(() => _adresseId = a.id),
                         onAjouter: () async {
-                          await context.push('/acheteur/adresses');
+                          await context.push('/acheteur/checkout/adresses');
                           ref.read(adressesProvider.notifier).charger();
                         },
                       ),
@@ -292,7 +292,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                     'Votre portefeuille est vide.'),
               ),
               TextButton(
-                onPressed: () => context.push('/acheteur/wallet/recharge'),
+                onPressed: () => context.push('/acheteur/checkout/recharge'),
                 child: const Text('Recharger'),
               ),
             ],

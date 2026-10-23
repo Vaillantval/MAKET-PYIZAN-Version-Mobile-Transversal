@@ -68,6 +68,16 @@ void main() {
     expect(_boutonPayer(tester).onPressed, isNull);
   });
 
+  testWidgets("« Ajouter une adresse » ouvre l'écran des adresses sans erreur",
+      (tester) async {
+    await monterApp(tester, chemin: '/acheteur/checkout',
+        utilisateur: utilisateurMembre, repondre: _avecAdresses([]));
+    await tester.tap(find.text('Aucune adresse enregistrée'));
+    await laisserCharger(tester);
+    expect(tester.takeException(), isNull);
+    expect(find.text('Mes adresses'), findsOneWidget);
+  });
+
   testWidgets("avec une adresse, le bouton s'active ; un virement exige la preuve",
       (tester) async {
     await monterApp(tester, chemin: '/acheteur/checkout',
